@@ -33,7 +33,7 @@ func (r *Round) Winner() Battler          { return r.roundWinner }
 
 // VoteCounts tallies votes per battler.
 func (r *Round) VoteCounts() map[Battler]int {
-	counts := map[Battler]int{BattlerGopher: 0, BattlerNullPtr: 0}
+	counts := map[Battler]int{BattlerBlue: 0, BattlerRed: 0}
 	for _, b := range r.votesBy {
 		counts[b]++
 	}
@@ -81,7 +81,7 @@ func (b *Battle) CurrentRound() *Round {
 
 // Scores counts round wins per battler.
 func (b *Battle) Scores() map[Battler]int {
-	scores := map[Battler]int{BattlerGopher: 0, BattlerNullPtr: 0}
+	scores := map[Battler]int{BattlerBlue: 0, BattlerRed: 0}
 	for _, r := range b.rounds {
 		if r.roundWinner.Valid() {
 			scores[r.roundWinner]++
@@ -97,10 +97,10 @@ func (b *Battle) Champion() Battler {
 	}
 	scores := b.Scores()
 	switch {
-	case scores[BattlerGopher] > scores[BattlerNullPtr]:
-		return BattlerGopher
-	case scores[BattlerNullPtr] > scores[BattlerGopher]:
-		return BattlerNullPtr
+	case scores[BattlerBlue] > scores[BattlerRed]:
+		return BattlerBlue
+	case scores[BattlerRed] > scores[BattlerBlue]:
+		return BattlerRed
 	default:
 		return ""
 	}
@@ -184,7 +184,7 @@ func (b *Battle) StartPerformances() error {
 		return ErrInvalidPhase
 	}
 	r := b.CurrentRound()
-	if r.verses[BattlerGopher] == "" || r.verses[BattlerNullPtr] == "" {
+	if r.verses[BattlerBlue] == "" || r.verses[BattlerRed] == "" {
 		return ErrInvalidPhase
 	}
 	b.phase = PhasePerformingA
@@ -234,10 +234,10 @@ func (b *Battle) CloseRound(judgeCommentary string) (Battler, error) {
 	r := b.CurrentRound()
 	counts := r.VoteCounts()
 	switch {
-	case counts[BattlerGopher] > counts[BattlerNullPtr]:
-		r.roundWinner = BattlerGopher
-	case counts[BattlerNullPtr] > counts[BattlerGopher]:
-		r.roundWinner = BattlerNullPtr
+	case counts[BattlerBlue] > counts[BattlerRed]:
+		r.roundWinner = BattlerBlue
+	case counts[BattlerRed] > counts[BattlerBlue]:
+		r.roundWinner = BattlerRed
 	}
 	r.judgeSay = judgeCommentary
 	if len(b.rounds) >= b.totalRounds {

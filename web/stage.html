@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>STAGE — AI Rap Battle</title>
+<title>Agent Arena · Stage</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0&display=block" rel="stylesheet">
@@ -16,7 +16,7 @@
     --red: #ea4335; --red-pastel: #fce8e6;
     --yellow: #f9ab00; --yellow-pastel: #fef7e0;
     --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
-    --gopher: var(--blue); --nullptr: var(--red);
+    
     --r-card: 24px; --r-pill: 50px; --r-input: 16px;
     --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
     --elev-1: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
@@ -39,7 +39,7 @@
     flex-wrap: wrap; gap: 12px; }
   h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em;
     display: flex; align-items: center; gap: 10px; }
-  h1 .g { color: var(--gopher); } h1 .n { color: var(--nullptr); }
+  h1 .g { color: var(--blue); } h1 .n { color: var(--red); }
   h1 .vs { color: var(--ink-soft); font-weight: 400; font-size: 1.2rem; }
   h1 > .ms { color: var(--blue); }
   .bk { color: var(--blue); font-weight: 700; }
@@ -61,12 +61,12 @@
   .verse { white-space: pre-wrap; font-family: 'Roboto Mono', ui-monospace, monospace;
     font-size: 1.25rem; line-height: 1.8; background: var(--bg); border-radius: var(--r-input);
     padding: 24px; border: 1px solid var(--border); animation: rise .5s var(--ease-strong) both .1s; }
-  .verse.gopher { border-left: 6px solid var(--gopher); }
-  .verse.nullptr { border-left: 6px solid var(--nullptr); }
+  .verse.blue { border-left: 6px solid var(--blue); }
+  .verse.red { border-left: 6px solid var(--red); }
   .tag { display: inline-flex; align-items: center; gap: 8px; padding: 7px 20px;
     border-radius: var(--r-pill); font-weight: 700; margin-bottom: 12px; color: #fff; }
-  .tag.gopher { background: var(--gopher); }
-  .tag.nullptr { background: var(--nullptr); }
+  .tag.blue { background: var(--blue); }
+  .tag.red { background: var(--red); }
   .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .agent { text-align: center; padding: 24px 12px; border-radius: var(--r-card);
     background: var(--bg); border: 1px solid var(--border);
@@ -74,8 +74,8 @@
   .avatar { width: 68px; height: 68px; border-radius: 50%; display: inline-flex;
     align-items: center; justify-content: center; margin-bottom: 10px; }
   .avatar .ms { font-size: 2.4rem; color: #fff; vertical-align: 0; }
-  .avatar.gopher { background: var(--gopher); }
-  .avatar.nullptr { background: var(--nullptr); }
+  .avatar.blue { background: var(--blue); }
+  .avatar.red { background: var(--red); }
   .agent b { display: block; }
   .agent .status { color: var(--ink-soft); margin-top: 8px; }
   .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
@@ -90,7 +90,7 @@
   .bar { flex: 1; height: 22px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 11px; overflow: hidden; }
   .bar > div { height: 100%; width: 0%; transition: width .5s var(--ease-strong); }
-  .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
+  .bar .g { background: var(--blue); } .bar .n { background: var(--red); }
   .controls button { width: 100%; padding: 13px; margin-bottom: 10px; border: 0;
     border-radius: var(--r-pill); font-size: 1rem; font-weight: 500; cursor: pointer;
     font-family: inherit; color: #fff; display: flex; align-items: center;
@@ -147,7 +147,7 @@
 <div class="top">
   <div>
     <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
-    <h1><span class="ms">mic</span><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span> <span id="conn"></span></h1>
+    <h1><span class="ms">mic</span>AGENT ARENA <span class="vs"><span class="g">Blue</span> vs <span class="n">Red</span> Gopher</span> <span id="conn"></span></h1>
   </div>
   <div class="join"><span class="ms">group_add</span>Join the jury → <b id="join-url"></b></div>
 </div>
@@ -172,8 +172,8 @@
     </div>
     <div class="card" style="margin-top:20px">
       <div class="scores">
-        <span style="color:var(--gopher)"><span class="ms">pets</span> <span id="score-g">0</span></span>
-        <span style="color:var(--nullptr)"><span class="ms">smart_toy</span> <span id="score-n">0</span></span>
+        <span style="color:var(--blue)"><span class="ms">pets</span> <span id="score-g">0</span></span>
+        <span style="color:var(--red)"><span class="ms">pets</span> <span id="score-n">0</span></span>
       </div>
     </div>
   </div>
@@ -182,17 +182,17 @@
 <script>
 const token = new URLSearchParams(location.search).get("token") || prompt("Presenter token:");
 document.getElementById("join-url").textContent = location.host;
-const ICONS = { gopher: "pets", nullptr: "smart_toy" };
-const NAMES = { gopher: "MC GOPHER", nullptr: "NULL PTR" };
+const ICONS = { blue: "pets", red: "pets" };
+const NAMES = { blue: "BLUE GOPHER", red: "RED GOPHER" };
 const NEXT = {
   idle: "open topic submissions", topics_open: "close topics → agents write",
-  writing: "start Gopher's performance", performing_a: "start NULL PTR's performance",
+  writing: "start Blue Gopher's performance", performing_a: "start Red Gopher's performance",
   performing_b: "open audience voting", voting: "close votes → judge speaks",
   round_result: "open next round", champion: "battle over — reset for a new one",
 };
 const WIPE_LABEL = {
-  topics_open: "pick a topic", writing: "agents writing", performing_a: "MC Gopher",
-  performing_b: "NULL PTR", voting: "vote now", round_result: "round result",
+  topics_open: "pick a topic", writing: "agents writing", performing_a: "Blue Gopher",
+  performing_b: "Red Gopher", voting: "vote now", round_result: "round result",
   champion: "the champion",
 };
 let ws, lastState = null, lastPhase = null;
@@ -261,9 +261,9 @@ function render(s) {
   document.getElementById("kv-round").textContent = r ? `${r.number} / ${s.total_rounds}` : "—";
   document.getElementById("kv-next").textContent = NEXT[s.phase] || "—";
   document.getElementById("kv-verses").textContent = r
-    ? `G:${r.verses && r.verses.gopher ? "✓" : "…"} N:${r.verses && r.verses.nullptr ? "✓" : "…"}` : "—";
-  document.getElementById("score-g").textContent = s.scores ? s.scores.gopher : 0;
-  document.getElementById("score-n").textContent = s.scores ? s.scores.nullptr : 0;
+    ? `G:${r.verses && r.verses.blue ? "✓" : "…"} N:${r.verses && r.verses.red ? "✓" : "…"}` : "—";
+  document.getElementById("score-g").textContent = s.scores ? s.scores.blue : 0;
+  document.getElementById("score-n").textContent = s.scores ? s.scores.red : 0;
   document.getElementById("judge").textContent = "";
   if (s.phase !== "performing_a" && s.phase !== "performing_b") {
     document.getElementById("tts-alert").style.display = "none";
@@ -283,17 +283,17 @@ function render(s) {
     }
     case "writing":
       c.innerHTML = `<div class="topic"><span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span></div><div class="agents">
-        <div class="agent ${r.verses && r.verses.gopher ? "" : "writing"}"><span class="avatar gopher"><span class="ms">pets</span></span><b>MC GOPHER</b><div class="status">${r.verses && r.verses.gopher ? "verse ready ✓" : "writing"}</div></div>
-        <div class="agent ${r.verses && r.verses.nullptr ? "" : "writing"}"><span class="avatar nullptr"><span class="ms">smart_toy</span></span><b>NULL PTR</b><div class="status">${r.verses && r.verses.nullptr ? "verse ready ✓" : "writing"}</div></div>
+        <div class="agent ${r.verses && r.verses.blue ? "" : "writing"}"><span class="avatar blue"><span class="ms">pets</span></span><b>BLUE GOPHER</b><div class="status">${r.verses && r.verses.blue ? "verse ready ✓" : "writing"}</div></div>
+        <div class="agent ${r.verses && r.verses.red ? "" : "writing"}"><span class="avatar red"><span class="ms">pets</span></span><b>RED GOPHER</b><div class="status">${r.verses && r.verses.red ? "verse ready ✓" : "writing"}</div></div>
       </div>`;
       break;
-    case "performing_a": showVerse(r, "gopher"); break;
-    case "performing_b": showVerse(r, "nullptr"); break;
+    case "performing_a": showVerse(r, "blue"); break;
+    case "performing_b": showVerse(r, "red"); break;
     case "voting": {
-      const g = r.vote_counts.gopher || 0, n = r.vote_counts.nullptr || 0, total = Math.max(g + n, 1);
+      const g = r.vote_counts.blue || 0, n = r.vote_counts.red || 0, total = Math.max(g + n, 1);
       c.innerHTML = `<div class="topic"><span class="ms" style="color:var(--blue)">how_to_vote</span> VOTE NOW at <span style="color:var(--blue)">${esc(location.host)}</span></div>
-        <div class="bar-row"><span class="name" style="color:var(--gopher)"><span class="ms">pets</span>Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>
-        <div class="bar-row"><span class="name" style="color:var(--nullptr)"><span class="ms">smart_toy</span>NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+        <div class="bar-row"><span class="name" style="color:var(--blue)"><span class="ms">pets</span>Blue</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>
+        <div class="bar-row"><span class="name" style="color:var(--red)"><span class="ms">pets</span>Red</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
       break;
     }
     case "round_result": {

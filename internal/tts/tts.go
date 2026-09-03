@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/genai"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 const ttsModel = "gemini-2.5-flash-preview-tts"
@@ -20,15 +20,15 @@ const (
 )
 
 // voices gives each battler a recognizable character:
-// Puck is upbeat (the Gopher), Kore is firm and cold (NULL PTR).
+// Puck is upbeat and smooth (Blue Gopher), Fenrir is excitable (Red Gopher).
 var voices = map[domain.Battler]string{
-	domain.BattlerGopher:  "Puck",
-	domain.BattlerNullPtr: "Kore",
+	domain.BattlerBlue: "Puck",
+	domain.BattlerRed:  "Fenrir",
 }
 
 var deliveries = map[domain.Battler]string{
-	domain.BattlerGopher:  "Perform this rap verse with high energy, fast playful flow and total confidence",
-	domain.BattlerNullPtr: "Perform this rap verse in a cold, menacing, deadpan rhythmic delivery",
+	domain.BattlerBlue: "Perform this rap verse with calm, confident, precise flow — cool and unshakeable",
+	domain.BattlerRed:  "Perform this rap verse with fiery, aggressive, high-energy delivery",
 }
 
 // Client synthesizes battle verses with the Gemini TTS models.

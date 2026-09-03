@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
-	"github.com/jibaru/rapbattle/internal/battle/service"
+	"github.com/jibaru/agentarena/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/service"
 )
 
 // Room separates the two client kinds.

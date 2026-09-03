@@ -11,10 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
-	"github.com/jibaru/rapbattle/internal/battle/infra/persistence/embedded"
-	"github.com/jibaru/rapbattle/internal/battle/infra/persistence/memory"
-	"github.com/jibaru/rapbattle/internal/battle/service"
+	"github.com/jibaru/agentarena/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/infra/persistence/embedded"
+	"github.com/jibaru/agentarena/internal/battle/infra/persistence/memory"
+	"github.com/jibaru/agentarena/internal/battle/service"
 )
 
 type fakeWriter struct{ err error }
@@ -108,7 +108,7 @@ func waitForVerses(t *testing.T, svc *service.BattleService) domain.BattleState 
 		state, err := svc.State(context.Background())
 		require.NoError(t, err)
 		round := state.Rounds[len(state.Rounds)-1]
-		if round.Verses[domain.BattlerGopher] != "" && round.Verses[domain.BattlerNullPtr] != "" {
+		if round.Verses[domain.BattlerBlue] != "" && round.Verses[domain.BattlerRed] != "" {
 			return state
 		}
 		time.Sleep(10 * time.Millisecond)
@@ -133,7 +133,7 @@ func TestFullShowFlow(t *testing.T) {
 	_, err = svc.Advance(ctx) // topics_open -> writing (agents kick off)
 	require.NoError(t, err)
 	state = waitForVerses(t, svc)
-	assert.Equal(t, "gopher raps about mondays", state.Rounds[0].Verses[domain.BattlerGopher])
+	assert.Equal(t, "blue raps about mondays", state.Rounds[0].Verses[domain.BattlerBlue])
 
 	_, err = svc.Advance(ctx) // writing -> performing_a
 	require.NoError(t, err)
@@ -142,11 +142,11 @@ func TestFullShowFlow(t *testing.T) {
 	_, err = svc.Advance(ctx) // performing_b -> voting
 	require.NoError(t, err)
 
-	require.NoError(t, svc.Vote(ctx, "c1", domain.BattlerNullPtr))
+	require.NoError(t, svc.Vote(ctx, "c1", domain.BattlerRed))
 	state, err = svc.Advance(ctx) // voting -> champion (single round)
 	require.NoError(t, err)
 	assert.Equal(t, domain.PhaseChampion, state.Phase)
-	assert.Equal(t, domain.BattlerNullPtr, state.Champion)
+	assert.Equal(t, domain.BattlerRed, state.Champion)
 	assert.Equal(t, "what a round!", state.Rounds[0].JudgeCommentary)
 
 	// Both performances reached the stage with audio.
@@ -173,7 +173,7 @@ func TestWriterFailureFallsBackToEmergencyVerses(t *testing.T) {
 	require.NoError(t, err)
 
 	state := waitForVerses(t, svc)
-	assert.Contains(t, state.Rounds[0].Verses[domain.BattlerGopher], "kubernetes",
+	assert.Contains(t, state.Rounds[0].Verses[domain.BattlerBlue], "kubernetes",
 		"emergency verse has the topic substituted")
 }
 

@@ -5,7 +5,7 @@
 set -euo pipefail
 
 CONFIG_NAME="devfest"
-SERVICE="rapbattle"
+SERVICE="agent-arena"
 cd "$(dirname "$0")/.."
 
 [ -f .env ] || { echo "No .env found. Run ./scripts/setup.sh first."; exit 1; }

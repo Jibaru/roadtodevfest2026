@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 // Crew fakes both battlers and the judge using the emergency verse cache.
@@ -30,8 +30,8 @@ func (c *Crew) Commentary(_ context.Context, state domain.BattleState) (string, 
 	round := state.Rounds[len(state.Rounds)-1]
 	return fmt.Sprintf("Round %d is in the books! The crowd went %d-%d — what a battle, and we're just getting warmed up!",
 		round.Number,
-		round.VoteCounts[domain.BattlerGopher],
-		round.VoteCounts[domain.BattlerNullPtr],
+		round.VoteCounts[domain.BattlerBlue],
+		round.VoteCounts[domain.BattlerRed],
 	), nil
 }
 

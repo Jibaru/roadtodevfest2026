@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
-	"github.com/jibaru/rapbattle/internal/battle/infra/persistence/embedded"
-	filerepo "github.com/jibaru/rapbattle/internal/battle/infra/persistence/file"
-	"github.com/jibaru/rapbattle/internal/battle/infra/persistence/memory"
+	"github.com/jibaru/agentarena/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/infra/persistence/embedded"
+	filerepo "github.com/jibaru/agentarena/internal/battle/infra/persistence/file"
+	"github.com/jibaru/agentarena/internal/battle/infra/persistence/memory"
 )
 
 // Both repositories implement the same domain interface; the same
@@ -54,7 +54,7 @@ func TestEmbeddedVerseCache(t *testing.T) {
 	cache, err := embedded.NewVerseCache()
 	require.NoError(t, err)
 
-	for _, battler := range []domain.Battler{domain.BattlerGopher, domain.BattlerNullPtr} {
+	for _, battler := range []domain.Battler{domain.BattlerBlue, domain.BattlerRed} {
 		v1, err := cache.Emergency(battler, "mondays")
 		require.NoError(t, err)
 		assert.Contains(t, v1, "mondays", "topic placeholder is filled")

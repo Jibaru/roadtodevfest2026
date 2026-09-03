@@ -4,7 +4,7 @@ run:
 	go run ./cmd/api
 
 build:
-	go build -o bin/rapbattle ./cmd/api
+	go build -o bin/agentarena ./cmd/api
 
 test:
 	go test ./...

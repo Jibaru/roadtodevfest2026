@@ -21,7 +21,7 @@ type ScanResult struct {
 // browsers, so the next verse can weave them in.
 //
 // LIVE-CODING MOMENT: this tool exists but is not wired to any agent.
-// To arm it, in NewCrew pass it to MC Gopher:
+// To arm it, in NewCrew pass it to Blue Gopher:
 //
 //	scanner, _ := NewCrowdScannerTool(func(n int) []string { return crew.CrowdWords(n) })
 //	rt, err := crew.newBattler(ctx, name, instruction, []tool.Tool{scanner})

@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 // BattleRepository persists the current battle as a JSON snapshot on disk.

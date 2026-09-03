@@ -1,6 +1,6 @@
-# 🐹🎤🤖 AI Rap Battle — MC Gopher vs NULL PTR
+# Agent Arena — Blue Gopher vs Red Gopher
 
-A live, audience-judged rap battle between two AI agents, built in **Go** with
+Agent Arena is a live, audience-judged rap battle between two AI agents, built in **Go** with
 **[ADK Go v2](https://adk.dev)** and **Gemini**, for Google DevFest 2026.
 
 The audience joins a web page, submits topics, and votes each round. Two agents
@@ -53,7 +53,7 @@ Before the talk, put the deployed URL on slide 5 (`join-url`).
 ## Live-coding cheat sheet
 
 The crowd-scanner tool already exists in `internal/agents/crowdscanner.go`.
-On stage, wire it to MC Gopher in `internal/agents/crew.go` (see the
+On stage, wire it to Blue Gopher in `internal/agents/crew.go` (see the
 `LIVE-CODING MOMENT` comment), redeploy or restart, and the next verse will
 quote what the audience is shouting.
 
@@ -75,7 +75,7 @@ internal/battle/domain       entities, repo interfaces, domain errors
 internal/battle/service      the show's state machine (phases, fallbacks)
 internal/battle/infra        memory | file-snapshot | embedded — same interface
 internal/agents              ADK Go: 2 battlers (persistent sessions) + judge
-internal/tts                 Gemini TTS → WAV (Puck vs Kore voices)
+internal/tts                 Gemini TTS → WAV (Puck vs Fenrir voices)
 internal/realtime            WebSocket hub; slow clients get dropped
 internal/{handlers,server}   thin HTTP layer, DTOs, middleware
 web/                         audience + stage pages, go:embed, EN/ES

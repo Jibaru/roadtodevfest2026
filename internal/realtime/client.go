@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/jibaru/rapbattle/internal/battle/service"
+	"github.com/jibaru/agentarena/internal/battle/service"
 )
 
 const (

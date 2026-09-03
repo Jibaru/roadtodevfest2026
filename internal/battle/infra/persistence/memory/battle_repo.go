@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 // BattleRepository keeps the current battle in memory.

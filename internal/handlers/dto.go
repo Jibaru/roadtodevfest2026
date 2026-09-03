@@ -1,6 +1,6 @@
 package handlers
 
-import "github.com/jibaru/rapbattle/internal/battle/domain"
+import "github.com/jibaru/agentarena/internal/battle/domain"
 
 // StartBattleRequest configures a new battle.
 type StartBattleRequest struct {

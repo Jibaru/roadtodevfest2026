@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 func TestBattleFullHappyPath(t *testing.T) {
@@ -22,22 +22,22 @@ func TestBattleFullHappyPath(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "mondays", topic, "most-submitted normalized word wins")
 
-	require.NoError(t, b.SetVerse(domain.BattlerGopher, "gopher bars"))
-	require.NoError(t, b.SetVerse(domain.BattlerNullPtr, "null bars"))
+	require.NoError(t, b.SetVerse(domain.BattlerBlue, "gopher bars"))
+	require.NoError(t, b.SetVerse(domain.BattlerRed, "null bars"))
 	require.NoError(t, b.StartPerformances())
 	assert.Equal(t, domain.PhasePerformingA, b.Phase())
 	require.NoError(t, b.NextPerformance())
 	require.NoError(t, b.OpenVoting())
 
-	require.NoError(t, b.Vote("client-1", domain.BattlerGopher))
-	require.NoError(t, b.Vote("client-2", domain.BattlerGopher))
-	require.NoError(t, b.Vote("client-3", domain.BattlerNullPtr))
+	require.NoError(t, b.Vote("client-1", domain.BattlerBlue))
+	require.NoError(t, b.Vote("client-2", domain.BattlerBlue))
+	require.NoError(t, b.Vote("client-3", domain.BattlerRed))
 
 	winner, err := b.CloseRound("gopher cooked")
 	require.NoError(t, err)
-	assert.Equal(t, domain.BattlerGopher, winner)
+	assert.Equal(t, domain.BattlerBlue, winner)
 	assert.Equal(t, domain.PhaseChampion, b.Phase(), "single-round battle ends after round 1")
-	assert.Equal(t, domain.BattlerGopher, b.Champion())
+	assert.Equal(t, domain.BattlerBlue, b.Champion())
 }
 
 func TestBattleMultiRoundProgression(t *testing.T) {
@@ -47,8 +47,8 @@ func TestBattleMultiRoundProgression(t *testing.T) {
 		require.NoError(t, b.SubmitTopic("c1", "cats"))
 		_, err := b.StartWriting()
 		require.NoError(t, err)
-		require.NoError(t, b.SetVerse(domain.BattlerGopher, "v1"))
-		require.NoError(t, b.SetVerse(domain.BattlerNullPtr, "v2"))
+		require.NoError(t, b.SetVerse(domain.BattlerBlue, "v1"))
+		require.NoError(t, b.SetVerse(domain.BattlerRed, "v2"))
 		require.NoError(t, b.StartPerformances())
 		require.NoError(t, b.NextPerformance())
 		require.NoError(t, b.OpenVoting())
@@ -57,12 +57,12 @@ func TestBattleMultiRoundProgression(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	playRound(domain.BattlerNullPtr)
+	playRound(domain.BattlerRed)
 	assert.Equal(t, domain.PhaseRoundResult, b.Phase())
-	playRound(domain.BattlerNullPtr)
+	playRound(domain.BattlerRed)
 	assert.Equal(t, domain.PhaseChampion, b.Phase())
-	assert.Equal(t, domain.BattlerNullPtr, b.Champion())
-	assert.Equal(t, 2, b.Scores()[domain.BattlerNullPtr])
+	assert.Equal(t, domain.BattlerRed, b.Champion())
+	assert.Equal(t, 2, b.Scores()[domain.BattlerRed])
 
 	// No more rounds after champion.
 	assert.ErrorIs(t, b.OpenTopics(), domain.ErrInvalidPhase)
@@ -76,13 +76,13 @@ func TestBattleDeduplication(t *testing.T) {
 
 	_, err := b.StartWriting()
 	require.NoError(t, err)
-	require.NoError(t, b.SetVerse(domain.BattlerGopher, "v"))
-	require.NoError(t, b.SetVerse(domain.BattlerNullPtr, "v"))
+	require.NoError(t, b.SetVerse(domain.BattlerBlue, "v"))
+	require.NoError(t, b.SetVerse(domain.BattlerRed, "v"))
 	require.NoError(t, b.StartPerformances())
 	require.NoError(t, b.NextPerformance())
 	require.NoError(t, b.OpenVoting())
-	require.NoError(t, b.Vote("c1", domain.BattlerGopher))
-	assert.ErrorIs(t, b.Vote("c1", domain.BattlerNullPtr), domain.ErrAlreadyVoted)
+	require.NoError(t, b.Vote("c1", domain.BattlerBlue))
+	assert.ErrorIs(t, b.Vote("c1", domain.BattlerRed), domain.ErrAlreadyVoted)
 }
 
 func TestBattlePhaseGuards(t *testing.T) {
@@ -90,7 +90,7 @@ func TestBattlePhaseGuards(t *testing.T) {
 	assert.ErrorIs(t, b.SubmitTopic("c1", "x"), domain.ErrInvalidPhase)
 	_, err := b.StartWriting()
 	assert.ErrorIs(t, err, domain.ErrInvalidPhase)
-	assert.ErrorIs(t, b.Vote("c1", domain.BattlerGopher), domain.ErrInvalidPhase)
+	assert.ErrorIs(t, b.Vote("c1", domain.BattlerBlue), domain.ErrInvalidPhase)
 
 	require.NoError(t, b.OpenTopics())
 	// Writing cannot start with zero topics.
@@ -100,7 +100,7 @@ func TestBattlePhaseGuards(t *testing.T) {
 	require.NoError(t, b.SubmitTopic("c1", "x"))
 	_, err = b.StartWriting()
 	require.NoError(t, err)
-	require.NoError(t, b.SetVerse(domain.BattlerGopher, "only one"))
+	require.NoError(t, b.SetVerse(domain.BattlerBlue, "only one"))
 	assert.ErrorIs(t, b.StartPerformances(), domain.ErrInvalidPhase)
 }
 
@@ -110,17 +110,17 @@ func TestSnapshotRoundTrip(t *testing.T) {
 	require.NoError(t, b.SubmitTopic("c1", "cats"))
 	_, err := b.StartWriting()
 	require.NoError(t, err)
-	require.NoError(t, b.SetVerse(domain.BattlerGopher, "bars"))
+	require.NoError(t, b.SetVerse(domain.BattlerBlue, "bars"))
 	require.NoError(t, b.AddCrowdWord("fire"))
 
 	restored := domain.RestoreBattle(b.Snapshot())
 	assert.Equal(t, b.Phase(), restored.Phase())
 	assert.Equal(t, "cats", restored.CurrentRound().Topic())
-	assert.Equal(t, "bars", restored.CurrentRound().Verse(domain.BattlerGopher))
+	assert.Equal(t, "bars", restored.CurrentRound().Verse(domain.BattlerBlue))
 	assert.Equal(t, []string{"fire"}, restored.RecentCrowdWords(5))
 
 	// The restored aggregate keeps enforcing invariants (e.g. topic dedup state).
-	require.NoError(t, restored.SetVerse(domain.BattlerNullPtr, "cold bars"))
+	require.NoError(t, restored.SetVerse(domain.BattlerRed, "cold bars"))
 	require.NoError(t, restored.StartPerformances())
 }
 

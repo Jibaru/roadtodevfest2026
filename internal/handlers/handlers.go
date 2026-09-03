@@ -8,9 +8,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
-	"github.com/jibaru/rapbattle/internal/battle/service"
-	"github.com/jibaru/rapbattle/internal/realtime"
+	"github.com/jibaru/agentarena/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/service"
+	"github.com/jibaru/agentarena/internal/realtime"
 )
 
 const clientCookie = "rapbattle_client"

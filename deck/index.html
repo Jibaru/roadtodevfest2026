@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Rap Battle — Building Agents in Go</title>
+<title>Agent Arena — Building Agents in Go</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0&display=block" rel="stylesheet">
@@ -106,9 +106,10 @@
   <div style="margin-bottom:24px">
     <span class="avatar blue"><span class="ms">pets</span></span>
     <span class="avatar yellow"><span class="ms">mic</span></span>
-    <span class="avatar red"><span class="ms">smart_toy</span></span>
+    <span class="avatar red"><span class="ms">pets</span></span>
   </div>
-  <h1><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span></h1>
+  <h1>AGENT ARENA</h1>
+  <p class="sub" style="font-size:1.5rem;margin-bottom:12px"><span class="g" style="font-weight:700">Blue Gopher</span> <span class="vs">vs</span> <span class="n" style="font-weight:700">Red Gopher</span></p>
   <h2 style="font-weight:400" data-i18n="s1_sub">Building AI agents in Go for the agentic era</h2>
   <p class="sub">Go + ADK · <span class="gold" data-i18n="s1_you">you are the jury</span></p>
 </section>
@@ -144,9 +145,9 @@
     <span class="pill"><span class="ms">autorenew</span> Loops</span><span class="pill"><span class="ms">hub</span> Graphs</span>
   </div>
   <pre style="margin-top:30px"><span class="fn">llmagent</span>.New(llmagent.Config{
-    Name:        <span class="st">"mc_gopher"</span>,
+    Name:        <span class="st">"blue_gopher"</span>,
     Model:       geminiModel,
-    Instruction: <span class="st">"You are MC GOPHER, battle rapper…"</span>,
+    Instruction: <span class="st">"You are BLUE GOPHER, battle rapper…"</span>,
     Tools:       []tool.Tool{crowdScanner},
 })</pre>
   <p class="sub" style="margin-top:16px" data-i18n="s4_note">A personality is just an instruction string.</p>
@@ -156,7 +157,7 @@
 <section class="slide">
   <div style="margin-bottom:24px"><span class="avatar blue"><span class="ms">smartphone</span></span></div>
   <h1><span class="bk">[</span> <span data-i18n="s5_title">DEMO TIME</span> <span class="bk">]</span></h1>
-  <div class="join-chip" id="join-url">rapbattle-xxxx.run.app</div>
+  <div class="join-chip" id="join-url">agent-arena-xxxx.run.app</div>
   <p class="sub" data-i18n="s5_sub">Join now: you pick the topics, you judge the rounds.<br>3 rounds. Two AIs. One champion.</p>
 </section>
 
@@ -169,7 +170,7 @@ Audience (you) ──WebSocket──▶ <span class="g">Hub</span> ──▶ <sp
                                         │
               ┌─────────────────────────┼──────────────────┐
               ▼                         ▼                  ▼
-        <span class="g">MC Gopher agent</span>        <span class="n">NULL PTR agent</span>       <span class="gold">Judge agent</span>
+        <span class="g">Blue Gopher agent</span>       <span class="n">Red Gopher agent</span>       <span class="gold">Judge agent</span>
               └────────── <span class="kw">parallel verse writing</span> ─────────┘
                                         │
                                Gemini TTS (2 voices)</div>
@@ -205,10 +206,10 @@ web/               <span class="cm">// go:embed — UI inside the binary</span><
 
 <!-- 9 · Live coding -->
 <section class="slide">
-  <h2><span class="ms" style="color:var(--blue)">visibility</span> <span data-i18n="s9_title">Live coding: give the Gopher eyes</span></h2>
+  <h2><span class="ms" style="color:var(--blue)">visibility</span> <span data-i18n="s9_title">Live coding: give Blue Gopher eyes</span></h2>
   <pre>scanner, _ := <span class="fn">NewCrowdScannerTool</span>(crew.CrowdWords)
 
-<span class="cm">// mc_gopher gets one extra line:</span>
+<span class="cm">// blue_gopher gets one extra line:</span>
 Tools: []tool.Tool{<span class="g">scanner</span>}</pre>
   <p class="sub" style="margin-top:16px" data-i18n="s9_note">A typed Go function becomes a tool the model decides to call.<br>Next verse: watch it quote what you're shouting right now.</p>
 </section>
@@ -278,7 +279,7 @@ const I18N = {
     s8_p2: "El último verso del oponente se inyecta al prompt en cada ronda",
     s8_p3: "Memoria + contexto = la ronda 3 respondiendo el punchline de la ronda 1",
     s8_p4: "El voto de la audiencia es el humano-en-el-loop",
-    s9_title: "Live coding: dale ojos al Gopher",
+    s9_title: "Live coding: dale ojos a Blue Gopher",
     s9_note: "Una función Go tipada se convierte en una herramienta que el modelo decide llamar.\nPróximo verso: mira cómo cita lo que están gritando ahora mismo.",
     s10_title: "Llevándolo a producción",
     s10_r1: "Todo el demo de hoy (versos + TTS + Cloud Run)",

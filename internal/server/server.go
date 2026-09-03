@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/jibaru/rapbattle/internal/handlers"
+	"github.com/jibaru/agentarena/internal/handlers"
 )
 
 // New builds the router with all routes and middleware.

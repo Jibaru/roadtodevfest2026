@@ -1,4 +1,4 @@
-module github.com/jibaru/rapbattle
+module github.com/jibaru/agentarena
 
 go 1.26.6
 

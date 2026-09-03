@@ -3,7 +3,7 @@
 set -euo pipefail
 
 CONFIG_NAME="devfest"
-SERVICE="rapbattle"
+SERVICE="agent-arena"
 cd "$(dirname "$0")/.."
 
 set -a; source .env; set +a

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Rap Battle — MC Gopher vs NULL PTR</title>
+<title>Agent Arena — DevFest 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0&display=block" rel="stylesheet">
@@ -16,7 +16,7 @@
     --red: #ea4335; --red-dark: #c5221f; --red-pastel: #fce8e6;
     --yellow: #f9ab00; --yellow-pastel: #fef7e0;
     --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
-    --gopher: var(--blue); --nullptr: var(--red);
+    
     --r-card: 24px; --r-pill: 50px; --r-input: 16px;
     --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
     --elev-1: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
@@ -49,8 +49,8 @@
   .brand { font-size: .78rem; font-weight: 500; letter-spacing: .1em; color: var(--ink-soft);
     text-transform: uppercase; margin-bottom: 8px; }
   .bk { color: var(--blue); font-weight: 700; }
-  header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -.01em; }
-  header h1 .g { color: var(--gopher); } header h1 .n { color: var(--nullptr); }
+  header h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: .02em; }
+  header .g { color: var(--blue); } header .n { color: var(--red); }
   .vs { color: var(--ink-soft); font-weight: 400; font-size: 1.1rem; }
   .sub { color: var(--ink-soft); font-size: .9rem; margin-top: 6px; }
   #lang { position: fixed; top: 12px; right: 12px; background: var(--bg);
@@ -101,10 +101,10 @@
     transform: translateY(0);
     transition: transform .08s ease, box-shadow .08s ease; }
   .votebtn .ms { font-size: 2rem; }
-  .votebtn.gopher { border-color: var(--gopher); background: var(--blue-pastel);
-    color: var(--gopher); box-shadow: 0 3px 0 var(--gopher); }
-  .votebtn.nullptr { border-color: var(--nullptr); background: var(--red-pastel);
-    color: var(--nullptr); box-shadow: 0 3px 0 var(--nullptr); }
+  .votebtn.blue { border-color: var(--blue); background: var(--blue-pastel);
+    color: var(--blue); box-shadow: 0 3px 0 var(--blue); }
+  .votebtn.red { border-color: var(--red); background: var(--red-pastel);
+    color: var(--red); box-shadow: 0 3px 0 var(--red); }
   .votebtn:active { transform: translateY(3px); box-shadow: 0 0 0 transparent !important; }
 
   .bar-wrap { margin-top: 18px; }
@@ -113,7 +113,7 @@
   .bar { flex: 1; height: 14px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 7px; overflow: hidden; }
   .bar > div { height: 100%; width: 0%; transition: width .5s var(--ease-strong); }
-  .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
+  .bar .g { background: var(--blue); } .bar .n { background: var(--red); }
 
   .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .agent { text-align: center; padding: 18px 8px; border-radius: var(--r-card); background: var(--bg);
@@ -121,8 +121,8 @@
   .avatar { width: 56px; height: 56px; border-radius: 50%; display: inline-flex;
     align-items: center; justify-content: center; margin-bottom: 8px; }
   .avatar .ms { font-size: 2rem; color: #fff; vertical-align: 0; }
-  .avatar.gopher { background: var(--gopher); }
-  .avatar.nullptr { background: var(--nullptr); }
+  .avatar.blue { background: var(--blue); }
+  .avatar.red { background: var(--red); }
   .agent b { font-weight: 700; display: block; }
   .agent .status { font-size: .8rem; color: var(--ink-soft); margin-top: 6px; min-height: 1em; }
   .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
@@ -135,12 +135,12 @@
     font-size: .9rem; line-height: 1.65; background: var(--bg); border-radius: var(--r-input);
     padding: 16px; margin-top: 12px; border: 1px solid var(--border);
     animation: rise .5s var(--ease-strong) both .12s; }
-  .verse.gopher { border-left: 5px solid var(--gopher); }
-  .verse.nullptr { border-left: 5px solid var(--nullptr); }
+  .verse.blue { border-left: 5px solid var(--blue); }
+  .verse.red { border-left: 5px solid var(--red); }
   .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 16px;
     border-radius: var(--r-pill); font-size: .78rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
-  .tag.gopher { background: var(--gopher); }
-  .tag.nullptr { background: var(--nullptr); }
+  .tag.blue { background: var(--blue); }
+  .tag.red { background: var(--red); }
   .topic-banner { text-align: center; color: var(--ink); font-weight: 700;
     font-size: 1.15rem; margin-bottom: 12px; }
   .champion { text-align: center; font-size: 1.3rem; font-weight: 700; padding: 8px; }
@@ -191,16 +191,16 @@
 <button id="lang"><span class="ms">language</span><span id="lang-label">ES</span></button>
 <header>
   <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
-  <h1><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span></h1>
-  <div class="sub" data-i18n="subtitle">AI Rap Battle — you are the jury</div>
+  <h1>AGENT ARENA</h1>
+  <div class="sub"><span class="g" style="font-weight:700">Blue Gopher</span> <span class="vs">vs</span> <span class="n" style="font-weight:700">Red Gopher</span> — <span data-i18n="subtitle">you are the jury</span></div>
 </header>
 <main>
   <!-- IDLE -->
   <section id="v-idle" class="card blue hidden">
     <div class="phase-title"><span class="ms">mic</span><span data-i18n="idle_title">The battle is about to begin…</span></div>
     <div style="text-align:center; display:flex; justify-content:center; gap:18px; padding:6px 0">
-      <span class="avatar gopher"><span class="ms">pets</span></span>
-      <span class="avatar nullptr"><span class="ms">smart_toy</span></span>
+      <span class="avatar blue"><span class="ms">pets</span></span>
+      <span class="avatar red"><span class="ms">pets</span></span>
     </div>
   </section>
 
@@ -217,8 +217,8 @@
     <div class="topic-banner" id="writing-topic"></div>
     <div class="phase-title"><span class="ms">edit_note</span><span data-i18n="writing_title">The agents are writing their verses…</span></div>
     <div class="agents">
-      <div class="agent" id="agent-gopher"><span class="avatar gopher"><span class="ms">pets</span></span><b>MC GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
-      <div class="agent" id="agent-nullptr"><span class="avatar nullptr"><span class="ms">smart_toy</span></span><b>NULL PTR</b><div class="status" data-i18n="writing_status">writing</div></div>
+      <div class="agent" id="agent-blue"><span class="avatar blue"><span class="ms">pets</span></span><b>BLUE GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
+      <div class="agent" id="agent-red"><span class="avatar red"><span class="ms">pets</span></span><b>RED GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
     </div>
   </section>
 
@@ -232,8 +232,8 @@
   <section id="v-voting" class="card hidden">
     <div class="phase-title"><span class="ms">how_to_vote</span><span data-i18n="voting_title">Who won this round?</span></div>
     <div class="votebtns">
-      <button class="votebtn gopher" data-battler="gopher"><span class="ms">pets</span>MC GOPHER</button>
-      <button class="votebtn nullptr" data-battler="nullptr"><span class="ms">smart_toy</span>NULL PTR</button>
+      <button class="votebtn blue" data-battler="blue"><span class="ms">pets</span>BLUE GOPHER</button>
+      <button class="votebtn red" data-battler="red"><span class="ms">pets</span>RED GOPHER</button>
     </div>
     <div class="bar-wrap" id="vote-bars"></div>
   </section>
@@ -248,7 +248,7 @@
   <!-- CROWD WORDS (always available once battle runs) -->
   <section id="v-crowd" class="card hidden">
     <div class="phase-title" style="font-size:.9rem"><span class="ms" style="color:var(--red)">local_fire_department</span><span data-i18n="crowd_title">Hype the mic — shout a word</span></div>
-    <input id="crowd-input" type="text" maxlength="40" data-i18n-ph="crowd_ph" placeholder="fire, cringe, gopher4ever…">
+    <input id="crowd-input" type="text" maxlength="40" data-i18n-ph="crowd_ph" placeholder="fire, cringe, ship-it-friday…">
     <button id="crowd-send" class="primary"><span class="ms">volume_up</span><span data-i18n="crowd_send">Shout</span></button>
   </section>
 </main>
@@ -257,7 +257,7 @@
 <script>
 const I18N = {
   en: {
-    subtitle: "AI Rap Battle — you are the jury",
+    subtitle: "you are the jury",
     idle_title: "The battle is about to begin…",
     topics_title_pre: "Round",
     topics_title: "shout a topic!",
@@ -269,7 +269,7 @@ const I18N = {
     fallback_status: "ready (from the vault)",
     voting_title: "Who won this round?",
     crowd_title: "Hype the mic — shout a word",
-    crowd_ph: "fire, cringe, gopher4ever…",
+    crowd_ph: "fire, cringe, ship-it-friday…",
     crowd_send: "Shout",
     performing: "ON THE MIC",
     round_winner: "takes round",
@@ -282,11 +282,11 @@ const I18N = {
     err_voted: "You already voted this round",
     err_submitted: "You already submitted a topic this round",
     wipe_topics_open: "pick a topic", wipe_writing: "agents writing",
-    wipe_performing_a: "MC Gopher", wipe_performing_b: "NULL PTR",
+    wipe_performing_a: "Blue Gopher", wipe_performing_b: "Red Gopher",
     wipe_voting: "vote now", wipe_round_result: "round result", wipe_champion: "the champion",
   },
   es: {
-    subtitle: "Batalla de Rap IA — tú eres el jurado",
+    subtitle: "tú eres el jurado",
     idle_title: "La batalla está por comenzar…",
     topics_title_pre: "Ronda",
     topics_title: "¡grita un tema!",
@@ -298,7 +298,7 @@ const I18N = {
     fallback_status: "listo (de la bóveda)",
     voting_title: "¿Quién ganó esta ronda?",
     crowd_title: "Prende el micro — grita una palabra",
-    crowd_ph: "fuego, cringe, gopher4ever…",
+    crowd_ph: "fuego, cringe, ship-it-friday…",
     crowd_send: "Gritar",
     performing: "EN EL MICRO",
     round_winner: "gana la ronda",
@@ -311,7 +311,7 @@ const I18N = {
     err_voted: "Ya votaste en esta ronda",
     err_submitted: "Ya enviaste un tema en esta ronda",
     wipe_topics_open: "elige un tema", wipe_writing: "agentes escribiendo",
-    wipe_performing_a: "MC Gopher", wipe_performing_b: "NULL PTR",
+    wipe_performing_a: "Blue Gopher", wipe_performing_b: "Red Gopher",
     wipe_voting: "vota ahora", wipe_round_result: "resultado", wipe_champion: "el campeón",
   },
 };
@@ -334,8 +334,8 @@ document.getElementById("lang").onclick = () => {
   if (lastState) render(lastState);
 };
 
-const ICONS = { gopher: "pets", nullptr: "smart_toy" };
-const NAMES = { gopher: "MC GOPHER", nullptr: "NULL PTR" };
+const ICONS = { blue: "pets", red: "pets" };
+const NAMES = { blue: "BLUE GOPHER", red: "RED GOPHER" };
 let ws, lastState = null, lastPhase = null;
 
 function connect() {
@@ -393,13 +393,13 @@ function render(s) {
     case "writing":
       show(["v-writing", "v-crowd"]);
       document.getElementById("writing-topic").innerHTML = topicChip(r.topic);
-      ["gopher","nullptr"].forEach((b) => {
+      ["blue","red"].forEach((b) => {
         const done = r.verses && r.verses[b];
         setAgentStatus(b, done ? "ready" : "writing");
       });
       break;
-    case "performing_a": renderPerformance(s, "gopher"); break;
-    case "performing_b": renderPerformance(s, "nullptr"); break;
+    case "performing_a": renderPerformance(s, "blue"); break;
+    case "performing_b": renderPerformance(s, "red"); break;
     case "voting": {
       show(["v-voting", "v-crowd"]);
       renderBars(r.vote_counts);
@@ -435,11 +435,11 @@ function renderPerformance(s, battler) {
     `<div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
 }
 function renderBars(counts) {
-  const g = (counts && counts.gopher) || 0, n = (counts && counts.nullptr) || 0;
+  const g = (counts && counts.blue) || 0, n = (counts && counts.red) || 0;
   const total = Math.max(g + n, 1);
   document.getElementById("vote-bars").innerHTML =
-    `<div class="bar-row"><span class="name" style="color:var(--gopher)"><span class="ms">pets</span>Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>` +
-    `<div class="bar-row"><span class="name" style="color:var(--nullptr)"><span class="ms">smart_toy</span>NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+    `<div class="bar-row"><span class="name" style="color:var(--blue)"><span class="ms">pets</span>Blue</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>` +
+    `<div class="bar-row"><span class="name" style="color:var(--red)"><span class="ms">pets</span>Red</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
 }
 function renderResult(s, icon, text, judge, animate) {
   const el = document.getElementById("result-title");
@@ -452,7 +452,7 @@ function renderResult(s, icon, text, judge, animate) {
     el.innerHTML = iconHTML + esc(text);
   }
   document.getElementById("result-scores").innerHTML =
-    `<span style="color:var(--gopher)"><span class="ms">pets</span> ${s.scores.gopher}</span><span style="color:var(--nullptr)"><span class="ms">smart_toy</span> ${s.scores.nullptr}</span>`;
+    `<span style="color:var(--blue)"><span class="ms">pets</span> ${s.scores.blue}</span><span style="color:var(--red)"><span class="ms">pets</span> ${s.scores.red}</span>`;
   document.getElementById("result-judge").innerHTML = judge
     ? `<span class="ms" style="color:var(--ink-soft)">gavel</span> ${esc(judge)}` : "";
 }

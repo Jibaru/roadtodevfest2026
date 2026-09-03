@@ -18,18 +18,18 @@ const (
 type Battler string
 
 const (
-	BattlerGopher  Battler = "gopher"
-	BattlerNullPtr Battler = "nullptr"
+	BattlerBlue Battler = "blue"
+	BattlerRed  Battler = "red"
 )
 
 func (b Battler) Valid() bool {
-	return b == BattlerGopher || b == BattlerNullPtr
+	return b == BattlerBlue || b == BattlerRed
 }
 
 // Opponent returns the other battler.
 func (b Battler) Opponent() Battler {
-	if b == BattlerGopher {
-		return BattlerNullPtr
+	if b == BattlerBlue {
+		return BattlerRed
 	}
-	return BattlerGopher
+	return BattlerBlue
 }

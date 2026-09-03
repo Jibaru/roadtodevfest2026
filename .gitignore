@@ -1,6 +1,6 @@
 # Binaries
 /bin/
-rapbattle
+agentarena
 
 # Local env
 .env

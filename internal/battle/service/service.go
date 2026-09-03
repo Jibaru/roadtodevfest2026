@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 const (
@@ -132,12 +132,12 @@ func (s *BattleService) Advance(ctx context.Context) (domain.BattleState, error)
 
 	case domain.PhaseWriting:
 		if err = b.StartPerformances(); err == nil {
-			go s.performVerse(domain.BattlerGopher, b.CurrentRound().Verse(domain.BattlerGopher))
+			go s.performVerse(domain.BattlerBlue, b.CurrentRound().Verse(domain.BattlerBlue))
 		}
 
 	case domain.PhasePerformingA:
 		if err = b.NextPerformance(); err == nil {
-			go s.performVerse(domain.BattlerNullPtr, b.CurrentRound().Verse(domain.BattlerNullPtr))
+			go s.performVerse(domain.BattlerRed, b.CurrentRound().Verse(domain.BattlerRed))
 		}
 
 	case domain.PhasePerformingB:
@@ -167,7 +167,7 @@ func (s *BattleService) writeVerses(topic string, history []domain.RoundState) {
 	defer cancel()
 
 	var wg sync.WaitGroup
-	for _, battler := range []domain.Battler{domain.BattlerGopher, domain.BattlerNullPtr} {
+	for _, battler := range []domain.Battler{domain.BattlerBlue, domain.BattlerRed} {
 		wg.Add(1)
 		go func(battler domain.Battler) {
 			defer wg.Done()

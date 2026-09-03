@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 // VerseWriter produces a battler's verse for a topic. Implemented by

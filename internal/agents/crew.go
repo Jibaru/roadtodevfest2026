@@ -15,7 +15,7 @@ import (
 	"google.golang.org/adk/v2/session"
 	"google.golang.org/adk/v2/tool"
 
-	"github.com/jibaru/rapbattle/internal/battle/domain"
+	"github.com/jibaru/agentarena/internal/battle/domain"
 )
 
 const (
@@ -53,8 +53,8 @@ func NewCrew(ctx context.Context, apiKey string) (*Crew, error) {
 	crew := &Crew{battlers: map[domain.Battler]*battlerRuntime{}, model: m}
 
 	instructions := map[domain.Battler]string{
-		domain.BattlerGopher:  gopherInstruction,
-		domain.BattlerNullPtr: nullptrInstruction,
+		domain.BattlerBlue: blueInstruction,
+		domain.BattlerRed:  redInstruction,
 	}
 	for battler, instruction := range instructions {
 		rt, err := crew.newBattler(ctx, battlerNames[battler], instruction, nil)
@@ -123,10 +123,10 @@ func (c *Crew) WriteVerse(ctx context.Context, battler domain.Battler, topic str
 func (c *Crew) Commentary(ctx context.Context, state domain.BattleState) (string, error) {
 	round := state.Rounds[len(state.Rounds)-1]
 	prompt := fmt.Sprintf(
-		"Round %d of %d. Topic: %q.\n\nMC GOPHER's verse:\n%s\n\nNULL PTR's verse:\n%s\n\nAudience votes: MC GOPHER %d, NULL PTR %d.\nGive your ringside commentary.",
+		"Round %d of %d. Topic: %q.\n\nBLUE GOPHER's verse:\n%s\n\nRED GOPHER's verse:\n%s\n\nAudience votes: BLUE GOPHER %d, RED GOPHER %d.\nGive your ringside commentary.",
 		round.Number, state.TotalRounds, round.Topic,
-		round.Verses[domain.BattlerGopher], round.Verses[domain.BattlerNullPtr],
-		round.VoteCounts[domain.BattlerGopher], round.VoteCounts[domain.BattlerNullPtr],
+		round.Verses[domain.BattlerBlue], round.Verses[domain.BattlerRed],
+		round.VoteCounts[domain.BattlerBlue], round.VoteCounts[domain.BattlerRed],
 	)
 
 	svc := session.InMemoryService()
