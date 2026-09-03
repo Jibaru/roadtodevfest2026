@@ -6,133 +6,219 @@
 <title>AI Rap Battle — MC Gopher vs NULL PTR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,1,0&display=block" rel="stylesheet">
 <style>
   :root {
     /* DevFest design tokens (developers.google.com/community/devfest) */
     --ink: #1e1e1e; --ink-soft: #5f6368; --bg: #ffffff; --surface: #f8f9fa;
     --border: #dadce0;
     --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe; --blue-soft: #c3e7ff;
-    --red: #ea4335; --red-pastel: #fce8e6;
+    --red: #ea4335; --red-dark: #c5221f; --red-pastel: #fce8e6;
     --yellow: #f9ab00; --yellow-pastel: #fef7e0;
     --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
     --gopher: var(--blue); --nullptr: var(--red);
     --r-card: 24px; --r-pill: 50px; --r-input: 16px;
+    --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
+    --elev-1: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+    --elev-2: 0 1px 3px rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg); color: var(--ink);
     font-family: 'Google Sans', 'Product Sans', Roboto, system-ui, sans-serif;
     min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-    padding: 16px;
+    padding: 16px; overflow-x: hidden;
   }
-  header { text-align: center; margin: 12px 0 24px; }
-  .brand { font-size: .8rem; font-weight: 500; letter-spacing: .06em; color: var(--ink-soft);
-    text-transform: uppercase; margin-bottom: 6px; }
+  /* Dot-grid texture, masked to the center so edges stay clean. */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    background-image: radial-gradient(circle, rgba(66,133,244,.16) 1.2px, transparent 1.2px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 30%, transparent 78%);
+    mask-image: radial-gradient(ellipse at 50% 20%, #000 30%, transparent 78%);
+  }
+  .ms {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal; font-style: normal; line-height: 1;
+    display: inline-block; vertical-align: -0.18em;
+    font-size: 1.25em;
+    letter-spacing: normal; text-transform: none; white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { text-align: center; margin: 10px 0 22px; }
+  .brand { font-size: .78rem; font-weight: 500; letter-spacing: .1em; color: var(--ink-soft);
+    text-transform: uppercase; margin-bottom: 8px; }
   .bk { color: var(--blue); font-weight: 700; }
-  header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; }
+  header h1 { font-size: 1.55rem; font-weight: 700; letter-spacing: -.01em; }
   header h1 .g { color: var(--gopher); } header h1 .n { color: var(--nullptr); }
+  .vs { color: var(--ink-soft); font-weight: 400; font-size: 1.1rem; }
   .sub { color: var(--ink-soft); font-size: .9rem; margin-top: 6px; }
   #lang { position: fixed; top: 12px; right: 12px; background: var(--bg);
     color: var(--blue); border: 1px solid var(--border); border-radius: var(--r-pill);
-    padding: 7px 16px; cursor: pointer; font-size: .8rem; font-weight: 500;
-    font-family: inherit; z-index: 10; }
+    padding: 7px 14px; cursor: pointer; font-size: .8rem; font-weight: 500;
+    font-family: inherit; z-index: 30; display: flex; align-items: center; gap: 5px; }
   main { width: 100%; max-width: 480px; }
   .card { background: var(--surface); border-radius: var(--r-card);
-    padding: 24px; margin-bottom: 16px; }
+    padding: 24px; margin-bottom: 16px; box-shadow: var(--elev-1); }
   .card.blue { background: var(--blue-pastel); }
   .card.yellow { background: var(--yellow-pastel); }
-  .phase-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; text-align: center; }
+  .phase-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .phase-title .ms { color: var(--blue); }
   .hidden { display: none !important; }
+
+  /* Staggered rise-in for freshly shown sections. */
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .card:not(.hidden) { animation: rise .45s var(--ease-strong) both; }
+  .card:not(.hidden) + .card:not(.hidden) { animation-delay: .09s; }
+
   input[type=text] { width: 100%; padding: 14px 18px; border-radius: var(--r-input);
     border: 1px solid var(--border); background: var(--bg); color: var(--ink);
-    font-size: 1rem; font-family: inherit; }
+    font-size: 1rem; font-family: inherit; transition: box-shadow .2s var(--ease-strong); }
   input[type=text]:focus { outline: 2px solid var(--blue-core); border-color: transparent; }
-  button.primary { width: 100%; margin-top: 12px; padding: 14px; border: 0;
+
+  /* Tactile buttons: they physically press down. */
+  button.primary { width: 100%; margin-top: 12px; padding: 13px; border: 0;
     border-radius: var(--r-pill); background: var(--blue);
-    color: #fff; font-weight: 500; font-size: 1rem; cursor: pointer; font-family: inherit; }
+    color: #fff; font-weight: 500; font-size: 1rem; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 3px 0 #14509e; transform: translateY(0);
+    transition: transform .08s ease, box-shadow .08s ease, background .15s; }
   button.primary:hover { background: #185abc; }
+  button.primary:active { transform: translateY(3px); box-shadow: 0 0 0 #14509e; }
   button:disabled { opacity: .5; cursor: default; }
+
   .topics { margin-top: 14px; }
   .topics li { display: flex; justify-content: space-between; padding: 8px 6px;
-    border-bottom: 1px solid var(--border); list-style: none; font-size: .95rem; }
+    border-bottom: 1px solid var(--border); list-style: none; font-size: .95rem;
+    animation: rise .35s var(--ease-strong) both; }
   .topics li b { color: var(--blue); }
-  .votebtns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .votebtn { padding: 20px 8px; border-radius: var(--r-card); border: 2px solid;
-    font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
-  .votebtn.gopher { border-color: var(--gopher); background: var(--blue-pastel); color: var(--gopher); }
-  .votebtn.nullptr { border-color: var(--nullptr); background: var(--red-pastel); color: var(--nullptr); }
-  .bar-wrap { margin-top: 16px; }
+
+  .votebtns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .votebtn { padding: 18px 8px 16px; border-radius: var(--r-card); border: 2px solid;
+    font-weight: 700; font-size: .95rem; cursor: pointer; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transform: translateY(0);
+    transition: transform .08s ease, box-shadow .08s ease; }
+  .votebtn .ms { font-size: 2rem; }
+  .votebtn.gopher { border-color: var(--gopher); background: var(--blue-pastel);
+    color: var(--gopher); box-shadow: 0 3px 0 var(--gopher); }
+  .votebtn.nullptr { border-color: var(--nullptr); background: var(--red-pastel);
+    color: var(--nullptr); box-shadow: 0 3px 0 var(--nullptr); }
+  .votebtn:active { transform: translateY(3px); box-shadow: 0 0 0 transparent !important; }
+
+  .bar-wrap { margin-top: 18px; }
   .bar-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: .85rem; }
-  .bar-row .name { width: 88px; font-weight: 500; }
+  .bar-row .name { width: 96px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
   .bar { flex: 1; height: 14px; background: var(--bg); border: 1px solid var(--border);
     border-radius: 7px; overflow: hidden; }
-  .bar > div { height: 100%; width: 0%; transition: width .4s; }
+  .bar > div { height: 100%; width: 0%; transition: width .5s var(--ease-strong); }
   .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
-  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .agent { text-align: center; padding: 18px 8px; border-radius: var(--r-card); background: var(--bg);
-    border: 1px solid var(--border); }
-  .agent .face { font-size: 2.2rem; }
-  .agent b { font-weight: 700; }
+    border: 1px solid var(--border); transition: background .3s, border-color .3s; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center; margin-bottom: 8px; }
+  .avatar .ms { font-size: 2rem; color: #fff; vertical-align: 0; }
+  .avatar.gopher { background: var(--gopher); }
+  .avatar.nullptr { background: var(--nullptr); }
+  .agent b { font-weight: 700; display: block; }
   .agent .status { font-size: .8rem; color: var(--ink-soft); margin-top: 6px; min-height: 1em; }
   .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
+  .agent.writing .avatar { animation: bob 1.1s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   .agent.writing .status::after { content: '…'; animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: .2; } }
+
   .verse { white-space: pre-wrap; font-family: 'Roboto Mono', ui-monospace, monospace;
     font-size: .9rem; line-height: 1.65; background: var(--bg); border-radius: var(--r-input);
-    padding: 16px; margin-top: 12px; border: 1px solid var(--border); }
+    padding: 16px; margin-top: 12px; border: 1px solid var(--border);
+    animation: rise .5s var(--ease-strong) both .12s; }
   .verse.gopher { border-left: 5px solid var(--gopher); }
   .verse.nullptr { border-left: 5px solid var(--nullptr); }
-  .tag { display: inline-block; padding: 4px 14px; border-radius: var(--r-pill);
-    font-size: .75rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 16px;
+    border-radius: var(--r-pill); font-size: .78rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
   .tag.gopher { background: var(--gopher); }
   .tag.nullptr { background: var(--nullptr); }
   .topic-banner { text-align: center; color: var(--ink); font-weight: 700;
     font-size: 1.15rem; margin-bottom: 12px; }
-  .topic-banner .bk { color: var(--blue); }
-  .champion { text-align: center; font-size: 1.35rem; font-weight: 700; padding: 10px; }
+  .champion { text-align: center; font-size: 1.3rem; font-weight: 700; padding: 8px; }
+  .champion .word span { display: inline-block; animation: pop .6s var(--ease-strong) both; }
+  @keyframes pop { 0% { transform: translateY(14px) scale(.7); opacity: 0; }
+    60% { transform: translateY(-4px) scale(1.06); opacity: 1; } 100% { transform: none; opacity: 1; } }
   .judge { font-style: italic; color: var(--ink-soft); margin-top: 12px; font-size: .9rem;
     text-align: center; }
   .scores { display: flex; justify-content: center; gap: 28px; font-weight: 700;
     font-size: 1.2rem; margin-top: 6px; }
-  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  .scores .ms { vertical-align: -0.22em; }
+
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
     background: var(--ink); color: #fff; padding: 12px 22px; border-radius: var(--r-pill);
-    font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; }
-  #toast.show { opacity: 1; }
-  #conn { position: fixed; top: 18px; left: 14px; width: 10px; height: 10px;
-    border-radius: 50%; background: var(--red); }
+    font-size: .85rem; opacity: 0; transition: opacity .3s, transform .3s var(--ease-strong);
+    pointer-events: none; z-index: 40; display: flex; align-items: center; gap: 8px;
+    box-shadow: var(--elev-2); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast .ms { color: var(--yellow); }
+  #conn { position: fixed; top: 19px; left: 14px; width: 10px; height: 10px;
+    border-radius: 50%; background: var(--red); z-index: 30; }
   #conn.ok { background: var(--green-bright); }
+
+  /* Phase wipe: a four-color Google stripe sweeps across; content swaps under it. */
+  #wipe { position: fixed; inset: 0; z-index: 50; pointer-events: none; display: none; }
+  #wipe.run { display: block; }
+  #wipe .panel { position: absolute; inset: 0; background: var(--bg);
+    transform: translateX(-101%); }
+  #wipe.run .panel { animation: sweep .8s var(--ease-strong) forwards; }
+  #wipe .stripe { position: absolute; top: 0; bottom: 0; right: -12px; width: 12px;
+    background: linear-gradient(to bottom, var(--blue-core) 0 25%, var(--red) 25% 50%,
+      var(--yellow) 50% 75%, var(--green) 75% 100%); }
+  @keyframes sweep {
+    0% { transform: translateX(-101%); }
+    42% { transform: translateX(0); }
+    58% { transform: translateX(0); }
+    100% { transform: translateX(101%); }
+  }
+  #wipe .label { position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: 1.1rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-soft); opacity: 0; }
+  #wipe.run .label { animation: label-fade .8s linear forwards; }
+  @keyframes label-fade { 0%,30% { opacity: 0; } 42%,58% { opacity: 1; } 72%,100% { opacity: 0; } }
 </style>
 </head>
 <body>
 <div id="conn" title="connection"></div>
-<button id="lang">ES</button>
+<button id="lang"><span class="ms">language</span><span id="lang-label">ES</span></button>
 <header>
   <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
-  <h1><span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span></h1>
+  <h1><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span></h1>
   <div class="sub" data-i18n="subtitle">AI Rap Battle — you are the jury</div>
 </header>
 <main>
   <!-- IDLE -->
   <section id="v-idle" class="card blue hidden">
-    <div class="phase-title" data-i18n="idle_title">The battle is about to begin…</div>
-    <div style="text-align:center; font-size:2.2rem">🎤🐹 🤖🎤</div>
+    <div class="phase-title"><span class="ms">mic</span><span data-i18n="idle_title">The battle is about to begin…</span></div>
+    <div style="text-align:center; display:flex; justify-content:center; gap:18px; padding:6px 0">
+      <span class="avatar gopher"><span class="ms">pets</span></span>
+      <span class="avatar nullptr"><span class="ms">smart_toy</span></span>
+    </div>
   </section>
 
   <!-- TOPICS -->
   <section id="v-topics" class="card blue hidden">
-    <div class="phase-title" data-i18n="topics_title">Round <span id="round-no">1</span>: shout a topic!</div>
+    <div class="phase-title"><span class="ms">campaign</span><span><span data-i18n="topics_title_pre">Round</span> <span id="round-no">1</span>: <span data-i18n="topics_title">shout a topic!</span></span></div>
     <input id="topic-input" type="text" maxlength="40" data-i18n-ph="topics_ph" placeholder="e.g. mondays, javascript, my wifi…">
-    <button id="topic-send" class="primary" data-i18n="topics_send">Submit topic</button>
+    <button id="topic-send" class="primary"><span class="ms">send</span><span data-i18n="topics_send">Submit topic</span></button>
     <ul class="topics" id="topic-list"></ul>
   </section>
 
   <!-- WRITING -->
   <section id="v-writing" class="card hidden">
     <div class="topic-banner" id="writing-topic"></div>
-    <div class="phase-title" data-i18n="writing_title">The agents are writing their verses…</div>
+    <div class="phase-title"><span class="ms">edit_note</span><span data-i18n="writing_title">The agents are writing their verses…</span></div>
     <div class="agents">
-      <div class="agent" id="agent-gopher"><div class="face">🐹</div><b>MC GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
-      <div class="agent" id="agent-nullptr"><div class="face">🤖</div><b>NULL PTR</b><div class="status" data-i18n="writing_status">writing</div></div>
+      <div class="agent" id="agent-gopher"><span class="avatar gopher"><span class="ms">pets</span></span><b>MC GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
+      <div class="agent" id="agent-nullptr"><span class="avatar nullptr"><span class="ms">smart_toy</span></span><b>NULL PTR</b><div class="status" data-i18n="writing_status">writing</div></div>
     </div>
   </section>
 
@@ -144,10 +230,10 @@
 
   <!-- VOTING -->
   <section id="v-voting" class="card hidden">
-    <div class="phase-title" data-i18n="voting_title">Who won this round?</div>
+    <div class="phase-title"><span class="ms">how_to_vote</span><span data-i18n="voting_title">Who won this round?</span></div>
     <div class="votebtns">
-      <button class="votebtn gopher" data-battler="gopher">🐹 MC GOPHER</button>
-      <button class="votebtn nullptr" data-battler="nullptr">🤖 NULL PTR</button>
+      <button class="votebtn gopher" data-battler="gopher"><span class="ms">pets</span>MC GOPHER</button>
+      <button class="votebtn nullptr" data-battler="nullptr"><span class="ms">smart_toy</span>NULL PTR</button>
     </div>
     <div class="bar-wrap" id="vote-bars"></div>
   </section>
@@ -161,18 +247,20 @@
 
   <!-- CROWD WORDS (always available once battle runs) -->
   <section id="v-crowd" class="card hidden">
-    <div class="phase-title" style="font-size:.9rem" data-i18n="crowd_title">🔥 Hype the mic — shout a word</div>
+    <div class="phase-title" style="font-size:.9rem"><span class="ms" style="color:var(--red)">local_fire_department</span><span data-i18n="crowd_title">Hype the mic — shout a word</span></div>
     <input id="crowd-input" type="text" maxlength="40" data-i18n-ph="crowd_ph" placeholder="fire, cringe, gopher4ever…">
-    <button id="crowd-send" class="primary" data-i18n="crowd_send">Shout</button>
+    <button id="crowd-send" class="primary"><span class="ms">volume_up</span><span data-i18n="crowd_send">Shout</span></button>
   </section>
 </main>
-<div id="toast"></div>
+<div id="toast"><span class="ms" id="toast-icon">check_circle</span><span id="toast-msg"></span></div>
+<div id="wipe"><div class="panel"><div class="stripe"></div></div><div class="label" id="wipe-label"></div></div>
 <script>
 const I18N = {
   en: {
     subtitle: "AI Rap Battle — you are the jury",
     idle_title: "The battle is about to begin…",
-    topics_title: "Shout a topic for this round!",
+    topics_title_pre: "Round",
+    topics_title: "shout a topic!",
     topics_ph: "e.g. mondays, javascript, my wifi…",
     topics_send: "Submit topic",
     writing_title: "The agents are writing their verses…",
@@ -180,24 +268,28 @@ const I18N = {
     ready_status: "ready!",
     fallback_status: "ready (from the vault)",
     voting_title: "Who won this round?",
-    crowd_title: "🔥 Hype the mic — shout a word",
+    crowd_title: "Hype the mic — shout a word",
     crowd_ph: "fire, cringe, gopher4ever…",
     crowd_send: "Shout",
     performing: "ON THE MIC",
     round_winner: "takes round",
     tie: "It's a tie!",
-    champion: "IS THE CHAMPION! 🏆",
-    champ_tie: "IT'S A DRAW — REMATCH! 🤝",
-    voted: "Vote registered! 🎉",
-    submitted: "Topic submitted! 🎤",
-    shouted: "The mic heard you! 🔥",
+    champion: "IS THE CHAMPION!",
+    champ_tie: "IT'S A DRAW — REMATCH!",
+    voted: "Vote registered!",
+    submitted: "Topic submitted!",
+    shouted: "The mic heard you!",
     err_voted: "You already voted this round",
     err_submitted: "You already submitted a topic this round",
+    wipe_topics_open: "pick a topic", wipe_writing: "agents writing",
+    wipe_performing_a: "MC Gopher", wipe_performing_b: "NULL PTR",
+    wipe_voting: "vote now", wipe_round_result: "round result", wipe_champion: "the champion",
   },
   es: {
     subtitle: "Batalla de Rap IA — tú eres el jurado",
     idle_title: "La batalla está por comenzar…",
-    topics_title: "¡Grita un tema para esta ronda!",
+    topics_title_pre: "Ronda",
+    topics_title: "¡grita un tema!",
     topics_ph: "ej. lunes, javascript, mi wifi…",
     topics_send: "Enviar tema",
     writing_title: "Los agentes están escribiendo sus versos…",
@@ -205,19 +297,22 @@ const I18N = {
     ready_status: "¡listo!",
     fallback_status: "listo (de la bóveda)",
     voting_title: "¿Quién ganó esta ronda?",
-    crowd_title: "🔥 Prende el micro — grita una palabra",
+    crowd_title: "Prende el micro — grita una palabra",
     crowd_ph: "fuego, cringe, gopher4ever…",
     crowd_send: "Gritar",
     performing: "EN EL MICRO",
     round_winner: "gana la ronda",
     tie: "¡Empate!",
-    champion: "¡ES EL CAMPEÓN! 🏆",
-    champ_tie: "¡EMPATE — REVANCHA! 🤝",
-    voted: "¡Voto registrado! 🎉",
-    submitted: "¡Tema enviado! 🎤",
-    shouted: "¡El micro te escuchó! 🔥",
+    champion: "¡ES EL CAMPEÓN!",
+    champ_tie: "¡EMPATE — REVANCHA!",
+    voted: "¡Voto registrado!",
+    submitted: "¡Tema enviado!",
+    shouted: "¡El micro te escuchó!",
     err_voted: "Ya votaste en esta ronda",
     err_submitted: "Ya enviaste un tema en esta ronda",
+    wipe_topics_open: "elige un tema", wipe_writing: "agentes escribiendo",
+    wipe_performing_a: "MC Gopher", wipe_performing_b: "NULL PTR",
+    wipe_voting: "vota ahora", wipe_round_result: "resultado", wipe_champion: "el campeón",
   },
 };
 let lang = localStorage.getItem("lang") || "en";
@@ -230,7 +325,7 @@ function applyI18n() {
   document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
     el.placeholder = t(el.dataset.i18nPh);
   });
-  document.getElementById("lang").textContent = lang === "en" ? "ES" : "EN";
+  document.getElementById("lang-label").textContent = lang === "en" ? "ES" : "EN";
 }
 document.getElementById("lang").onclick = () => {
   lang = lang === "en" ? "es" : "en";
@@ -239,8 +334,9 @@ document.getElementById("lang").onclick = () => {
   if (lastState) render(lastState);
 };
 
-const NAMES = { gopher: "🐹 MC GOPHER", nullptr: "🤖 NULL PTR" };
-let ws, lastState = null;
+const ICONS = { gopher: "pets", nullptr: "smart_toy" };
+const NAMES = { gopher: "MC GOPHER", nullptr: "NULL PTR" };
+let ws, lastState = null, lastPhase = null;
 
 function connect() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
@@ -252,12 +348,29 @@ function connect() {
   };
   ws.onmessage = (e) => {
     const { type, payload } = JSON.parse(e.data);
-    if (type === "state") { lastState = payload; render(payload); }
+    if (type === "state") { lastState = payload; renderWithWipe(payload); }
     else if (type === "agent_status") renderAgentStatus(payload);
     else if (type === "error") toastError(payload);
   };
 }
 function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
+
+// Phase changes sweep a Google-stripe wipe across; the view swaps while covered.
+function renderWithWipe(s) {
+  if (lastPhase === null || s.phase === lastPhase || s.phase === "idle") {
+    lastPhase = s.phase;
+    render(s);
+    return;
+  }
+  lastPhase = s.phase;
+  const wipe = document.getElementById("wipe");
+  document.getElementById("wipe-label").textContent = t("wipe_" + s.phase) || "";
+  wipe.classList.remove("run");
+  void wipe.offsetWidth; // restart animation
+  wipe.classList.add("run");
+  setTimeout(() => render(s), 340);          // swap while fully covered
+  setTimeout(() => wipe.classList.remove("run"), 820);
+}
 
 function show(ids) {
   ["v-idle","v-topics","v-writing","v-performing","v-voting","v-result","v-crowd"]
@@ -274,12 +387,12 @@ function render(s) {
       document.getElementById("round-no").textContent = r.number;
       const counts = Object.entries(r.topic_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
       document.getElementById("topic-list").innerHTML =
-        counts.map(([w, c]) => `<li><span>${esc(w)}</span><b>${c}</b></li>`).join("");
+        counts.map(([w, c], i) => `<li style="animation-delay:${i * 40}ms"><span>${esc(w)}</span><b>${c}</b></li>`).join("");
       break;
     }
     case "writing":
       show(["v-writing", "v-crowd"]);
-      document.getElementById("writing-topic").innerHTML = `<span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span>`;
+      document.getElementById("writing-topic").innerHTML = topicChip(r.topic);
       ["gopher","nullptr"].forEach((b) => {
         const done = r.verses && r.verses[b];
         setAgentStatus(b, done ? "ready" : "writing");
@@ -294,39 +407,54 @@ function render(s) {
     }
     case "round_result": {
       show(["v-result", "v-crowd"]);
-      const title = r.winner ? `${NAMES[r.winner]} ${t("round_winner")} ${r.number}!` : t("tie");
-      renderResult(s, title, r.judge_commentary);
+      const text = r.winner
+        ? `${NAMES[r.winner]} ${t("round_winner")} ${r.number}!`
+        : t("tie");
+      renderResult(s, r.winner ? ICONS[r.winner] : "how_to_vote", text, r.judge_commentary, false);
       break;
     }
     case "champion": {
       show(["v-result"]);
-      const title = s.champion ? `${NAMES[s.champion]} ${t("champion")}` : t("champ_tie");
+      const text = s.champion ? `${NAMES[s.champion]} ${t("champion")}` : t("champ_tie");
       const lastR = currentRound(s);
-      renderResult(s, title, lastR ? lastR.judge_commentary : "");
+      renderResult(s, s.champion ? "trophy" : "handshake", text,
+        lastR ? lastR.judge_commentary : "", true);
       break;
     }
   }
 }
+function topicChip(topic) {
+  return `<span class="bk">[</span> ${esc(topic)} <span class="bk">]</span>`;
+}
 function renderPerformance(s, battler) {
   show(["v-performing", "v-crowd"]);
   const r = currentRound(s);
-  document.getElementById("perf-topic").innerHTML = `<span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span>`;
+  document.getElementById("perf-topic").innerHTML = topicChip(r.topic);
   document.getElementById("perf-verse").innerHTML =
-    `<span class="tag ${battler}">${NAMES[battler]} — ${t("performing")}</span>` +
+    `<span class="tag ${battler}"><span class="ms">mic</span>${NAMES[battler]} — ${t("performing")}</span>` +
     `<div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
 }
 function renderBars(counts) {
   const g = (counts && counts.gopher) || 0, n = (counts && counts.nullptr) || 0;
   const total = Math.max(g + n, 1);
   document.getElementById("vote-bars").innerHTML =
-    `<div class="bar-row"><span class="name">🐹 Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>` +
-    `<div class="bar-row"><span class="name">🤖 NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+    `<div class="bar-row"><span class="name" style="color:var(--gopher)"><span class="ms">pets</span>Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>` +
+    `<div class="bar-row"><span class="name" style="color:var(--nullptr)"><span class="ms">smart_toy</span>NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
 }
-function renderResult(s, title, judge) {
-  document.getElementById("result-title").textContent = title;
+function renderResult(s, icon, text, judge, animate) {
+  const el = document.getElementById("result-title");
+  const iconHTML = `<span class="ms" style="color:var(--yellow)">${icon}</span> `;
+  if (animate) {
+    // Per-letter pop; the icon stays whole in front of the word.
+    el.innerHTML = iconHTML + `<span class="word">${[...text].map((ch, i) =>
+      `<span style="animation-delay:${i * 28}ms">${ch === " " ? "&nbsp;" : esc(ch)}</span>`).join("")}</span>`;
+  } else {
+    el.innerHTML = iconHTML + esc(text);
+  }
   document.getElementById("result-scores").innerHTML =
-    `<span style="color:var(--gopher)">🐹 ${s.scores.gopher}</span><span style="color:var(--nullptr)">🤖 ${s.scores.nullptr}</span>`;
-  document.getElementById("result-judge").textContent = judge ? `🎙️ ${judge}` : "";
+    `<span style="color:var(--gopher)"><span class="ms">pets</span> ${s.scores.gopher}</span><span style="color:var(--nullptr)"><span class="ms">smart_toy</span> ${s.scores.nullptr}</span>`;
+  document.getElementById("result-judge").innerHTML = judge
+    ? `<span class="ms" style="color:var(--ink-soft)">gavel</span> ${esc(judge)}` : "";
 }
 function setAgentStatus(battler, status) {
   const el = document.getElementById(`agent-${battler}`);
@@ -341,31 +469,32 @@ document.getElementById("topic-send").onclick = () => {
   if (!el.value.trim()) return;
   send({ type: "submit_topic", word: el.value });
   el.value = "";
-  toast(t("submitted"));
+  toast(t("submitted"), "mic");
 };
 document.getElementById("crowd-send").onclick = () => {
   const el = document.getElementById("crowd-input");
   if (!el.value.trim()) return;
   send({ type: "crowd_word", word: el.value });
   el.value = "";
-  toast(t("shouted"));
+  toast(t("shouted"), "local_fire_department");
 };
 document.querySelectorAll(".votebtn").forEach((b) => {
-  b.onclick = () => { send({ type: "vote", battler: b.dataset.battler }); toast(t("voted")); };
+  b.onclick = () => { send({ type: "vote", battler: b.dataset.battler }); toast(t("voted"), "how_to_vote"); };
 });
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, icon) {
+  document.getElementById("toast-msg").textContent = msg;
+  document.getElementById("toast-icon").textContent = icon || "check_circle";
   const el = document.getElementById("toast");
-  el.textContent = msg;
   el.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
 }
 function toastError(msg) {
-  if (String(msg).includes("already voted")) return toast(t("err_voted"));
-  if (String(msg).includes("already submitted")) return toast(t("err_submitted"));
-  toast(msg);
+  if (String(msg).includes("already voted")) return toast(t("err_voted"), "block");
+  if (String(msg).includes("already submitted")) return toast(t("err_submitted"), "block");
+  toast(msg, "error");
 }
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
