@@ -73,10 +73,38 @@
   .pill:nth-child(4) { background: var(--green-pastel); }
   .pill:nth-child(5) { background: var(--blue-soft); }
   .pill:nth-child(6) { background: var(--surface); }
-  .diagram { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 1.05rem;
-    line-height: 1.8; text-align: left; background: var(--surface); border-radius: var(--r-card);
-    padding: 26px 34px; border: 1px solid var(--border);
-    white-space: pre; overflow-x: auto; max-width: 90vw; }
+  /* SVG diagram */
+  svg.dg { width: 100%; max-width: 880px; height: auto; }
+  svg.dg text { font-family: 'Google Sans', Roboto, sans-serif; fill: var(--ink); }
+  svg.dg .nsub { fill: var(--ink-soft); font-size: 14px; }
+  svg.dg .nlbl { font-size: 19px; font-weight: 700; }
+  svg.dg .albl { fill: var(--ink-soft); font-size: 14px; }
+  svg.dg .mono { font-family: 'Roboto Mono', monospace; }
+  /* Numbered stepper */
+  .steps { text-align: left; max-width: 720px; margin: 0 auto; position: relative; }
+  .steps::before { content: ""; position: absolute; left: 17px; top: 20px; bottom: 20px;
+    width: 2px; background: var(--border); }
+  .step { display: flex; align-items: center; gap: 18px; padding: 8px 0; position: relative; }
+  .step .num { width: 36px; height: 36px; border-radius: 50%; color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    border: 3px solid var(--bg); }
+  .step:nth-child(4n+1) .num { background: var(--blue-core); }
+  .step:nth-child(4n+2) .num { background: var(--red); }
+  .step:nth-child(4n+3) .num { background: var(--yellow); color: var(--ink); }
+  .step:nth-child(4n)   .num { background: var(--green); }
+  .step .txt { font-size: 1.18rem; }
+  code.chip { font-family: 'Roboto Mono', monospace; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 2px 9px; font-size: .92em; }
+  /* File tree */
+  .tree { max-width: 840px; width: 100%; margin: 0 auto; text-align: left;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 10px 30px; }
+  .trow { display: flex; align-items: center; gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid var(--border); font-size: 1.15rem; }
+  .trow:last-child { border-bottom: 0; }
+  .trow .ms { color: var(--ink-soft); }
+  .trow code { font-family: 'Roboto Mono', monospace; font-weight: 500; }
+  .trow .tdesc { color: var(--ink-soft); margin-left: auto; font-size: .98rem; text-align: right; }
   footer { position: fixed; bottom: 14px; right: 20px; color: var(--ink-soft); font-size: .85rem; }
   #progress { position: fixed; bottom: 0; left: 0; height: 5px;
     background: linear-gradient(90deg, var(--blue-core) 0 25%, var(--red) 25% 50%,
@@ -166,44 +194,81 @@
 <!-- 6 · What just happened -->
 <section class="slide">
   <h2 data-i18n="s6_title">What you just experienced</h2>
-  <div class="diagram"><span class="cm">// every browser ↔ one Go binary</span>
-Audience (you) ──WebSocket──▶ <span class="g">Hub</span> ──▶ <span class="a">BattleService</span> (state machine)
-                                            │
-                ┌───────────────────────────┼─────────────────┐
-                ▼                           ▼                 ▼
-        <span class="g">Blue Gopher agent</span>           <span class="n">Red Gopher agent</span>     <span class="gold">Judge agent</span>
-                └── <span class="kw">parallel verse writing</span> ─┘
-                                            │
-                                  Gemini TTS (2 voices)</div>
+  <svg class="dg" viewBox="0 0 900 410" role="img" aria-label="Flow: audience browsers connect over WebSocket to the hub, then the battle service fans out to the Blue Gopher, Red Gopher and Judge agents; the two gophers write verses in parallel and feed Gemini TTS.">
+    <defs>
+      <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#5f6368"/>
+      </marker>
+    </defs>
+    <!-- row 1 -->
+    <rect x="20" y="20" width="185" height="58" rx="16" fill="#f8f9fa" stroke="#dadce0" stroke-width="2"/>
+    <text x="112" y="45" text-anchor="middle" class="nlbl">Audience</text>
+    <text x="112" y="66" text-anchor="middle" class="nsub">every browser</text>
+    <rect x="305" y="20" width="115" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
+    <text x="362" y="45" text-anchor="middle" class="nlbl" fill="#1967d2">Hub</text>
+    <text x="362" y="66" text-anchor="middle" class="nsub">realtime</text>
+    <rect x="520" y="20" width="250" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
+    <text x="645" y="45" text-anchor="middle" class="nlbl" fill="#1967d2">BattleService</text>
+    <text x="645" y="66" text-anchor="middle" class="nsub">state machine</text>
+    <line x1="205" y1="49" x2="298" y2="49" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <text x="252" y="38" text-anchor="middle" class="albl mono">WebSocket</text>
+    <line x1="420" y1="49" x2="513" y2="49" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <!-- fan-out -->
+    <path d="M645,78 V120 M160,120 H740 M160,120 V158 M450,120 V158 M740,120 V158" fill="none" stroke="#5f6368" stroke-width="2"/>
+    <line x1="160" y1="158" x2="160" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <line x1="450" y1="158" x2="450" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <line x1="740" y1="158" x2="740" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <!-- row 2: agents -->
+    <rect x="55" y="166" width="210" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
+    <text x="160" y="191" text-anchor="middle" class="nlbl" fill="#1967d2">Blue Gopher</text>
+    <text x="160" y="212" text-anchor="middle" class="nsub">llmagent + session</text>
+    <rect x="345" y="166" width="210" height="58" rx="16" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+    <text x="450" y="191" text-anchor="middle" class="nlbl" fill="#ea4335">Red Gopher</text>
+    <text x="450" y="212" text-anchor="middle" class="nsub">llmagent + session</text>
+    <rect x="635" y="166" width="210" height="58" rx="16" fill="#fef7e0" stroke="#f9ab00" stroke-width="2"/>
+    <text x="740" y="191" text-anchor="middle" class="nlbl" fill="#b06f00">Judge</text>
+    <text x="740" y="212" text-anchor="middle" class="nsub">commentary</text>
+    <!-- parallel bracket around the two gophers -->
+    <rect x="35" y="148" width="540" height="126" rx="20" fill="none" stroke="#1967d2" stroke-width="2" stroke-dasharray="7 6"/>
+    <text x="305" y="262" text-anchor="middle" class="albl mono" fill="#1967d2">goroutines — parallel verse writing</text>
+    <!-- TTS -->
+    <line x1="305" y1="274" x2="305" y2="313" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <rect x="165" y="316" width="280" height="58" rx="16" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+    <text x="305" y="341" text-anchor="middle" class="nlbl" fill="#1e7e34">Gemini TTS</text>
+    <text x="305" y="362" text-anchor="middle" class="nsub">Puck · Fenrir → WAV → stage</text>
+  </svg>
   <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every vote, topic and verse flowed through goroutines and channels.</p>
 </section>
 
 <!-- 6b · One round, end to end -->
 <section class="slide">
   <h2><span class="ms" style="color:var(--blue)">route</span> <span data-i18n="sf_title">One round, end to end</span></h2>
-  <div class="diagram"><span class="gold">1</span>  your phone ──ws──▶ {"type":"submit_topic","word":"wifi"}
-<span class="gold">2</span>  StartWriting()             <span class="cm">// most-submitted word wins</span>
-<span class="gold">3</span>  <span class="kw">go</span> write(<span class="g">Blue</span>)   ⇄   <span class="kw">go</span> write(<span class="n">Red</span>)      <span class="cm">// in parallel</span>
-<span class="gold">4</span>  ADK runner ──▶ Gemini 2.5 Flash ──▶ 8 bars each
-<span class="gold">5</span>  Gemini TTS (Puck / Fenrir) ──▶ WAV ──▶ stage audio
-<span class="gold">6</span>  audience votes (one per browser) ──▶ live tally
-<span class="gold">7</span>  Judge agent commentates ──▶ scores update
-<span class="gold">8</span>  round++ … <span class="gold">champion</span></div>
+  <div class="steps">
+    <div class="step"><span class="num">1</span><span class="txt" data-i18n="sf1">Your phone sends <code class="chip">submit_topic</code> over WebSocket</span></div>
+    <div class="step"><span class="num">2</span><span class="txt" data-i18n="sf2">The most-submitted word becomes the round topic</span></div>
+    <div class="step"><span class="num">3</span><span class="txt" data-i18n="sf3"><code class="chip">go write(Blue)</code> ⇄ <code class="chip">go write(Red)</code> — verses written in parallel</span></div>
+    <div class="step"><span class="num">4</span><span class="txt" data-i18n="sf4">Each ADK runner calls Gemini 2.5 Flash → 8 bars</span></div>
+    <div class="step"><span class="num">5</span><span class="txt" data-i18n="sf5">Gemini TTS performs them — Puck vs Fenrir voices</span></div>
+    <div class="step"><span class="num">6</span><span class="txt" data-i18n="sf6">The audience votes: one per browser, live tally</span></div>
+    <div class="step"><span class="num">7</span><span class="txt" data-i18n="sf7">The Judge agent drops its commentary, scores update</span></div>
+    <div class="step"><span class="num">8</span><span class="txt" data-i18n="sf8">Next round… until a champion is crowned</span></div>
+  </div>
   <p class="sub" style="margin-top:14px" data-i18n="sf_note">One HTTP button on the stage drives all of it — the state machine does the rest.</p>
 </section>
 
 <!-- 7 · Architecture -->
 <section class="slide">
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
-  <div class="diagram">cmd/api            <span class="cm">// wire everything</span>
-internal/
-  battle/<span class="g">domain</span>/     <span class="cm">// entities + repo interfaces + errors</span>
-  battle/<span class="a">service</span>/    <span class="cm">// the show's state machine</span>
-  battle/infra/      <span class="cm">// memory | file | embedded — same interface</span>
-  <span class="gold">agents</span>/            <span class="cm">// ADK: 2 battlers + 1 judge</span>
-  tts/               <span class="cm">// Gemini TTS → WAV</span>
-  realtime/          <span class="cm">// WebSocket hub, drops slow clients</span>
-web/               <span class="cm">// go:embed — UI inside the binary</span></div>
+  <div class="tree">
+    <div class="trow"><span class="ms">terminal</span><code>cmd/api</code><span class="tdesc" data-i18n="ar1">wires everything together</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/battle/<b class="g">domain</b></code><span class="tdesc" data-i18n="ar2">entities · repo interfaces · errors</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/battle/<b class="g">service</b></code><span class="tdesc" data-i18n="ar3">the show's state machine</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/battle/infra</code><span class="tdesc" data-i18n="ar4">memory | file | embedded — same interface</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/<b class="gold">agents</b></code><span class="tdesc" data-i18n="ar5">ADK: 2 battlers + 1 judge</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/tts</code><span class="tdesc" data-i18n="ar6">Gemini TTS → WAV</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/realtime</code><span class="tdesc" data-i18n="ar7">WebSocket hub, drops slow clients</span></div>
+    <div class="trow"><span class="ms">folder</span><code>web/</code><span class="tdesc" data-i18n="ar8">go:embed — UI inside the binary</span></div>
+  </div>
   <p class="sub" style="margin-top:14px" data-i18n="s7_note">Swapping storage is one constructor line. The agents are behind interfaces too — the show ran offline in rehearsal.</p>
 </section>
 
@@ -330,6 +395,22 @@ const I18N = {
     s4_note: "Una personalidad es solo un string de instrucciones.",
     sf_title: "Una ronda, de inicio a fin",
     sf_note: "Un solo botón HTTP en el stage maneja todo — la máquina de estados hace el resto.",
+    sf1: 'Tu teléfono envía <code class="chip">submit_topic</code> por WebSocket',
+    sf2: "La palabra más enviada se vuelve el tema de la ronda",
+    sf3: '<code class="chip">go write(Blue)</code> ⇄ <code class="chip">go write(Red)</code> — versos escritos en paralelo',
+    sf4: "Cada runner de ADK llama a Gemini 2.5 Flash → 8 barras",
+    sf5: "Gemini TTS los interpreta — voces Puck vs Fenrir",
+    sf6: "La audiencia vota: uno por navegador, conteo en vivo",
+    sf7: "El agente Juez suelta su comentario, los puntajes se actualizan",
+    sf8: "Siguiente ronda… hasta coronar al campeón",
+    ar1: "conecta todo",
+    ar2: "entidades · interfaces de repos · errores",
+    ar3: "la máquina de estados del show",
+    ar4: "memory | file | embedded — misma interfaz",
+    ar5: "ADK: 2 battlers + 1 juez",
+    ar6: "Gemini TTS → WAV",
+    ar7: "hub WebSocket, descarta clientes lentos",
+    ar8: "go:embed — la UI dentro del binario",
     g_eyebrow: "por qué Go — prueba",
     g_eyebrow2: "por qué Go — prueba",
     g_eyebrow3: "por qué Go — prueba",
