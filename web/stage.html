@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STAGE — AI Rap Battle</title>
+<style>
+  :root {
+    --bg: #07070d; --panel: #12121c; --text: #f2f2f7; --muted: #8a8a9e;
+    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: radial-gradient(1400px 700px at 50% -10%, #1c1330 0%, var(--bg) 60%);
+    color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; padding: 20px; }
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 1.6rem; } h1 .g { color: var(--gopher); } h1 .n { color: var(--nullptr); }
+  .join { font-size: 1.1rem; background: var(--panel); padding: 8px 16px; border-radius: 10px;
+    border: 1px solid #2a2a3a; }
+  .join b { color: var(--gold); }
+  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .card { background: var(--panel); border: 1px solid #262636; border-radius: 16px; padding: 20px; }
+  .phase-banner { text-align: center; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 14px; }
+  .topic { text-align: center; font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; }
+  .verse { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 1.25rem;
+    line-height: 1.8; background: #0b0b13; border-radius: 12px; padding: 20px; }
+  .verse.gopher { border-left: 6px solid var(--gopher); }
+  .verse.nullptr { border-left: 6px solid var(--nullptr); }
+  .tag { display: inline-block; padding: 4px 14px; border-radius: 14px; font-weight: 800; margin-bottom: 10px; }
+  .tag.gopher { background: var(--gopher); color: #04222b; }
+  .tag.nullptr { background: var(--nullptr); color: #2b040f; }
+  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .agent { text-align: center; padding: 20px 10px; border-radius: 14px; background: #0b0b13; }
+  .agent .face { font-size: 3rem; }
+  .agent .status { color: var(--muted); margin-top: 8px; }
+  .agent.writing .status::after { content: "…"; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+  .scores { display: flex; justify-content: center; gap: 40px; font-size: 2rem; font-weight: 900; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 1rem; }
+  .bar-row .name { width: 120px; font-weight: 700; }
+  .bar { flex: 1; height: 22px; background: #0b0b13; border-radius: 11px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0%; transition: width .4s; }
+  .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
+  .controls button { width: 100%; padding: 14px; margin-bottom: 10px; border: 0; border-radius: 10px;
+    font-size: 1rem; font-weight: 800; cursor: pointer; }
+  #btn-start { background: #2e7d32; color: #fff; }
+  #btn-advance { background: linear-gradient(90deg, var(--gopher), #7c5cff); color: #fff; }
+  #btn-reset { background: #40404f; color: #fff; }
+  #btn-beat { background: #6a1b9a; color: #fff; }
+  .kv { font-size: .9rem; color: var(--muted); margin: 4px 0; }
+  .kv b { color: var(--text); }
+  .alert { background: #4a1220; border: 1px solid var(--nullptr); border-radius: 10px;
+    padding: 12px; margin-top: 10px; font-weight: 700; display: none; }
+  .judge { font-style: italic; color: var(--gold); margin-top: 12px; font-size: 1.1rem; text-align: center; }
+  .topics li { display: flex; justify-content: space-between; padding: 8px 6px; font-size: 1.2rem;
+    border-bottom: 1px solid #22222f; list-style: none; }
+  #log { font-family: ui-monospace, monospace; font-size: .75rem; color: var(--muted);
+    max-height: 140px; overflow-y: auto; margin-top: 10px; }
+  #conn { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f43; }
+  #conn.ok { background: #3f6; }
+  .champion-view { text-align: center; font-size: 2.4rem; font-weight: 900; padding: 30px 0; }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>🎤 <span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span> <span id="conn"></span></h1>
+  <div class="join">Join the jury → <b id="join-url"></b></div>
+</div>
+<div class="grid">
+  <div class="card" id="main-view">
+    <div class="phase-banner" id="phase">idle</div>
+    <div id="content"></div>
+    <div class="alert" id="tts-alert">🎙️ TTS UNAVAILABLE — GRAB THE MIC AND PERFORM IT YOURSELF!</div>
+    <div class="judge" id="judge"></div>
+  </div>
+  <div>
+    <div class="card controls">
+      <button id="btn-start">▶ START BATTLE (3 rounds)</button>
+      <button id="btn-advance">⏭ ADVANCE →</button>
+      <button id="btn-beat">🥁 BEAT: OFF</button>
+      <button id="btn-reset">↺ RESET</button>
+      <div class="kv">Phase: <b id="kv-phase">—</b></div>
+      <div class="kv">Round: <b id="kv-round">—</b></div>
+      <div class="kv">Verses ready: <b id="kv-verses">—</b></div>
+      <div class="kv">Next: <b id="kv-next">start a battle</b></div>
+      <div id="log"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="scores"><span style="color:var(--gopher)">🐹 <span id="score-g">0</span></span>
+        <span style="color:var(--nullptr)">🤖 <span id="score-n">0</span></span></div>
+    </div>
+  </div>
+</div>
+<script>
+const token = new URLSearchParams(location.search).get("token") || prompt("Presenter token:");
+document.getElementById("join-url").textContent = location.host;
+const NAMES = { gopher: "🐹 MC GOPHER", nullptr: "🤖 NULL PTR" };
+const NEXT = {
+  idle: "open topic submissions", topics_open: "close topics → agents write",
+  writing: "start Gopher's performance", performing_a: "start NULL PTR's performance",
+  performing_b: "open audience voting", voting: "close votes → judge speaks",
+  round_result: "open next round", champion: "battle over — reset for a new one",
+};
+let ws, lastState = null;
+
+function log(msg) {
+  const el = document.getElementById("log");
+  el.innerHTML = `<div>${new Date().toLocaleTimeString()} ${esc(msg)}</div>` + el.innerHTML;
+}
+function connect() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(`${proto}://${location.host}/ws/stage?token=${encodeURIComponent(token)}`);
+  ws.onopen = () => document.getElementById("conn").classList.add("ok");
+  ws.onclose = () => { document.getElementById("conn").classList.remove("ok"); setTimeout(connect, 1500); };
+  ws.onmessage = (e) => {
+    const { type, payload } = JSON.parse(e.data);
+    if (type === "state") { lastState = payload; render(payload); }
+    else if (type === "agent_status") log(`${payload.battler}: ${payload.status}`);
+    else if (type === "performance") playPerformance(payload);
+    else if (type === "tts_unavailable") {
+      document.getElementById("tts-alert").style.display = "block";
+      log(`TTS failed for ${payload.battler} — perform live!`);
+    }
+    else if (type === "error") log(`error: ${payload}`);
+  };
+}
+
+// ---- Presenter controls (REST) ----
+async function api(path, body) {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "X-Presenter-Token": token, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok && res.status !== 204) {
+    const err = await res.json().catch(() => ({}));
+    log(`API ${res.status}: ${err.error || path}`);
+  }
+}
+document.getElementById("btn-start").onclick = () => api("/api/battles", { rounds: 3 });
+document.getElementById("btn-advance").onclick = () => api("/api/battles/current/advance");
+document.getElementById("btn-reset").onclick = () => { stopAudio(); api("/api/battles/current/reset"); };
+
+// ---- Rendering ----
+function currentRound(s) { return s.rounds && s.rounds.length ? s.rounds[s.rounds.length - 1] : null; }
+function render(s) {
+  const r = currentRound(s);
+  document.getElementById("phase").textContent = s.phase.replace("_", " ");
+  document.getElementById("kv-phase").textContent = s.phase;
+  document.getElementById("kv-round").textContent = r ? `${r.number} / ${s.total_rounds}` : "—";
+  document.getElementById("kv-next").textContent = NEXT[s.phase] || "—";
+  document.getElementById("kv-verses").textContent = r
+    ? `${r.verses && r.verses.gopher ? "🐹✓" : "🐹…"} ${r.verses && r.verses.nullptr ? "🤖✓" : "🤖…"}` : "—";
+  document.getElementById("score-g").textContent = s.scores ? s.scores.gopher : 0;
+  document.getElementById("score-n").textContent = s.scores ? s.scores.nullptr : 0;
+  document.getElementById("judge").textContent = "";
+  if (s.phase !== "performing_a" && s.phase !== "performing_b") {
+    document.getElementById("tts-alert").style.display = "none";
+  }
+
+  const c = document.getElementById("content");
+  switch (s.phase) {
+    case "idle":
+      c.innerHTML = `<div class="champion-view">🎤 Waiting to start…<br>
+        <span style="font-size:1.1rem;color:var(--muted)">audience joins at <b>${esc(location.host)}</b></span></div>`;
+      break;
+    case "topics_open": {
+      const counts = Object.entries(r.topic_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      c.innerHTML = `<div class="topic">📢 Round ${r.number}: the crowd picks a topic</div>
+        <ul class="topics">${counts.map(([w, x]) => `<li><span>${esc(w)}</span><b>${x}</b></li>`).join("") || "<li>waiting for submissions…</li>"}</ul>`;
+      break;
+    }
+    case "writing":
+      c.innerHTML = `<div class="topic">🎯 ${esc(r.topic)}</div><div class="agents">
+        <div class="agent ${r.verses && r.verses.gopher ? "" : "writing"}"><div class="face">🐹</div><b>MC GOPHER</b><div class="status">${r.verses && r.verses.gopher ? "verse ready ✓" : "writing"}</div></div>
+        <div class="agent ${r.verses && r.verses.nullptr ? "" : "writing"}"><div class="face">🤖</div><b>NULL PTR</b><div class="status">${r.verses && r.verses.nullptr ? "verse ready ✓" : "writing"}</div></div>
+      </div>`;
+      break;
+    case "performing_a": showVerse(r, "gopher"); break;
+    case "performing_b": showVerse(r, "nullptr"); break;
+    case "voting": {
+      const g = r.vote_counts.gopher || 0, n = r.vote_counts.nullptr || 0, total = Math.max(g + n, 1);
+      c.innerHTML = `<div class="topic">🗳️ VOTE NOW at <span style="color:var(--gold)">${esc(location.host)}</span></div>
+        <div class="bar-row"><span class="name">🐹 Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>
+        <div class="bar-row"><span class="name">🤖 NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+      break;
+    }
+    case "round_result": {
+      const title = r.winner ? `${NAMES[r.winner]} takes round ${r.number}!` : "It's a tie!";
+      c.innerHTML = `<div class="champion-view">${title}</div>`;
+      document.getElementById("judge").textContent = r.judge_commentary ? `🎙️ ${r.judge_commentary}` : "";
+      break;
+    }
+    case "champion": {
+      const title = s.champion ? `${NAMES[s.champion]} IS THE CHAMPION! 🏆` : "IT'S A DRAW — REMATCH! 🤝";
+      c.innerHTML = `<div class="champion-view">${title}</div>`;
+      document.getElementById("judge").textContent = r && r.judge_commentary ? `🎙️ ${r.judge_commentary}` : "";
+      break;
+    }
+  }
+}
+function showVerse(r, battler) {
+  document.getElementById("content").innerHTML =
+    `<div class="topic">🎯 ${esc(r.topic)}</div>
+     <span class="tag ${battler}">${NAMES[battler]} — ON THE MIC</span>
+     <div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
+}
+
+// ---- Audio: TTS playback + synthesized beat (Web Audio, no assets) ----
+let audioEl = null, actx = null, beatOn = false, beatTimer = null;
+function playPerformance(p) {
+  document.getElementById("tts-alert").style.display = "none";
+  stopVoice();
+  if (!p.audio_b64) return;
+  audioEl = new Audio("data:audio/wav;base64," + p.audio_b64);
+  audioEl.play().catch((e) => log("audio blocked — click anywhere then Advance again"));
+  log(`playing ${p.battler}'s verse`);
+}
+function stopVoice() { if (audioEl) { audioEl.pause(); audioEl = null; } }
+function stopAudio() { stopVoice(); if (beatOn) toggleBeat(); }
+
+function ensureCtx() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); }
+function kick(tm) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.frequency.setValueAtTime(150, tm); o.frequency.exponentialRampToValueAtTime(40, tm + .12);
+  g.gain.setValueAtTime(.8, tm); g.gain.exponentialRampToValueAtTime(.001, tm + .25);
+  o.connect(g).connect(actx.destination); o.start(tm); o.stop(tm + .3);
+}
+function snare(tm) {
+  const len = actx.sampleRate * .12, buf = actx.createBuffer(1, len, actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+  const src = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
+  src.buffer = buf; f.type = "highpass"; f.frequency.value = 1500; g.gain.value = .4;
+  src.connect(f).connect(g).connect(actx.destination); src.start(tm);
+}
+function hat(tm) {
+  const len = actx.sampleRate * .04, buf = actx.createBuffer(1, len, actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+  const src = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
+  src.buffer = buf; f.type = "highpass"; f.frequency.value = 7000; g.gain.value = .15;
+  src.connect(f).connect(g).connect(actx.destination); src.start(tm);
+}
+let nextBar = 0;
+function scheduleBeat() {
+  const bpm = 88, beat = 60 / bpm;
+  while (nextBar < actx.currentTime + 1.2) {
+    kick(nextBar); kick(nextBar + beat * 2.5);
+    snare(nextBar + beat); snare(nextBar + beat * 3);
+    for (let i = 0; i < 8; i++) hat(nextBar + (beat / 2) * i);
+    nextBar += beat * 4;
+  }
+}
+function toggleBeat() {
+  beatOn = !beatOn;
+  document.getElementById("btn-beat").textContent = beatOn ? "🥁 BEAT: ON" : "🥁 BEAT: OFF";
+  if (beatOn) { ensureCtx(); nextBar = actx.currentTime + .05; beatTimer = setInterval(scheduleBeat, 400); }
+  else clearInterval(beatTimer);
+}
+document.getElementById("btn-beat").onclick = toggleBeat;
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+connect();
+</script>
+</body>
+</html>

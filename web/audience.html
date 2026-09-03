@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Rap Battle — MC Gopher vs NULL PTR</title>
+<style>
+  :root {
+    --bg: #0b0b12; --panel: #15151f; --text: #f2f2f7; --muted: #8a8a9e;
+    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 50% -10%, #1c1330 0%, var(--bg) 60%);
+    color: var(--text); font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+  }
+  header { text-align: center; margin: 8px 0 20px; }
+  header h1 { font-size: 1.5rem; letter-spacing: 1px; }
+  header h1 .g { color: var(--gopher); } header h1 .n { color: var(--nullptr); }
+  .sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+  #lang { position: fixed; top: 10px; right: 10px; background: var(--panel);
+    color: var(--text); border: 1px solid #333; border-radius: 20px;
+    padding: 6px 14px; cursor: pointer; font-size: .8rem; }
+  main { width: 100%; max-width: 480px; }
+  .card { background: var(--panel); border: 1px solid #262636; border-radius: 16px;
+    padding: 20px; margin-bottom: 14px; }
+  .phase-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+  .hidden { display: none !important; }
+  input[type=text] { width: 100%; padding: 12px 14px; border-radius: 10px;
+    border: 1px solid #33334a; background: #0e0e16; color: var(--text); font-size: 1rem; }
+  button.primary { width: 100%; margin-top: 10px; padding: 12px; border: 0;
+    border-radius: 10px; background: linear-gradient(90deg, var(--gopher), #7c5cff);
+    color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .topics li { display: flex; justify-content: space-between; padding: 6px 4px;
+    border-bottom: 1px solid #22222f; list-style: none; font-size: .95rem; }
+  .votebtns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .votebtn { padding: 18px 8px; border-radius: 14px; border: 2px solid; background: #0e0e16;
+    color: var(--text); font-weight: 800; font-size: 1rem; cursor: pointer; }
+  .votebtn.gopher { border-color: var(--gopher); }
+  .votebtn.nullptr { border-color: var(--nullptr); }
+  .bar-wrap { margin-top: 14px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: .85rem; }
+  .bar-row .name { width: 84px; }
+  .bar { flex: 1; height: 14px; background: #0e0e16; border-radius: 7px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0%; transition: width .4s; }
+  .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
+  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .agent { text-align: center; padding: 14px 8px; border-radius: 14px; background: #0e0e16; }
+  .agent .face { font-size: 2rem; }
+  .agent .status { font-size: .8rem; color: var(--muted); margin-top: 6px; min-height: 1em; }
+  .agent.writing .status::after { content: '…'; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+  .verse { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: .92rem;
+    line-height: 1.6; background: #0e0e16; border-radius: 12px; padding: 14px; margin-top: 10px; }
+  .verse.gopher { border-left: 4px solid var(--gopher); }
+  .verse.nullptr { border-left: 4px solid var(--nullptr); }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .75rem;
+    font-weight: 700; margin-bottom: 6px; }
+  .tag.gopher { background: var(--gopher); color: #04222b; }
+  .tag.nullptr { background: var(--nullptr); color: #2b040f; }
+  .topic-banner { text-align: center; color: var(--gold); font-weight: 800;
+    font-size: 1.1rem; margin-bottom: 10px; }
+  .champion { text-align: center; font-size: 1.4rem; font-weight: 900; padding: 10px; }
+  .judge { font-style: italic; color: var(--muted); margin-top: 10px; font-size: .9rem; }
+  .scores { display: flex; justify-content: center; gap: 24px; font-weight: 800;
+    font-size: 1.1rem; margin-top: 4px; }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #2b2b3d; padding: 10px 18px; border-radius: 10px; font-size: .85rem;
+    opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #toast.show { opacity: 1; }
+  #conn { position: fixed; top: 12px; left: 12px; width: 10px; height: 10px;
+    border-radius: 50%; background: #f43; }
+  #conn.ok { background: #3f6; }
+</style>
+</head>
+<body>
+<div id="conn" title="connection"></div>
+<button id="lang">ES</button>
+<header>
+  <h1><span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span></h1>
+  <div class="sub" data-i18n="subtitle">AI Rap Battle — you are the jury</div>
+</header>
+<main>
+  <!-- IDLE -->
+  <section id="v-idle" class="card hidden">
+    <div class="phase-title" data-i18n="idle_title">The battle is about to begin…</div>
+    <div style="text-align:center; font-size:2.2rem">🎤🐹 🤖🎤</div>
+  </section>
+
+  <!-- TOPICS -->
+  <section id="v-topics" class="card hidden">
+    <div class="phase-title" data-i18n="topics_title">Round <span id="round-no">1</span>: shout a topic!</div>
+    <input id="topic-input" type="text" maxlength="40" data-i18n-ph="topics_ph" placeholder="e.g. mondays, javascript, my wifi…">
+    <button id="topic-send" class="primary" data-i18n="topics_send">Submit topic</button>
+    <ul class="topics" id="topic-list" style="margin-top:12px"></ul>
+  </section>
+
+  <!-- WRITING -->
+  <section id="v-writing" class="card hidden">
+    <div class="topic-banner" id="writing-topic"></div>
+    <div class="phase-title" data-i18n="writing_title">The agents are writing their verses…</div>
+    <div class="agents">
+      <div class="agent" id="agent-gopher"><div class="face">🐹</div><b>MC GOPHER</b><div class="status" data-i18n="writing_status">writing</div></div>
+      <div class="agent" id="agent-nullptr"><div class="face">🤖</div><b>NULL PTR</b><div class="status" data-i18n="writing_status">writing</div></div>
+    </div>
+  </section>
+
+  <!-- PERFORMING -->
+  <section id="v-performing" class="card hidden">
+    <div class="topic-banner" id="perf-topic"></div>
+    <div id="perf-verse"></div>
+  </section>
+
+  <!-- VOTING -->
+  <section id="v-voting" class="card hidden">
+    <div class="phase-title" data-i18n="voting_title">Who won this round?</div>
+    <div class="votebtns">
+      <button class="votebtn gopher" data-battler="gopher">🐹 MC GOPHER</button>
+      <button class="votebtn nullptr" data-battler="nullptr">🤖 NULL PTR</button>
+    </div>
+    <div class="bar-wrap" id="vote-bars"></div>
+  </section>
+
+  <!-- ROUND RESULT / CHAMPION -->
+  <section id="v-result" class="card hidden">
+    <div class="champion" id="result-title"></div>
+    <div class="scores" id="result-scores"></div>
+    <div class="judge" id="result-judge"></div>
+  </section>
+
+  <!-- CROWD WORDS (always available once battle runs) -->
+  <section id="v-crowd" class="card hidden">
+    <div class="phase-title" style="font-size:.9rem" data-i18n="crowd_title">🔥 Hype the mic — shout a word</div>
+    <input id="crowd-input" type="text" maxlength="40" data-i18n-ph="crowd_ph" placeholder="fire, cringe, gopher4ever…">
+    <button id="crowd-send" class="primary" data-i18n="crowd_send">Shout</button>
+  </section>
+</main>
+<div id="toast"></div>
+<script>
+const I18N = {
+  en: {
+    subtitle: "AI Rap Battle — you are the jury",
+    idle_title: "The battle is about to begin…",
+    topics_title: "Shout a topic for this round!",
+    topics_ph: "e.g. mondays, javascript, my wifi…",
+    topics_send: "Submit topic",
+    writing_title: "The agents are writing their verses…",
+    writing_status: "writing",
+    ready_status: "ready!",
+    fallback_status: "ready (from the vault)",
+    voting_title: "Who won this round?",
+    crowd_title: "🔥 Hype the mic — shout a word",
+    crowd_ph: "fire, cringe, gopher4ever…",
+    crowd_send: "Shout",
+    performing: "ON THE MIC",
+    round_winner: "takes round",
+    tie: "It's a tie!",
+    champion: "IS THE CHAMPION! 🏆",
+    champ_tie: "IT'S A DRAW — REMATCH! 🤝",
+    voted: "Vote registered! 🎉",
+    submitted: "Topic submitted! 🎤",
+    shouted: "The mic heard you! 🔥",
+    err_voted: "You already voted this round",
+    err_submitted: "You already submitted a topic this round",
+  },
+  es: {
+    subtitle: "Batalla de Rap IA — tú eres el jurado",
+    idle_title: "La batalla está por comenzar…",
+    topics_title: "¡Grita un tema para esta ronda!",
+    topics_ph: "ej. lunes, javascript, mi wifi…",
+    topics_send: "Enviar tema",
+    writing_title: "Los agentes están escribiendo sus versos…",
+    writing_status: "escribiendo",
+    ready_status: "¡listo!",
+    fallback_status: "listo (de la bóveda)",
+    voting_title: "¿Quién ganó esta ronda?",
+    crowd_title: "🔥 Prende el micro — grita una palabra",
+    crowd_ph: "fuego, cringe, gopher4ever…",
+    crowd_send: "Gritar",
+    performing: "EN EL MICRO",
+    round_winner: "gana la ronda",
+    tie: "¡Empate!",
+    champion: "¡ES EL CAMPEÓN! 🏆",
+    champ_tie: "¡EMPATE — REVANCHA! 🤝",
+    voted: "¡Voto registrado! 🎉",
+    submitted: "¡Tema enviado! 🎤",
+    shouted: "¡El micro te escuchó! 🔥",
+    err_voted: "Ya votaste en esta ronda",
+    err_submitted: "Ya enviaste un tema en esta ronda",
+  },
+};
+let lang = localStorage.getItem("lang") || "en";
+const t = (k) => (I18N[lang][k] ?? I18N.en[k] ?? k);
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  document.getElementById("lang").textContent = lang === "en" ? "ES" : "EN";
+}
+document.getElementById("lang").onclick = () => {
+  lang = lang === "en" ? "es" : "en";
+  localStorage.setItem("lang", lang);
+  applyI18n();
+  if (lastState) render(lastState);
+};
+
+const NAMES = { gopher: "🐹 MC GOPHER", nullptr: "🤖 NULL PTR" };
+let ws, lastState = null;
+
+function connect() {
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onopen = () => document.getElementById("conn").classList.add("ok");
+  ws.onclose = () => {
+    document.getElementById("conn").classList.remove("ok");
+    setTimeout(connect, 1500);
+  };
+  ws.onmessage = (e) => {
+    const { type, payload } = JSON.parse(e.data);
+    if (type === "state") { lastState = payload; render(payload); }
+    else if (type === "agent_status") renderAgentStatus(payload);
+    else if (type === "error") toastError(payload);
+  };
+}
+function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
+
+function show(ids) {
+  ["v-idle","v-topics","v-writing","v-performing","v-voting","v-result","v-crowd"]
+    .forEach((id) => document.getElementById(id).classList.toggle("hidden", !ids.includes(id)));
+}
+function currentRound(s) { return s.rounds && s.rounds.length ? s.rounds[s.rounds.length - 1] : null; }
+
+function render(s) {
+  const r = currentRound(s);
+  switch (s.phase) {
+    case "idle": show(["v-idle"]); break;
+    case "topics_open": {
+      show(["v-topics"]);
+      document.getElementById("round-no").textContent = r.number;
+      const counts = Object.entries(r.topic_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      document.getElementById("topic-list").innerHTML =
+        counts.map(([w, c]) => `<li><span>${esc(w)}</span><b>${c}</b></li>`).join("");
+      break;
+    }
+    case "writing":
+      show(["v-writing", "v-crowd"]);
+      document.getElementById("writing-topic").textContent = `🎯 ${r.topic}`;
+      ["gopher","nullptr"].forEach((b) => {
+        const done = r.verses && r.verses[b];
+        setAgentStatus(b, done ? "ready" : "writing");
+      });
+      break;
+    case "performing_a": renderPerformance(s, "gopher"); break;
+    case "performing_b": renderPerformance(s, "nullptr"); break;
+    case "voting": {
+      show(["v-voting", "v-crowd"]);
+      renderBars(r.vote_counts);
+      break;
+    }
+    case "round_result": {
+      show(["v-result", "v-crowd"]);
+      const title = r.winner ? `${NAMES[r.winner]} ${t("round_winner")} ${r.number}!` : t("tie");
+      renderResult(s, title, r.judge_commentary);
+      break;
+    }
+    case "champion": {
+      show(["v-result"]);
+      const title = s.champion ? `${NAMES[s.champion]} ${t("champion")}` : t("champ_tie");
+      const lastR = currentRound(s);
+      renderResult(s, title, lastR ? lastR.judge_commentary : "");
+      break;
+    }
+  }
+}
+function renderPerformance(s, battler) {
+  show(["v-performing", "v-crowd"]);
+  const r = currentRound(s);
+  document.getElementById("perf-topic").textContent = `🎯 ${r.topic}`;
+  document.getElementById("perf-verse").innerHTML =
+    `<span class="tag ${battler}">${NAMES[battler]} — ${t("performing")}</span>` +
+    `<div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
+}
+function renderBars(counts) {
+  const g = (counts && counts.gopher) || 0, n = (counts && counts.nullptr) || 0;
+  const total = Math.max(g + n, 1);
+  document.getElementById("vote-bars").innerHTML =
+    `<div class="bar-row"><span class="name">🐹 Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>` +
+    `<div class="bar-row"><span class="name">🤖 NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+}
+function renderResult(s, title, judge) {
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-scores").innerHTML =
+    `<span style="color:var(--gopher)">🐹 ${s.scores.gopher}</span><span style="color:var(--nullptr)">🤖 ${s.scores.nullptr}</span>`;
+  document.getElementById("result-judge").textContent = judge ? `🎙️ ${judge}` : "";
+}
+function setAgentStatus(battler, status) {
+  const el = document.getElementById(`agent-${battler}`);
+  if (!el) return;
+  el.classList.toggle("writing", status === "writing");
+  el.querySelector(".status").textContent = t(`${status}_status`) || status;
+}
+function renderAgentStatus(p) { setAgentStatus(p.battler, p.status); }
+
+document.getElementById("topic-send").onclick = () => {
+  const el = document.getElementById("topic-input");
+  if (!el.value.trim()) return;
+  send({ type: "submit_topic", word: el.value });
+  el.value = "";
+  toast(t("submitted"));
+};
+document.getElementById("crowd-send").onclick = () => {
+  const el = document.getElementById("crowd-input");
+  if (!el.value.trim()) return;
+  send({ type: "crowd_word", word: el.value });
+  el.value = "";
+  toast(t("shouted"));
+};
+document.querySelectorAll(".votebtn").forEach((b) => {
+  b.onclick = () => { send({ type: "vote", battler: b.dataset.battler }); toast(t("voted")); };
+});
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+function toastError(msg) {
+  if (String(msg).includes("already voted")) return toast(t("err_voted"));
+  if (String(msg).includes("already submitted")) return toast(t("err_submitted"));
+  toast(msg);
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+applyI18n();
+show(["v-idle"]);
+connect();
+</script>
+</body>
+</html>

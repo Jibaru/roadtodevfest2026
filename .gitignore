@@ -1,0 +1,17 @@
+# Binaries
+/bin/
+rapbattle
+
+# Local env
+.env
+*.local
+
+# Rehearsal snapshots
+/snapshots/
+
+# OS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/

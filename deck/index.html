@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Rap Battle — Building Agents in Go</title>
+<style>
+  :root {
+    --bg: #0b0b12; --panel: #15151f; --text: #f2f2f7; --muted: #9a9ab0;
+    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166; --accent: #7c5cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif;
+    overflow: hidden; }
+  .slide { position: absolute; inset: 0; display: none; flex-direction: column;
+    justify-content: center; align-items: center; padding: 6vh 8vw; text-align: center;
+    background: radial-gradient(1200px 600px at 50% -10%, #1c1330 0%, var(--bg) 60%); }
+  .slide.active { display: flex; }
+  h1 { font-size: 3.2rem; line-height: 1.15; margin-bottom: 18px; }
+  h2 { font-size: 2.2rem; margin-bottom: 26px; }
+  .g { color: var(--gopher); } .n { color: var(--nullptr); } .a { color: var(--accent); }
+  .gold { color: var(--gold); }
+  .sub { color: var(--muted); font-size: 1.3rem; }
+  ul.points { text-align: left; font-size: 1.5rem; line-height: 2.1; list-style: none; }
+  ul.points li::before { content: "→ "; color: var(--gopher); font-weight: 700; }
+  pre { text-align: left; background: #0e0e16; border: 1px solid #262636; border-radius: 14px;
+    padding: 24px 28px; font-size: 1.05rem; line-height: 1.55; overflow-x: auto; max-width: 90vw;
+    font-family: ui-monospace, "SF Mono", monospace; }
+  .kw { color: var(--nullptr); } .st { color: #9ece6a; } .fn { color: var(--gopher); }
+  .cm { color: #565f89; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .big-emoji { font-size: 5rem; margin-bottom: 20px; }
+  .huge { font-size: 4rem; font-weight: 900; }
+  .pill { display: inline-block; background: var(--panel); border: 1px solid #333;
+    border-radius: 30px; padding: 10px 26px; margin: 8px; font-size: 1.3rem; }
+  .diagram { font-family: ui-monospace, monospace; font-size: 1.15rem; line-height: 1.9;
+    text-align: left; background: #0e0e16; border-radius: 14px; padding: 26px 34px;
+    border: 1px solid #262636; }
+  footer { position: fixed; bottom: 14px; right: 20px; color: var(--muted); font-size: .85rem; }
+  #progress { position: fixed; bottom: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--gopher), var(--accent), var(--nullptr)); transition: width .3s; }
+  #lang { position: fixed; top: 14px; right: 16px; background: var(--panel); color: var(--text);
+    border: 1px solid #333; border-radius: 20px; padding: 6px 14px; cursor: pointer; z-index: 10; }
+  .vs { font-size: 2rem; font-weight: 900; }
+  table.compare { border-collapse: collapse; font-size: 1.25rem; }
+  table.compare td, table.compare th { border: 1px solid #2a2a3a; padding: 12px 22px; text-align: left; }
+</style>
+</head>
+<body>
+<button id="lang">ES</button>
+
+<!-- 1 · Title -->
+<section class="slide active">
+  <div class="big-emoji">🐹🎤🤖</div>
+  <h1><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span></h1>
+  <h2 style="font-weight:400" data-i18n="s1_sub">Building AI agents in Go for the agentic era</h2>
+  <p class="sub">Google DevFest 2026 · Go + ADK · <span class="gold" data-i18n="s1_you">you are the jury</span></p>
+</section>
+
+<!-- 2 · The agentic era -->
+<section class="slide">
+  <h2 data-i18n="s2_title">Welcome to the agentic era</h2>
+  <ul class="points">
+    <li data-i18n="s2_p1">2023: we chatted with LLMs</li>
+    <li data-i18n="s2_p2">2024–25: LLMs got tools and started doing things</li>
+    <li data-i18n="s2_p3">2026: software is becoming teams of agents that plan, act and cooperate</li>
+    <li data-i18n="s2_p4">An agent = model + instructions + tools + memory, in a loop</li>
+  </ul>
+</section>
+
+<!-- 3 · Why Go -->
+<section class="slide">
+  <h2 data-i18n="s3_title">Why Go for agents?</h2>
+  <ul class="points">
+    <li data-i18n="s3_p1">Agents are concurrent by nature — goroutines and channels are the native fit</li>
+    <li data-i18n="s3_p2">One static binary: the whole show tonight ships as a single file</li>
+    <li data-i18n="s3_p3">Typed tools: the function signature IS the contract the model sees</li>
+    <li data-i18n="s3_p4">Boring, fast, deployable — perfect for agents that must not fall over</li>
+  </ul>
+</section>
+
+<!-- 4 · ADK Go -->
+<section class="slide">
+  <h2><span class="a">ADK Go v2</span> — Agent Development Kit</h2>
+  <div>
+    <span class="pill">🤖 LLM Agents</span><span class="pill">🔧 Tools</span>
+    <span class="pill">🧠 Sessions</span><span class="pill">⚡ Parallel</span>
+    <span class="pill">🔁 Loops</span><span class="pill">🕸️ Graphs</span>
+  </div>
+  <pre style="margin-top:30px"><span class="fn">llmagent</span>.New(llmagent.Config{
+    Name:        <span class="st">"mc_gopher"</span>,
+    Model:       geminiModel,
+    Instruction: <span class="st">"You are MC GOPHER, battle rapper…"</span>,
+    Tools:       []tool.Tool{crowdScanner},
+})</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="s4_note">A personality is just an instruction string.</p>
+</section>
+
+<!-- 5 · The demo -->
+<section class="slide">
+  <div class="big-emoji">📱</div>
+  <h1 data-i18n="s5_title">DEMO TIME</h1>
+  <h2 class="gold" id="join-url">rapbattle-xxxx.run.app</h2>
+  <p class="sub" data-i18n="s5_sub">Join now: you pick the topics, you judge the rounds.<br>3 rounds. Two AIs. One champion.</p>
+</section>
+
+<!-- 6 · What just happened -->
+<section class="slide">
+  <h2 data-i18n="s6_title">What you just experienced</h2>
+  <div class="diagram">
+<span class="cm">// every browser ↔ one Go binary</span>
+Audience (you) ──WebSocket──▶ <span class="g">Hub</span> ──▶ <span class="a">BattleService</span> (state machine)
+                                        │
+              ┌─────────────────────────┼──────────────────┐
+              ▼                         ▼                  ▼
+        <span class="g">MC Gopher agent</span>        <span class="n">NULL PTR agent</span>       <span class="gold">Judge agent</span>
+              └────────── <span class="kw">parallel verse writing</span> ─────────┘
+                                        │
+                               Gemini TTS (2 voices)</div>
+  <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every vote, topic and verse flowed through goroutines and channels.</p>
+</section>
+
+<!-- 7 · Architecture -->
+<section class="slide">
+  <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
+  <div class="diagram">
+cmd/api            <span class="cm">// wire everything</span>
+internal/
+  battle/<span class="g">domain</span>/     <span class="cm">// entities + repo interfaces + errors</span>
+  battle/<span class="a">service</span>/    <span class="cm">// the show's state machine</span>
+  battle/infra/      <span class="cm">// memory | file | embedded — same interface</span>
+  <span class="gold">agents</span>/            <span class="cm">// ADK: 2 rappers + 1 judge</span>
+  tts/               <span class="cm">// Gemini TTS → WAV</span>
+  realtime/          <span class="cm">// WebSocket hub, drops slow clients</span>
+web/               <span class="cm">// go:embed — UI inside the binary</span></div>
+  <p class="sub" style="margin-top:14px" data-i18n="s7_note">Swapping storage is one constructor line. The agents are behind interfaces too — the show ran offline in rehearsal.</p>
+</section>
+
+<!-- 8 · Sessions -->
+<section class="slide">
+  <h2 data-i18n="s8_title">Did you notice the comebacks?</h2>
+  <ul class="points">
+    <li data-i18n="s8_p1">Each battler has a persistent ADK session — it remembers its own verses</li>
+    <li data-i18n="s8_p2">The opponent's last verse is injected into the prompt each round</li>
+    <li data-i18n="s8_p3">Memory + context = round 3 answering round 1's punchline</li>
+    <li data-i18n="s8_p4">The audience vote is the human-in-the-loop</li>
+  </ul>
+</section>
+
+<!-- 9 · Live coding -->
+<section class="slide">
+  <h2 data-i18n="s9_title">Live coding: give the Gopher eyes 👀</h2>
+  <pre>scanner, _ := <span class="fn">NewCrowdScannerTool</span>(crew.CrowdWords)
+
+<span class="cm">// mc_gopher gets one extra line:</span>
+Tools: []tool.Tool{<span class="g">scanner</span>}</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="s9_note">A typed Go function becomes a tool the model decides to call.<br>Next verse: watch it quote what you're shouting right now.</p>
+</section>
+
+<!-- 10 · Deploy -->
+<section class="slide">
+  <h2 data-i18n="s10_title">Shipping it</h2>
+  <pre>$ ./scripts/deploy.sh
+
+<span class="cm"># → gcloud run deploy --source . --max-instances 1</span>
+<span class="cm">#   one binary, one instance, one source of truth</span>
+🎤 Show is live!</pre>
+  <table class="compare" style="margin-top:24px">
+    <tr><td data-i18n="s10_r1">Whole demo tonight (verses + TTS + Cloud Run)</td><td class="gold">&lt; $1</td></tr>
+    <tr><td data-i18n="s10_r2">Concurrent WebSocket viewers on 512 MB</td><td class="gold">300+</td></tr>
+  </table>
+</section>
+
+<!-- 11 · Lessons -->
+<section class="slide">
+  <h2 data-i18n="s11_title">What building this taught me</h2>
+  <ul class="points">
+    <li data-i18n="s11_p1">Design for failure: cached emergency verses, TTS→text fallback, offline mode</li>
+    <li data-i18n="s11_p2">Agents are just another dependency — put them behind an interface</li>
+    <li data-i18n="s11_p3">Persona engineering is prompt engineering with commitment</li>
+    <li data-i18n="s11_p4">The demo people remember is the one they were part of</li>
+  </ul>
+</section>
+
+<!-- 12 · Close -->
+<section class="slide">
+  <div class="big-emoji">🏆</div>
+  <h1 data-i18n="s12_title">Go build your own battle</h1>
+  <p class="sub" style="font-size:1.4rem; line-height:2">
+    <span class="a">adk.dev</span> · ADK for Go<br>
+    <span class="g">github.com/jibaru</span> · <span data-i18n="s12_code">code &amp; slides</span><br>
+    <span class="gold" data-i18n="s12_thanks">¡Gracias! Questions?</span>
+  </p>
+</section>
+
+<div id="progress"></div>
+<footer><span id="counter">1</span> · ← → · L</footer>
+<script>
+const I18N = {
+  es: {
+    s1_sub: "Construyendo agentes de IA en Go para la era agéntica",
+    s1_you: "tú eres el jurado",
+    s2_title: "Bienvenidos a la era agéntica",
+    s2_p1: "2023: chateábamos con LLMs",
+    s2_p2: "2024–25: los LLMs recibieron herramientas y empezaron a hacer cosas",
+    s2_p3: "2026: el software se vuelve equipos de agentes que planean, actúan y cooperan",
+    s2_p4: "Un agente = modelo + instrucciones + herramientas + memoria, en un loop",
+    s3_title: "¿Por qué Go para agentes?",
+    s3_p1: "Los agentes son concurrentes por naturaleza — goroutines y channels son el fit nativo",
+    s3_p2: "Un binario estático: todo el show de hoy es un solo archivo",
+    s3_p3: "Herramientas tipadas: la firma de la función ES el contrato que ve el modelo",
+    s3_p4: "Aburrido, rápido, desplegable — perfecto para agentes que no pueden caerse",
+    s4_note: "Una personalidad es solo un string de instrucciones.",
+    s5_title: "HORA DEL DEMO",
+    s5_sub: "Entra ahora: tú eliges los temas, tú juzgas las rondas.\n3 rondas. Dos IAs. Un campeón.",
+    s6_title: "Lo que acaban de vivir",
+    s6_note: "Cada voto, tema y verso pasó por goroutines y channels.",
+    s7_title: "La arquitectura (limpia y aburrida a propósito)",
+    s7_note: "Cambiar el storage es una línea de constructor. Los agentes también están detrás de interfaces — el show corrió offline en los ensayos.",
+    s8_title: "¿Notaron las respuestas entre rondas?",
+    s8_p1: "Cada rapero tiene una sesión ADK persistente — recuerda sus propios versos",
+    s8_p2: "El último verso del oponente se inyecta al prompt en cada ronda",
+    s8_p3: "Memoria + contexto = la ronda 3 respondiendo el punchline de la ronda 1",
+    s8_p4: "El voto de la audiencia es el humano-en-el-loop",
+    s9_title: "Live coding: dale ojos al Gopher 👀",
+    s9_note: "Una función Go tipada se convierte en una herramienta que el modelo decide llamar.\nPróximo verso: mira cómo cita lo que están gritando ahora mismo.",
+    s10_title: "Llevándolo a producción",
+    s10_r1: "Todo el demo de hoy (versos + TTS + Cloud Run)",
+    s10_r2: "Viewers WebSocket concurrentes en 512 MB",
+    s11_title: "Lo que aprendí construyendo esto",
+    s11_p1: "Diseña para el fallo: versos de emergencia, TTS→texto, modo offline",
+    s11_p2: "Los agentes son una dependencia más — ponlos detrás de una interfaz",
+    s11_p3: "Ingeniería de personas es prompt engineering con compromiso",
+    s11_p4: "El demo que la gente recuerda es del que fueron parte",
+    s12_title: "Ve y construye tu propia batalla",
+    s12_code: "código y slides",
+    s12_thanks: "¡Gracias! ¿Preguntas?",
+  },
+};
+const defaults = {};
+let lang = "en";
+document.querySelectorAll("[data-i18n]").forEach((el) => (defaults[el.dataset.i18n] = el.innerHTML));
+document.getElementById("lang").onclick = () => {
+  lang = lang === "en" ? "es" : "en";
+  document.getElementById("lang").textContent = lang === "en" ? "ES" : "EN";
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const k = el.dataset.i18n;
+    el.innerHTML = lang === "es" && I18N.es[k] ? I18N.es[k].replace(/\n/g, "<br>") : defaults[k];
+  });
+};
+
+const slides = [...document.querySelectorAll(".slide")];
+let idx = 0;
+function show(i) {
+  idx = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((s, j) => s.classList.toggle("active", j === idx));
+  document.getElementById("counter").textContent = `${idx + 1}/${slides.length}`;
+  document.getElementById("progress").style.width = `${((idx + 1) / slides.length) * 100}vw`;
+  location.hash = idx + 1;
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") show(idx + 1);
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") show(idx - 1);
+  else if (e.key.toLowerCase() === "l") document.getElementById("lang").click();
+});
+document.addEventListener("click", (e) => {
+  if (e.target.id !== "lang") show(idx + 1);
+});
+show(parseInt(location.hash.slice(1) || "1", 10) - 1);
+</script>
+</body>
+</html>
