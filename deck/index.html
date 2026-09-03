@@ -73,9 +73,10 @@
   .pill:nth-child(4) { background: var(--green-pastel); }
   .pill:nth-child(5) { background: var(--blue-soft); }
   .pill:nth-child(6) { background: var(--surface); }
-  .diagram { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 1.12rem;
-    line-height: 1.9; text-align: left; background: var(--surface); border-radius: var(--r-card);
-    padding: 28px 36px; border: 1px solid var(--border); }
+  .diagram { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 1.05rem;
+    line-height: 1.8; text-align: left; background: var(--surface); border-radius: var(--r-card);
+    padding: 26px 34px; border: 1px solid var(--border);
+    white-space: pre; overflow-x: auto; max-width: 90vw; }
   footer { position: fixed; bottom: 14px; right: 20px; color: var(--ink-soft); font-size: .85rem; }
   #progress { position: fixed; bottom: 0; left: 0; height: 5px;
     background: linear-gradient(90deg, var(--blue-core) 0 25%, var(--red) 25% 50%,
@@ -164,29 +165,27 @@
 <!-- 6 · What just happened -->
 <section class="slide">
   <h2 data-i18n="s6_title">What you just experienced</h2>
-  <div class="diagram">
-<span class="cm">// every browser ↔ one Go binary</span>
+  <div class="diagram"><span class="cm">// every browser ↔ one Go binary</span>
 Audience (you) ──WebSocket──▶ <span class="g">Hub</span> ──▶ <span class="a">BattleService</span> (state machine)
-                                        │
-              ┌─────────────────────────┼──────────────────┐
-              ▼                         ▼                  ▼
-        <span class="g">Blue Gopher agent</span>       <span class="n">Red Gopher agent</span>       <span class="gold">Judge agent</span>
-              └────────── <span class="kw">parallel verse writing</span> ─────────┘
-                                        │
-                               Gemini TTS (2 voices)</div>
+                                            │
+                ┌───────────────────────────┼─────────────────┐
+                ▼                           ▼                 ▼
+        <span class="g">Blue Gopher agent</span>           <span class="n">Red Gopher agent</span>     <span class="gold">Judge agent</span>
+                └── <span class="kw">parallel verse writing</span> ─┘
+                                            │
+                                  Gemini TTS (2 voices)</div>
   <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every vote, topic and verse flowed through goroutines and channels.</p>
 </section>
 
 <!-- 7 · Architecture -->
 <section class="slide">
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
-  <div class="diagram">
-cmd/api            <span class="cm">// wire everything</span>
+  <div class="diagram">cmd/api            <span class="cm">// wire everything</span>
 internal/
   battle/<span class="g">domain</span>/     <span class="cm">// entities + repo interfaces + errors</span>
   battle/<span class="a">service</span>/    <span class="cm">// the show's state machine</span>
   battle/infra/      <span class="cm">// memory | file | embedded — same interface</span>
-  <span class="gold">agents</span>/            <span class="cm">// ADK: 2 rappers + 1 judge</span>
+  <span class="gold">agents</span>/            <span class="cm">// ADK: 2 battlers + 1 judge</span>
   tts/               <span class="cm">// Gemini TTS → WAV</span>
   realtime/          <span class="cm">// WebSocket hub, drops slow clients</span>
 web/               <span class="cm">// go:embed — UI inside the binary</span></div>
