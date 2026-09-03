@@ -135,6 +135,7 @@
     <li data-i18n="s3_p3">Typed tools: the function signature IS the contract the model sees</li>
     <li data-i18n="s3_p4">Boring, fast, deployable — perfect for agents that must not fall over</li>
   </ul>
+  <p class="sub" style="margin-top:20px" data-i18n="s3_promise">Don't take my word for it — you'll see each claim in the app's real code.</p>
 </section>
 
 <!-- 4 · ADK Go -->
@@ -177,6 +178,20 @@ Audience (you) ──WebSocket──▶ <span class="g">Hub</span> ──▶ <sp
   <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every vote, topic and verse flowed through goroutines and channels.</p>
 </section>
 
+<!-- 6b · One round, end to end -->
+<section class="slide">
+  <h2><span class="ms" style="color:var(--blue)">route</span> <span data-i18n="sf_title">One round, end to end</span></h2>
+  <div class="diagram"><span class="gold">1</span>  your phone ──ws──▶ {"type":"submit_topic","word":"wifi"}
+<span class="gold">2</span>  StartWriting()             <span class="cm">// most-submitted word wins</span>
+<span class="gold">3</span>  <span class="kw">go</span> write(<span class="g">Blue</span>)   ⇄   <span class="kw">go</span> write(<span class="n">Red</span>)      <span class="cm">// in parallel</span>
+<span class="gold">4</span>  ADK runner ──▶ Gemini 2.5 Flash ──▶ 8 bars each
+<span class="gold">5</span>  Gemini TTS (Puck / Fenrir) ──▶ WAV ──▶ stage audio
+<span class="gold">6</span>  audience votes (one per browser) ──▶ live tally
+<span class="gold">7</span>  Judge agent commentates ──▶ scores update
+<span class="gold">8</span>  round++ … <span class="gold">champion</span></div>
+  <p class="sub" style="margin-top:14px" data-i18n="sf_note">One HTTP button on the stage drives all of it — the state machine does the rest.</p>
+</section>
+
 <!-- 7 · Architecture -->
 <section class="slide">
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
@@ -190,6 +205,51 @@ internal/
   realtime/          <span class="cm">// WebSocket hub, drops slow clients</span>
 web/               <span class="cm">// go:embed — UI inside the binary</span></div>
   <p class="sub" style="margin-top:14px" data-i18n="s7_note">Swapping storage is one constructor line. The agents are behind interfaces too — the show ran offline in rehearsal.</p>
+</section>
+
+<!-- 7b · Why Go, proof 1: goroutines -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow">why Go — proof</span> 1/3 <span class="bk">]</span></div>
+  <h2 data-i18n="g1_title">Two agents rapping at once = two goroutines</h2>
+  <pre>var wg sync.WaitGroup
+<span class="kw">for</span> _, battler := <span class="kw">range</span> []Battler{<span class="g">Blue</span>, <span class="n">Red</span>} {
+    wg.Add(1)
+    <span class="kw">go</span> <span class="kw">func</span>(b Battler) {
+        <span class="kw">defer</span> wg.Done()
+        verse, err := writer.<span class="fn">WriteVerse</span>(ctx, b, topic, history)
+        ...
+    }(battler)
+}
+wg.Wait()</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="g1_note">This is the real code from the show you just watched. No async/await, no thread pools, no callback pyramids — the language primitive IS the feature.</p>
+</section>
+
+<!-- 7c · Why Go, proof 2: channels -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow2">why Go — proof</span> 2/3 <span class="bk">]</span></div>
+  <h2 data-i18n="g2_title">Broadcasting to every browser = one channel each</h2>
+  <pre><span class="kw">for</span> client := <span class="kw">range</span> hub.clients {
+    <span class="kw">select</span> {
+    <span class="kw">case</span> client.send <- data:   <span class="cm">// mailbox: a buffered channel</span>
+    <span class="kw">default</span>:                    <span class="cm">// slow client? drop it,</span>
+        <span class="kw">go</span> client.close()       <span class="cm">// never stall the show</span>
+    }
+}</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="g2_note">Hundreds of viewers, one 512 MB instance. Backpressure handling is a select statement — in most stacks this is a message broker.</p>
+</section>
+
+<!-- 7d · Why Go, proof 3: errors as values -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow3">why Go — proof</span> 3/3 <span class="bk">]</span></div>
+  <h2 data-i18n="g3_title">A live show can't crash — errors are just values</h2>
+  <pre>verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, history)
+<span class="kw">if</span> err != nil {
+    verse, err = cache.<span class="fn">Emergency</span>(battler, topic)  <span class="cm">// plan B: embedded verses</span>
+}
+<span class="kw">if</span> err != nil {
+    verse = <span class="st">"(lost the beat — skip this round)"</span>  <span class="cm">// plan C: shrug, continue</span>
+}</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="g3_note">Gemini down? Cached verses. TTS down? I perform it live. Every fallback is a visible `if err != nil` — no hidden exception paths on stage.</p>
 </section>
 
 <!-- 8 · Sessions -->
@@ -266,7 +326,19 @@ const I18N = {
     s3_p2: "Un binario estático: todo el show de hoy es un solo archivo",
     s3_p3: "Herramientas tipadas: la firma de la función ES el contrato que ve el modelo",
     s3_p4: "Aburrido, rápido, desplegable — perfecto para agentes que no pueden caerse",
+    s3_promise: "No me crean a mí — verán cada afirmación en el código real de la app.",
     s4_note: "Una personalidad es solo un string de instrucciones.",
+    sf_title: "Una ronda, de inicio a fin",
+    sf_note: "Un solo botón HTTP en el stage maneja todo — la máquina de estados hace el resto.",
+    g_eyebrow: "por qué Go — prueba",
+    g_eyebrow2: "por qué Go — prueba",
+    g_eyebrow3: "por qué Go — prueba",
+    g1_title: "Dos agentes rapeando a la vez = dos goroutines",
+    g1_note: "Este es el código real del show que acaban de ver. Sin async/await, sin thread pools, sin pirámides de callbacks — la primitiva del lenguaje ES el feature.",
+    g2_title: "Transmitir a cada navegador = un channel por cliente",
+    g2_note: "Cientos de espectadores, una instancia de 512 MB. El manejo de backpressure es un select — en la mayoría de stacks esto es un message broker.",
+    g3_title: "Un show en vivo no puede caerse — los errores son valores",
+    g3_note: "¿Gemini caído? Versos en caché. ¿TTS caído? Lo interpreto en vivo. Cada fallback es un `if err != nil` visible — sin rutas de excepción ocultas en el escenario.",
     s5_title: "HORA DEL DEMO",
     s5_sub: "Entra ahora: tú eliges los temas, tú juzgas las rondas.\n3 rondas. Dos IAs. Un campeón.",
     s6_title: "Lo que acaban de vivir",
