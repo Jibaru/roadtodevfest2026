@@ -47,7 +47,7 @@ lives in memory, so one instance owns the whole show.
 | Live-code the crowd-scanner tool | 5 min |
 | Q&A | 7 min |
 
-Slides: open `deck/index.html` (arrows to navigate, `L` toggles EN/ES).
+Slides: open `docs/index.html` (arrows to navigate, `L` toggles EN/ES).
 Before the talk, put the deployed URL on slide 5 (`join-url`).
 
 ## Live-coding cheat sheet
@@ -79,7 +79,7 @@ internal/tts                 Gemini TTS → WAV (Puck vs Fenrir voices)
 internal/realtime            WebSocket hub; slow clients get dropped
 internal/{handlers,server}   thin HTTP layer, DTOs, middleware
 web/                         audience + stage pages, go:embed, EN/ES
-deck/                        HTML slides (EN/ES)
+docs/                        HTML slides (EN/ES) — served via GitHub Pages
 ```
 
 State machine: `idle → topics_open → writing → performing_a → performing_b →
