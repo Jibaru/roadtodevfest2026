@@ -4,47 +4,74 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Rap Battle — Building Agents in Go</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0b12; --panel: #15151f; --text: #f2f2f7; --muted: #9a9ab0;
-    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166; --accent: #7c5cff;
+    /* DevFest design tokens (developers.google.com/community/devfest) */
+    --ink: #1e1e1e; --ink-soft: #5f6368; --bg: #ffffff; --surface: #f8f9fa;
+    --border: #dadce0;
+    --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe; --blue-soft: #c3e7ff;
+    --red: #ea4335; --red-pastel: #fce8e6;
+    --yellow: #f9ab00; --yellow-pastel: #fef7e0;
+    --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
+    --r-card: 24px; --r-pill: 50px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif;
-    overflow: hidden; }
+  body { background: var(--bg); color: var(--ink);
+    font-family: 'Google Sans', 'Product Sans', Roboto, system-ui, sans-serif; overflow: hidden; }
   .slide { position: absolute; inset: 0; display: none; flex-direction: column;
     justify-content: center; align-items: center; padding: 6vh 8vw; text-align: center;
-    background: radial-gradient(1200px 600px at 50% -10%, #1c1330 0%, var(--bg) 60%); }
+    background: var(--bg); }
   .slide.active { display: flex; }
-  h1 { font-size: 3.2rem; line-height: 1.15; margin-bottom: 18px; }
-  h2 { font-size: 2.2rem; margin-bottom: 26px; }
-  .g { color: var(--gopher); } .n { color: var(--nullptr); } .a { color: var(--accent); }
-  .gold { color: var(--gold); }
-  .sub { color: var(--muted); font-size: 1.3rem; }
-  ul.points { text-align: left; font-size: 1.5rem; line-height: 2.1; list-style: none; }
-  ul.points li::before { content: "→ "; color: var(--gopher); font-weight: 700; }
-  pre { text-align: left; background: #0e0e16; border: 1px solid #262636; border-radius: 14px;
-    padding: 24px 28px; font-size: 1.05rem; line-height: 1.55; overflow-x: auto; max-width: 90vw;
-    font-family: ui-monospace, "SF Mono", monospace; }
-  .kw { color: var(--nullptr); } .st { color: #9ece6a; } .fn { color: var(--gopher); }
-  .cm { color: #565f89; }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  h1 { font-size: 3.4rem; font-weight: 700; line-height: 1.12; letter-spacing: -.015em;
+    margin-bottom: 18px; }
+  h2 { font-size: 2.3rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: 28px; }
+  .bk { color: var(--blue); font-weight: 700; }
+  .g { color: var(--blue); } .n { color: var(--red); } .a { color: var(--blue); }
+  .gold { color: var(--yellow); } .grn { color: var(--green); }
+  .sub { color: var(--ink-soft); font-size: 1.3rem; }
+  ul.points { text-align: left; font-size: 1.5rem; line-height: 2.15; list-style: none;
+    max-width: 68vw; }
+  ul.points li::before { content: "→ "; color: var(--blue); font-weight: 700; }
+  pre { text-align: left; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-card); padding: 26px 32px; font-size: 1.05rem; line-height: 1.6;
+    overflow-x: auto; max-width: 90vw; color: var(--ink);
+    font-family: 'Roboto Mono', ui-monospace, "SF Mono", monospace; }
+  .kw { color: #c5221f; } .st { color: #188038; } .fn { color: var(--blue); }
+  .cm { color: #80868b; }
   .big-emoji { font-size: 5rem; margin-bottom: 20px; }
-  .huge { font-size: 4rem; font-weight: 900; }
-  .pill { display: inline-block; background: var(--panel); border: 1px solid #333;
-    border-radius: 30px; padding: 10px 26px; margin: 8px; font-size: 1.3rem; }
-  .diagram { font-family: ui-monospace, monospace; font-size: 1.15rem; line-height: 1.9;
-    text-align: left; background: #0e0e16; border-radius: 14px; padding: 26px 34px;
-    border: 1px solid #262636; }
-  footer { position: fixed; bottom: 14px; right: 20px; color: var(--muted); font-size: .85rem; }
-  #progress { position: fixed; bottom: 0; left: 0; height: 4px;
-    background: linear-gradient(90deg, var(--gopher), var(--accent), var(--nullptr)); transition: width .3s; }
-  #lang { position: fixed; top: 14px; right: 16px; background: var(--panel); color: var(--text);
-    border: 1px solid #333; border-radius: 20px; padding: 6px 14px; cursor: pointer; z-index: 10; }
-  .vs { font-size: 2rem; font-weight: 900; }
-  table.compare { border-collapse: collapse; font-size: 1.25rem; }
-  table.compare td, table.compare th { border: 1px solid #2a2a3a; padding: 12px 22px; text-align: left; }
+  .pill { display: inline-block; background: var(--blue-pastel); color: var(--ink);
+    border-radius: var(--r-pill); padding: 12px 28px; margin: 8px; font-size: 1.25rem;
+    font-weight: 500; }
+  .pill:nth-child(2) { background: var(--red-pastel); }
+  .pill:nth-child(3) { background: var(--yellow-pastel); }
+  .pill:nth-child(4) { background: var(--green-pastel); }
+  .pill:nth-child(5) { background: var(--blue-soft); }
+  .pill:nth-child(6) { background: var(--surface); }
+  .diagram { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 1.12rem;
+    line-height: 1.9; text-align: left; background: var(--surface); border-radius: var(--r-card);
+    padding: 28px 36px; border: 1px solid var(--border); }
+  footer { position: fixed; bottom: 14px; right: 20px; color: var(--ink-soft); font-size: .85rem; }
+  #progress { position: fixed; bottom: 0; left: 0; height: 5px;
+    background: linear-gradient(90deg, var(--blue-core) 0 25%, var(--red) 25% 50%,
+      var(--yellow) 50% 75%, var(--green) 75% 100%);
+    transition: width .3s; }
+  #lang { position: fixed; top: 14px; right: 16px; background: var(--bg); color: var(--blue);
+    border: 1px solid var(--border); border-radius: var(--r-pill); padding: 7px 16px;
+    cursor: pointer; z-index: 10; font-family: inherit; font-weight: 500; }
+  .vs { font-size: 2rem; font-weight: 700; color: var(--ink-soft); }
+  table.compare { border-collapse: separate; border-spacing: 0; font-size: 1.25rem;
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  table.compare td { border-bottom: 1px solid var(--border); padding: 14px 26px; text-align: left; }
+  table.compare tr:last-child td { border-bottom: 0; }
+  table.compare td.val { color: var(--blue); font-weight: 700; }
+  .eyebrow { font-size: .95rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-soft); margin-bottom: 16px; }
+  .join-chip { display: inline-block; background: var(--blue); color: #fff;
+    border-radius: var(--r-pill); padding: 16px 42px; font-size: 1.9rem; font-weight: 700;
+    margin: 10px 0 16px; }
 </style>
 </head>
 <body>
@@ -52,10 +79,11 @@
 
 <!-- 1 · Title -->
 <section class="slide active">
+  <div class="eyebrow"><span class="bk">[</span> Google DevFest 2026 <span class="bk">]</span></div>
   <div class="big-emoji">🐹🎤🤖</div>
   <h1><span class="g">MC GOPHER</span> <span class="vs">vs</span> <span class="n">NULL PTR</span></h1>
   <h2 style="font-weight:400" data-i18n="s1_sub">Building AI agents in Go for the agentic era</h2>
-  <p class="sub">Google DevFest 2026 · Go + ADK · <span class="gold" data-i18n="s1_you">you are the jury</span></p>
+  <p class="sub">Go + ADK · <span class="gold" data-i18n="s1_you">you are the jury</span></p>
 </section>
 
 <!-- 2 · The agentic era -->
@@ -100,8 +128,8 @@
 <!-- 5 · The demo -->
 <section class="slide">
   <div class="big-emoji">📱</div>
-  <h1 data-i18n="s5_title">DEMO TIME</h1>
-  <h2 class="gold" id="join-url">rapbattle-xxxx.run.app</h2>
+  <h1><span class="bk">[</span> <span data-i18n="s5_title">DEMO TIME</span> <span class="bk">]</span></h1>
+  <div class="join-chip" id="join-url">rapbattle-xxxx.run.app</div>
   <p class="sub" data-i18n="s5_sub">Join now: you pick the topics, you judge the rounds.<br>3 rounds. Two AIs. One champion.</p>
 </section>
 
@@ -167,8 +195,8 @@ Tools: []tool.Tool{<span class="g">scanner</span>}</pre>
 <span class="cm">#   one binary, one instance, one source of truth</span>
 🎤 Show is live!</pre>
   <table class="compare" style="margin-top:24px">
-    <tr><td data-i18n="s10_r1">Whole demo tonight (verses + TTS + Cloud Run)</td><td class="gold">&lt; $1</td></tr>
-    <tr><td data-i18n="s10_r2">Concurrent WebSocket viewers on 512 MB</td><td class="gold">300+</td></tr>
+    <tr><td data-i18n="s10_r1">Whole demo tonight (verses + TTS + Cloud Run)</td><td class="val">&lt; $1</td></tr>
+    <tr><td data-i18n="s10_r2">Concurrent WebSocket viewers on 512 MB</td><td class="val">300+</td></tr>
   </table>
 </section>
 

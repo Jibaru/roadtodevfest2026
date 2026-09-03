@@ -4,70 +4,99 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STAGE — AI Rap Battle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #07070d; --panel: #12121c; --text: #f2f2f7; --muted: #8a8a9e;
-    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166;
+    /* DevFest design tokens (developers.google.com/community/devfest) */
+    --ink: #1e1e1e; --ink-soft: #5f6368; --bg: #ffffff; --surface: #f8f9fa;
+    --border: #dadce0;
+    --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe; --blue-soft: #c3e7ff;
+    --red: #ea4335; --red-pastel: #fce8e6;
+    --yellow: #f9ab00; --yellow-pastel: #fef7e0;
+    --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
+    --gopher: var(--blue); --nullptr: var(--red);
+    --r-card: 24px; --r-pill: 50px; --r-input: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: radial-gradient(1400px 700px at 50% -10%, #1c1330 0%, var(--bg) 60%);
-    color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; padding: 20px; }
-  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  h1 { font-size: 1.6rem; } h1 .g { color: var(--gopher); } h1 .n { color: var(--nullptr); }
-  .join { font-size: 1.1rem; background: var(--panel); padding: 8px 16px; border-radius: 10px;
-    border: 1px solid #2a2a3a; }
-  .join b { color: var(--gold); }
-  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
-  .card { background: var(--panel); border: 1px solid #262636; border-radius: 16px; padding: 20px; }
-  .phase-banner { text-align: center; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px;
-    color: var(--gold); text-transform: uppercase; margin-bottom: 14px; }
-  .topic { text-align: center; font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; }
-  .verse { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 1.25rem;
-    line-height: 1.8; background: #0b0b13; border-radius: 12px; padding: 20px; }
+  body { background: var(--bg); color: var(--ink);
+    font-family: 'Google Sans', 'Product Sans', Roboto, system-ui, sans-serif;
+    min-height: 100vh; padding: 24px 28px; }
+  .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    flex-wrap: wrap; gap: 12px; }
+  h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em; }
+  h1 .g { color: var(--gopher); } h1 .n { color: var(--nullptr); }
+  .bk { color: var(--blue); font-weight: 700; }
+  .brand { font-size: .8rem; font-weight: 500; letter-spacing: .06em; color: var(--ink-soft);
+    text-transform: uppercase; }
+  .join { font-size: 1.1rem; background: var(--blue-pastel); padding: 12px 22px;
+    border-radius: var(--r-pill); }
+  .join b { color: var(--blue); }
+  .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  .card { background: var(--surface); border-radius: var(--r-card); padding: 26px; }
+  .card.blue { background: var(--blue-pastel); }
+  .phase-banner { text-align: center; font-size: 1rem; font-weight: 700; letter-spacing: .12em;
+    color: var(--blue); text-transform: uppercase; margin-bottom: 16px; }
+  .topic { text-align: center; font-size: 1.7rem; font-weight: 700; margin-bottom: 14px; }
+  .verse { white-space: pre-wrap; font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 1.25rem; line-height: 1.8; background: var(--bg); border-radius: var(--r-input);
+    padding: 24px; border: 1px solid var(--border); }
   .verse.gopher { border-left: 6px solid var(--gopher); }
   .verse.nullptr { border-left: 6px solid var(--nullptr); }
-  .tag { display: inline-block; padding: 4px 14px; border-radius: 14px; font-weight: 800; margin-bottom: 10px; }
-  .tag.gopher { background: var(--gopher); color: #04222b; }
-  .tag.nullptr { background: var(--nullptr); color: #2b040f; }
-  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .agent { text-align: center; padding: 20px 10px; border-radius: 14px; background: #0b0b13; }
+  .tag { display: inline-block; padding: 6px 18px; border-radius: var(--r-pill);
+    font-weight: 700; margin-bottom: 12px; color: #fff; }
+  .tag.gopher { background: var(--gopher); }
+  .tag.nullptr { background: var(--nullptr); }
+  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .agent { text-align: center; padding: 24px 12px; border-radius: var(--r-card);
+    background: var(--bg); border: 1px solid var(--border); }
   .agent .face { font-size: 3rem; }
-  .agent .status { color: var(--muted); margin-top: 8px; }
+  .agent .status { color: var(--ink-soft); margin-top: 8px; }
+  .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
   .agent.writing .status::after { content: "…"; animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: .2; } }
-  .scores { display: flex; justify-content: center; gap: 40px; font-size: 2rem; font-weight: 900; }
-  .bar-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; font-size: 1rem; }
+  .scores { display: flex; justify-content: center; gap: 40px; font-size: 2rem; font-weight: 700; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 1rem; }
   .bar-row .name { width: 120px; font-weight: 700; }
-  .bar { flex: 1; height: 22px; background: #0b0b13; border-radius: 11px; overflow: hidden; }
+  .bar { flex: 1; height: 22px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 11px; overflow: hidden; }
   .bar > div { height: 100%; width: 0%; transition: width .4s; }
   .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
-  .controls button { width: 100%; padding: 14px; margin-bottom: 10px; border: 0; border-radius: 10px;
-    font-size: 1rem; font-weight: 800; cursor: pointer; }
-  #btn-start { background: #2e7d32; color: #fff; }
-  #btn-advance { background: linear-gradient(90deg, var(--gopher), #7c5cff); color: #fff; }
-  #btn-reset { background: #40404f; color: #fff; }
-  #btn-beat { background: #6a1b9a; color: #fff; }
-  .kv { font-size: .9rem; color: var(--muted); margin: 4px 0; }
-  .kv b { color: var(--text); }
-  .alert { background: #4a1220; border: 1px solid var(--nullptr); border-radius: 10px;
-    padding: 12px; margin-top: 10px; font-weight: 700; display: none; }
-  .judge { font-style: italic; color: var(--gold); margin-top: 12px; font-size: 1.1rem; text-align: center; }
-  .topics li { display: flex; justify-content: space-between; padding: 8px 6px; font-size: 1.2rem;
-    border-bottom: 1px solid #22222f; list-style: none; }
-  #log { font-family: ui-monospace, monospace; font-size: .75rem; color: var(--muted);
-    max-height: 140px; overflow-y: auto; margin-top: 10px; }
-  #conn { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f43; }
-  #conn.ok { background: #3f6; }
-  .champion-view { text-align: center; font-size: 2.4rem; font-weight: 900; padding: 30px 0; }
+  .controls button { width: 100%; padding: 14px; margin-bottom: 10px; border: 0;
+    border-radius: var(--r-pill); font-size: 1rem; font-weight: 500; cursor: pointer;
+    font-family: inherit; color: #fff; }
+  #btn-start { background: var(--green); }
+  #btn-advance { background: var(--blue); }
+  #btn-beat { background: var(--yellow); color: var(--ink); }
+  #btn-reset { background: var(--bg); color: var(--ink); border: 1px solid var(--border); }
+  .kv { font-size: .9rem; color: var(--ink-soft); margin: 5px 0; }
+  .kv b { color: var(--ink); }
+  .alert { background: var(--red-pastel); border: 2px solid var(--red); color: var(--red);
+    border-radius: var(--r-input); padding: 14px; margin-top: 12px; font-weight: 700; display: none; }
+  .judge { font-style: italic; color: var(--ink-soft); margin-top: 14px; font-size: 1.15rem;
+    text-align: center; }
+  .topics li { display: flex; justify-content: space-between; padding: 10px 6px; font-size: 1.2rem;
+    border-bottom: 1px solid var(--border); list-style: none; }
+  .topics li b { color: var(--blue); }
+  #log { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: .72rem;
+    color: var(--ink-soft); max-height: 140px; overflow-y: auto; margin-top: 12px; }
+  #conn { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--red); }
+  #conn.ok { background: var(--green-bright); }
+  .champion-view { text-align: center; font-size: 2.4rem; font-weight: 700; padding: 34px 0; }
+  .champion-view .sub { font-size: 1.1rem; color: var(--ink-soft); font-weight: 400; }
 </style>
 </head>
 <body>
 <div class="top">
-  <h1>🎤 <span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span> <span id="conn"></span></h1>
+  <div>
+    <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
+    <h1>🎤 <span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span> <span id="conn"></span></h1>
+  </div>
   <div class="join">Join the jury → <b id="join-url"></b></div>
 </div>
 <div class="grid">
-  <div class="card" id="main-view">
+  <div class="card blue" id="main-view">
     <div class="phase-banner" id="phase">idle</div>
     <div id="content"></div>
     <div class="alert" id="tts-alert">🎙️ TTS UNAVAILABLE — GRAB THE MIC AND PERFORM IT YOURSELF!</div>
@@ -85,7 +114,7 @@
       <div class="kv">Next: <b id="kv-next">start a battle</b></div>
       <div id="log"></div>
     </div>
-    <div class="card" style="margin-top:16px">
+    <div class="card" style="margin-top:20px">
       <div class="scores"><span style="color:var(--gopher)">🐹 <span id="score-g">0</span></span>
         <span style="color:var(--nullptr)">🤖 <span id="score-n">0</span></span></div>
     </div>
@@ -162,7 +191,7 @@ function render(s) {
   switch (s.phase) {
     case "idle":
       c.innerHTML = `<div class="champion-view">🎤 Waiting to start…<br>
-        <span style="font-size:1.1rem;color:var(--muted)">audience joins at <b>${esc(location.host)}</b></span></div>`;
+        <span class="sub">audience joins at <b>${esc(location.host)}</b></span></div>`;
       break;
     case "topics_open": {
       const counts = Object.entries(r.topic_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
@@ -171,7 +200,7 @@ function render(s) {
       break;
     }
     case "writing":
-      c.innerHTML = `<div class="topic">🎯 ${esc(r.topic)}</div><div class="agents">
+      c.innerHTML = `<div class="topic"><span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span></div><div class="agents">
         <div class="agent ${r.verses && r.verses.gopher ? "" : "writing"}"><div class="face">🐹</div><b>MC GOPHER</b><div class="status">${r.verses && r.verses.gopher ? "verse ready ✓" : "writing"}</div></div>
         <div class="agent ${r.verses && r.verses.nullptr ? "" : "writing"}"><div class="face">🤖</div><b>NULL PTR</b><div class="status">${r.verses && r.verses.nullptr ? "verse ready ✓" : "writing"}</div></div>
       </div>`;
@@ -180,7 +209,7 @@ function render(s) {
     case "performing_b": showVerse(r, "nullptr"); break;
     case "voting": {
       const g = r.vote_counts.gopher || 0, n = r.vote_counts.nullptr || 0, total = Math.max(g + n, 1);
-      c.innerHTML = `<div class="topic">🗳️ VOTE NOW at <span style="color:var(--gold)">${esc(location.host)}</span></div>
+      c.innerHTML = `<div class="topic">🗳️ VOTE NOW at <span style="color:var(--blue)">${esc(location.host)}</span></div>
         <div class="bar-row"><span class="name">🐹 Gopher</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>
         <div class="bar-row"><span class="name">🤖 NULL PTR</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
       break;
@@ -201,7 +230,7 @@ function render(s) {
 }
 function showVerse(r, battler) {
   document.getElementById("content").innerHTML =
-    `<div class="topic">🎯 ${esc(r.topic)}</div>
+    `<div class="topic"><span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span></div>
      <span class="tag ${battler}">${NAMES[battler]} — ON THE MIC</span>
      <div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
 }

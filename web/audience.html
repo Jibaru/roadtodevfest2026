@@ -4,98 +4,126 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Rap Battle — MC Gopher vs NULL PTR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Roboto+Mono:400,500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0b12; --panel: #15151f; --text: #f2f2f7; --muted: #8a8a9e;
-    --gopher: #00ADD8; --nullptr: #ff3d71; --gold: #ffd166;
+    /* DevFest design tokens (developers.google.com/community/devfest) */
+    --ink: #1e1e1e; --ink-soft: #5f6368; --bg: #ffffff; --surface: #f8f9fa;
+    --border: #dadce0;
+    --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe; --blue-soft: #c3e7ff;
+    --red: #ea4335; --red-pastel: #fce8e6;
+    --yellow: #f9ab00; --yellow-pastel: #fef7e0;
+    --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
+    --gopher: var(--blue); --nullptr: var(--red);
+    --r-card: 24px; --r-pill: 50px; --r-input: 16px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #1c1330 0%, var(--bg) 60%);
-    color: var(--text); font-family: system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-family: 'Google Sans', 'Product Sans', Roboto, system-ui, sans-serif;
     min-height: 100vh; display: flex; flex-direction: column; align-items: center;
     padding: 16px;
   }
-  header { text-align: center; margin: 8px 0 20px; }
-  header h1 { font-size: 1.5rem; letter-spacing: 1px; }
+  header { text-align: center; margin: 12px 0 24px; }
+  .brand { font-size: .8rem; font-weight: 500; letter-spacing: .06em; color: var(--ink-soft);
+    text-transform: uppercase; margin-bottom: 6px; }
+  .bk { color: var(--blue); font-weight: 700; }
+  header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; }
   header h1 .g { color: var(--gopher); } header h1 .n { color: var(--nullptr); }
-  .sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
-  #lang { position: fixed; top: 10px; right: 10px; background: var(--panel);
-    color: var(--text); border: 1px solid #333; border-radius: 20px;
-    padding: 6px 14px; cursor: pointer; font-size: .8rem; }
+  .sub { color: var(--ink-soft); font-size: .9rem; margin-top: 6px; }
+  #lang { position: fixed; top: 12px; right: 12px; background: var(--bg);
+    color: var(--blue); border: 1px solid var(--border); border-radius: var(--r-pill);
+    padding: 7px 16px; cursor: pointer; font-size: .8rem; font-weight: 500;
+    font-family: inherit; z-index: 10; }
   main { width: 100%; max-width: 480px; }
-  .card { background: var(--panel); border: 1px solid #262636; border-radius: 16px;
-    padding: 20px; margin-bottom: 14px; }
-  .phase-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; text-align: center; }
+  .card { background: var(--surface); border-radius: var(--r-card);
+    padding: 24px; margin-bottom: 16px; }
+  .card.blue { background: var(--blue-pastel); }
+  .card.yellow { background: var(--yellow-pastel); }
+  .phase-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; text-align: center; }
   .hidden { display: none !important; }
-  input[type=text] { width: 100%; padding: 12px 14px; border-radius: 10px;
-    border: 1px solid #33334a; background: #0e0e16; color: var(--text); font-size: 1rem; }
-  button.primary { width: 100%; margin-top: 10px; padding: 12px; border: 0;
-    border-radius: 10px; background: linear-gradient(90deg, var(--gopher), #7c5cff);
-    color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; }
+  input[type=text] { width: 100%; padding: 14px 18px; border-radius: var(--r-input);
+    border: 1px solid var(--border); background: var(--bg); color: var(--ink);
+    font-size: 1rem; font-family: inherit; }
+  input[type=text]:focus { outline: 2px solid var(--blue-core); border-color: transparent; }
+  button.primary { width: 100%; margin-top: 12px; padding: 14px; border: 0;
+    border-radius: var(--r-pill); background: var(--blue);
+    color: #fff; font-weight: 500; font-size: 1rem; cursor: pointer; font-family: inherit; }
+  button.primary:hover { background: #185abc; }
   button:disabled { opacity: .5; cursor: default; }
-  .topics li { display: flex; justify-content: space-between; padding: 6px 4px;
-    border-bottom: 1px solid #22222f; list-style: none; font-size: .95rem; }
+  .topics { margin-top: 14px; }
+  .topics li { display: flex; justify-content: space-between; padding: 8px 6px;
+    border-bottom: 1px solid var(--border); list-style: none; font-size: .95rem; }
+  .topics li b { color: var(--blue); }
   .votebtns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .votebtn { padding: 18px 8px; border-radius: 14px; border: 2px solid; background: #0e0e16;
-    color: var(--text); font-weight: 800; font-size: 1rem; cursor: pointer; }
-  .votebtn.gopher { border-color: var(--gopher); }
-  .votebtn.nullptr { border-color: var(--nullptr); }
-  .bar-wrap { margin-top: 14px; }
-  .bar-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: .85rem; }
-  .bar-row .name { width: 84px; }
-  .bar { flex: 1; height: 14px; background: #0e0e16; border-radius: 7px; overflow: hidden; }
+  .votebtn { padding: 20px 8px; border-radius: var(--r-card); border: 2px solid;
+    font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
+  .votebtn.gopher { border-color: var(--gopher); background: var(--blue-pastel); color: var(--gopher); }
+  .votebtn.nullptr { border-color: var(--nullptr); background: var(--red-pastel); color: var(--nullptr); }
+  .bar-wrap { margin-top: 16px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; font-size: .85rem; }
+  .bar-row .name { width: 88px; font-weight: 500; }
+  .bar { flex: 1; height: 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 7px; overflow: hidden; }
   .bar > div { height: 100%; width: 0%; transition: width .4s; }
   .bar .g { background: var(--gopher); } .bar .n { background: var(--nullptr); }
   .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .agent { text-align: center; padding: 14px 8px; border-radius: 14px; background: #0e0e16; }
-  .agent .face { font-size: 2rem; }
-  .agent .status { font-size: .8rem; color: var(--muted); margin-top: 6px; min-height: 1em; }
+  .agent { text-align: center; padding: 18px 8px; border-radius: var(--r-card); background: var(--bg);
+    border: 1px solid var(--border); }
+  .agent .face { font-size: 2.2rem; }
+  .agent b { font-weight: 700; }
+  .agent .status { font-size: .8rem; color: var(--ink-soft); margin-top: 6px; min-height: 1em; }
+  .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
   .agent.writing .status::after { content: '…'; animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: .2; } }
-  .verse { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: .92rem;
-    line-height: 1.6; background: #0e0e16; border-radius: 12px; padding: 14px; margin-top: 10px; }
-  .verse.gopher { border-left: 4px solid var(--gopher); }
-  .verse.nullptr { border-left: 4px solid var(--nullptr); }
-  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .75rem;
-    font-weight: 700; margin-bottom: 6px; }
-  .tag.gopher { background: var(--gopher); color: #04222b; }
-  .tag.nullptr { background: var(--nullptr); color: #2b040f; }
-  .topic-banner { text-align: center; color: var(--gold); font-weight: 800;
-    font-size: 1.1rem; margin-bottom: 10px; }
-  .champion { text-align: center; font-size: 1.4rem; font-weight: 900; padding: 10px; }
-  .judge { font-style: italic; color: var(--muted); margin-top: 10px; font-size: .9rem; }
-  .scores { display: flex; justify-content: center; gap: 24px; font-weight: 800;
-    font-size: 1.1rem; margin-top: 4px; }
+  .verse { white-space: pre-wrap; font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: .9rem; line-height: 1.65; background: var(--bg); border-radius: var(--r-input);
+    padding: 16px; margin-top: 12px; border: 1px solid var(--border); }
+  .verse.gopher { border-left: 5px solid var(--gopher); }
+  .verse.nullptr { border-left: 5px solid var(--nullptr); }
+  .tag { display: inline-block; padding: 4px 14px; border-radius: var(--r-pill);
+    font-size: .75rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .tag.gopher { background: var(--gopher); }
+  .tag.nullptr { background: var(--nullptr); }
+  .topic-banner { text-align: center; color: var(--ink); font-weight: 700;
+    font-size: 1.15rem; margin-bottom: 12px; }
+  .topic-banner .bk { color: var(--blue); }
+  .champion { text-align: center; font-size: 1.35rem; font-weight: 700; padding: 10px; }
+  .judge { font-style: italic; color: var(--ink-soft); margin-top: 12px; font-size: .9rem;
+    text-align: center; }
+  .scores { display: flex; justify-content: center; gap: 28px; font-weight: 700;
+    font-size: 1.2rem; margin-top: 6px; }
   #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    background: #2b2b3d; padding: 10px 18px; border-radius: 10px; font-size: .85rem;
-    opacity: 0; transition: opacity .3s; pointer-events: none; }
+    background: var(--ink); color: #fff; padding: 12px 22px; border-radius: var(--r-pill);
+    font-size: .85rem; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 20; }
   #toast.show { opacity: 1; }
-  #conn { position: fixed; top: 12px; left: 12px; width: 10px; height: 10px;
-    border-radius: 50%; background: #f43; }
-  #conn.ok { background: #3f6; }
+  #conn { position: fixed; top: 18px; left: 14px; width: 10px; height: 10px;
+    border-radius: 50%; background: var(--red); }
+  #conn.ok { background: var(--green-bright); }
 </style>
 </head>
 <body>
 <div id="conn" title="connection"></div>
 <button id="lang">ES</button>
 <header>
+  <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
   <h1><span class="g">MC GOPHER</span> vs <span class="n">NULL PTR</span></h1>
   <div class="sub" data-i18n="subtitle">AI Rap Battle — you are the jury</div>
 </header>
 <main>
   <!-- IDLE -->
-  <section id="v-idle" class="card hidden">
+  <section id="v-idle" class="card blue hidden">
     <div class="phase-title" data-i18n="idle_title">The battle is about to begin…</div>
     <div style="text-align:center; font-size:2.2rem">🎤🐹 🤖🎤</div>
   </section>
 
   <!-- TOPICS -->
-  <section id="v-topics" class="card hidden">
+  <section id="v-topics" class="card blue hidden">
     <div class="phase-title" data-i18n="topics_title">Round <span id="round-no">1</span>: shout a topic!</div>
     <input id="topic-input" type="text" maxlength="40" data-i18n-ph="topics_ph" placeholder="e.g. mondays, javascript, my wifi…">
     <button id="topic-send" class="primary" data-i18n="topics_send">Submit topic</button>
-    <ul class="topics" id="topic-list" style="margin-top:12px"></ul>
+    <ul class="topics" id="topic-list"></ul>
   </section>
 
   <!-- WRITING -->
@@ -125,7 +153,7 @@
   </section>
 
   <!-- ROUND RESULT / CHAMPION -->
-  <section id="v-result" class="card hidden">
+  <section id="v-result" class="card yellow hidden">
     <div class="champion" id="result-title"></div>
     <div class="scores" id="result-scores"></div>
     <div class="judge" id="result-judge"></div>
@@ -251,7 +279,7 @@ function render(s) {
     }
     case "writing":
       show(["v-writing", "v-crowd"]);
-      document.getElementById("writing-topic").textContent = `🎯 ${r.topic}`;
+      document.getElementById("writing-topic").innerHTML = `<span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span>`;
       ["gopher","nullptr"].forEach((b) => {
         const done = r.verses && r.verses[b];
         setAgentStatus(b, done ? "ready" : "writing");
@@ -282,7 +310,7 @@ function render(s) {
 function renderPerformance(s, battler) {
   show(["v-performing", "v-crowd"]);
   const r = currentRound(s);
-  document.getElementById("perf-topic").textContent = `🎯 ${r.topic}`;
+  document.getElementById("perf-topic").innerHTML = `<span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span>`;
   document.getElementById("perf-verse").innerHTML =
     `<span class="tag ${battler}">${NAMES[battler]} — ${t("performing")}</span>` +
     `<div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
