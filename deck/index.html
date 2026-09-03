@@ -105,6 +105,25 @@
   .trow .ms { color: var(--ink-soft); }
   .trow code { font-family: 'Roboto Mono', monospace; font-weight: 500; }
   .trow .tdesc { color: var(--ink-soft); margin-left: auto; font-size: .98rem; text-align: right; }
+  /* Phase pill chain */
+  .flow-pills { display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 6px; max-width: 880px; }
+  .fpill { padding: 10px 20px; border-radius: var(--r-pill); font-family: 'Roboto Mono', monospace;
+    font-size: 1.02rem; font-weight: 500; border: 2px solid var(--border); background: var(--surface); }
+  .fpill.p-blue { border-color: var(--blue); background: var(--blue-pastel); color: var(--blue); }
+  .fpill.p-red { border-color: var(--red); background: var(--red-pastel); color: var(--red); }
+  .fpill.p-yellow { border-color: var(--yellow); background: var(--yellow-pastel); color: #b06f00; }
+  .fpill.p-green { border-color: var(--green); background: var(--green-pastel); color: #1e7e34; }
+  .flow-pills .ms { color: var(--ink-soft); }
+  /* Scorecard */
+  table.scorecard { border-collapse: separate; border-spacing: 0; font-size: 1.2rem;
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden; max-width: 860px; }
+  table.scorecard td { border-bottom: 1px solid var(--border); padding: 13px 24px; text-align: left; }
+  table.scorecard tr:last-child td { border-bottom: 0; }
+  table.scorecard td:first-child { background: var(--surface); }
+  table.scorecard td:last-child { font-family: 'Roboto Mono', monospace; font-size: 1.05rem;
+    color: var(--blue); font-weight: 500; }
+  table.scorecard .ms { color: var(--ink-soft); margin-right: 10px; }
   footer { position: fixed; bottom: 14px; right: 20px; color: var(--ink-soft); font-size: .85rem; }
   #progress { position: fixed; bottom: 0; left: 0; height: 5px;
     background: linear-gradient(90deg, var(--blue-core) 0 25%, var(--red) 25% 50%,
@@ -256,6 +275,23 @@
   <p class="sub" style="margin-top:14px" data-i18n="sf_note">One HTTP button on the stage drives all of it — the state machine does the rest.</p>
 </section>
 
+<!-- 6c · The state machine -->
+<section class="slide">
+  <h2><span class="ms" style="color:var(--blue)">account_tree</span> <span data-i18n="sm_title">The state machine that runs the show</span></h2>
+  <div class="flow-pills">
+    <span class="fpill">idle</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-blue">topics_open</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-yellow">writing</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-blue">performing_a</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-red">performing_b</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-green">voting</span><span class="ms">arrow_forward</span>
+    <span class="fpill">round_result</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-yellow">champion</span>
+  </div>
+  <p class="sub" style="margin-top:22px"><span class="ms">replay</span> <span data-i18n="sm_loop">round_result loops back to topics_open until best-of-3 is decided</span></p>
+  <p class="sub" style="margin-top:14px" data-i18n="sm_note">The agents are non-deterministic — the show can't be. Every transition is guarded in the domain; one mutex owns the truth. Deterministic orchestration around stochastic agents.</p>
+</section>
+
 <!-- 7 · Architecture -->
 <section class="slide">
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
@@ -272,9 +308,25 @@
   <p class="sub" style="margin-top:14px" data-i18n="s7_note">Swapping storage is one constructor line. The agents are behind interfaces too — the show ran offline in rehearsal.</p>
 </section>
 
+<!-- 7a2 · Agents behind ports -->
+<section class="slide">
+  <h2><span class="ms" style="color:var(--blue)">swap_horiz</span> <span data-i18n="ports_title">The LLM is just another dependency</span></h2>
+  <pre><span class="kw">type</span> <span class="fn">VerseWriter</span> <span class="kw">interface</span> {
+    WriteVerse(ctx, battler, topic, history) (<span class="kw">string</span>, error)
+}
+
+<span class="cm">// wiring in main.go — one flag swaps the whole cast:</span>
+<span class="kw">if</span> cfg.FakeAgents {
+    writer = &amp;fake.Crew{Cache: verses}      <span class="cm">// rehearse offline, zero tokens</span>
+} <span class="kw">else</span> {
+    writer, _ = agents.<span class="fn">NewCrew</span>(ctx, apiKey) <span class="cm">// the real Gemini crew</span>
+}</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="ports_note">Small implicit interfaces make Gemini swappable like a database. Every rehearsal of this talk ran the full show offline — the state machine never knew.</p>
+</section>
+
 <!-- 7b · Why Go, proof 1: goroutines -->
 <section class="slide">
-  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow">why Go — proof</span> 1/3 <span class="bk">]</span></div>
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow">why Go — proof</span> 1/4 <span class="bk">]</span></div>
   <h2 data-i18n="g1_title">Two agents rapping at once = two goroutines</h2>
   <pre>var wg sync.WaitGroup
 <span class="kw">for</span> _, battler := <span class="kw">range</span> []Battler{<span class="g">Blue</span>, <span class="n">Red</span>} {
@@ -291,7 +343,7 @@ wg.Wait()</pre>
 
 <!-- 7c · Why Go, proof 2: channels -->
 <section class="slide">
-  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow2">why Go — proof</span> 2/3 <span class="bk">]</span></div>
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow2">why Go — proof</span> 2/4 <span class="bk">]</span></div>
   <h2 data-i18n="g2_title">Broadcasting to every browser = one channel each</h2>
   <pre><span class="kw">for</span> client := <span class="kw">range</span> hub.clients {
     <span class="kw">select</span> {
@@ -305,7 +357,7 @@ wg.Wait()</pre>
 
 <!-- 7d · Why Go, proof 3: errors as values -->
 <section class="slide">
-  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow3">why Go — proof</span> 3/3 <span class="bk">]</span></div>
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow3">why Go — proof</span> 3/4 <span class="bk">]</span></div>
   <h2 data-i18n="g3_title">A live show can't crash — errors are just values</h2>
   <pre>verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, history)
 <span class="kw">if</span> err != nil {
@@ -315,6 +367,34 @@ wg.Wait()</pre>
     verse = <span class="st">"(lost the beat — skip this round)"</span>  <span class="cm">// plan C: shrug, continue</span>
 }</pre>
   <p class="sub" style="margin-top:16px" data-i18n="g3_note">Gemini down? Cached verses. TTS down? I perform it live. Every fallback is a visible `if err != nil` — no hidden exception paths on stage.</p>
+</section>
+
+<!-- 7e · Why Go, proof 4: context -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow4">why Go — proof</span> 4/4 <span class="bk">]</span></div>
+  <h2 data-i18n="g4_title">An agent that never answers can't freeze the show</h2>
+  <pre>ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, 45*time.Second)
+<span class="kw">defer</span> cancel()
+
+verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, history)
+
+<span class="cm">// every LLM call in the show has a budget:</span>
+<span class="cm">// verses 45s · TTS 60s · judge 20s — then the fallbacks kick in</span></pre>
+  <p class="sub" style="margin-top:16px" data-i18n="g4_note">Cancellation flows through every layer — ADK, HTTP, TTS — because context is the standard library's contract, not a bolt-on. LLMs are the slowest, flakiest dependency you'll ever call; deadlines are not optional.</p>
+</section>
+
+<!-- 7f · Scorecard -->
+<section class="slide">
+  <h2><span class="ms" style="color:var(--blue)">checklist</span> <span data-i18n="sc_title">Go for agentic development — the scorecard</span></h2>
+  <table class="scorecard">
+    <tr><td><span class="ms">bolt</span><span data-i18n="sc_r1">Many agents thinking at once</span></td><td>goroutines</td></tr>
+    <tr><td><span class="ms">cell_tower</span><span data-i18n="sc_r2">Fan-out to a live audience</span></td><td>channels + select</td></tr>
+    <tr><td><span class="ms">error</span><span data-i18n="sc_r3">LLMs fail, constantly</span></td><td>errors are values</td></tr>
+    <tr><td><span class="ms">handshake</span><span data-i18n="sc_r4">Tool calls need contracts</span></td><td>typed structs = schema</td></tr>
+    <tr><td><span class="ms">timer</span><span data-i18n="sc_r5">Slow or hung model calls</span></td><td>context deadlines</td></tr>
+    <tr><td><span class="ms">rocket_launch</span><span data-i18n="sc_r6">Ship the demo anywhere</span></td><td>one static binary</td></tr>
+  </table>
+  <p class="sub" style="margin-top:18px" data-i18n="sc_note">Not one of these needed a framework. Agentic workloads are concurrent, failure-prone, I/O-bound systems programming — exactly what Go was built for.</p>
 </section>
 
 <!-- 8 · Sessions -->
@@ -411,6 +491,22 @@ const I18N = {
     ar6: "Gemini TTS → WAV",
     ar7: "hub WebSocket, descarta clientes lentos",
     ar8: "go:embed — la UI dentro del binario",
+    sm_title: "La máquina de estados que maneja el show",
+    sm_loop: "round_result vuelve a topics_open hasta decidir el mejor de 3",
+    sm_note: "Los agentes son no-deterministas — el show no puede serlo. Cada transición está protegida en el dominio; un mutex es dueño de la verdad. Orquestación determinista alrededor de agentes estocásticos.",
+    ports_title: "El LLM es una dependencia más",
+    ports_note: "Interfaces pequeñas e implícitas hacen a Gemini intercambiable como una base de datos. Cada ensayo de esta charla corrió el show completo offline — la máquina de estados nunca se enteró.",
+    g_eyebrow4: "por qué Go — prueba",
+    g4_title: "Un agente que nunca responde no puede congelar el show",
+    g4_note: "La cancelación fluye por todas las capas — ADK, HTTP, TTS — porque context es el contrato de la librería estándar, no un agregado. Los LLMs son la dependencia más lenta y frágil que llamarás; los deadlines no son opcionales.",
+    sc_title: "Go para desarrollo agéntico — el scorecard",
+    sc_r1: "Muchos agentes pensando a la vez",
+    sc_r2: "Fan-out a una audiencia en vivo",
+    sc_r3: "Los LLMs fallan, constantemente",
+    sc_r4: "Los tool calls necesitan contratos",
+    sc_r5: "Llamadas al modelo lentas o colgadas",
+    sc_r6: "Desplegar el demo donde sea",
+    sc_note: "Ninguna de estas necesitó un framework. Las cargas agénticas son sistemas concurrentes, propensos a fallos y limitados por I/O — exactamente para lo que Go fue construido.",
     g_eyebrow: "por qué Go — prueba",
     g_eyebrow2: "por qué Go — prueba",
     g_eyebrow3: "por qué Go — prueba",
