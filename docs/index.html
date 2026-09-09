@@ -140,6 +140,24 @@
   table.compare td.val { color: var(--blue); font-weight: 700; }
   .eyebrow { font-size: .95rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
     color: var(--ink-soft); margin-bottom: 16px; }
+  /* Speaker slide */
+  .speaker { display: flex; align-items: center; gap: 56px; max-width: 900px; text-align: left; }
+  .speaker-photo { width: 230px; height: 230px; border-radius: 50%; object-fit: cover;
+    flex-shrink: 0; padding: 6px; background:
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    conic-gradient(var(--blue-core) 0 25%, var(--red) 25% 50%,
+      var(--yellow) 50% 75%, var(--green) 75% 100%) border-box;
+    border: 6px solid transparent; }
+  .speaker h2 { margin-bottom: 6px; }
+  .speaker .role { font-size: 1.25rem; color: var(--ink-soft); margin-bottom: 18px; }
+  .speaker .role b { color: var(--ink); }
+  .speaker ul { list-style: none; font-size: 1.12rem; line-height: 1.9; margin-bottom: 20px; }
+  .speaker ul li::before { content: "→ "; color: var(--blue); font-weight: 700; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .links span { display: inline-flex; align-items: center; gap: 6px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--r-pill); padding: 7px 16px;
+    font-size: .95rem; font-weight: 500; }
+  .links .ms { color: var(--blue); }
   .join-chip { display: inline-block; background: var(--blue); color: #fff;
     border-radius: var(--r-pill); padding: 16px 42px; font-size: 1.9rem; font-weight: 700;
     margin: 10px 0 16px; }
@@ -160,6 +178,30 @@
   <p class="sub" style="font-size:1.5rem;margin-bottom:12px"><span class="n" style="font-weight:700">Bug Hunter</span> · <span class="gold" style="font-weight:700">Sentinel</span> · <span class="g" style="font-weight:700">The Simplifier</span></p>
   <h2 style="font-weight:400" data-i18n="s1_sub">Live AI code review — agents in Go for the agentic era</h2>
   <p class="sub">Go + ADK · <span class="gold" data-i18n="s1_you">your repos, your votes</span></p>
+</section>
+
+<!-- 1b · Speaker -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="sp_eyebrow">your host</span> <span class="bk">]</span></div>
+  <div class="speaker">
+    <img class="speaker-photo" src="ignacio.png" alt="Ignacio Rueda">
+    <div>
+      <h2>Ignacio Rueda</h2>
+      <p class="role" data-i18n="sp_role">Software Engineer at <b>Clerk</b> · Builder at <b>Crafter Station</b> · Lima, Perú</p>
+      <ul>
+        <li data-i18n="sp_p1">Go, TypeScript &amp; cloud — backends, distributed systems, dev tools</li>
+        <li data-i18n="sp_p2">Before: Go services for Disney Parks at Globant</li>
+        <li data-i18n="sp_p3">Winner, Gemini CLI Desktop UI Challenge 2025 (built with Go + React)</li>
+        <li data-i18n="sp_p4">Hackathons, YouTube, and community events around AI &amp; shipping fast</li>
+      </ul>
+      <div class="links">
+        <span><span class="ms">code</span>github.com/jibaru</span>
+        <span><span class="ms">alternate_email</span>@IgnacioRuedaB</span>
+        <span><span class="ms">play_circle</span>youtube.com/@ignacio-rueda</span>
+        <span><span class="ms">groups</span>crafterstation.com</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- 2 · The agentic era -->
@@ -470,6 +512,12 @@ const I18N = {
     s3_p3: "Herramientas tipadas: la firma de la función ES el contrato que ve el modelo",
     s3_p4: "Aburrido, rápido, desplegable — perfecto para agentes que no pueden caerse",
     s3_promise: "No me crean a mí — verán cada afirmación en el código real de la app.",
+    sp_eyebrow: "su anfitrión",
+    sp_role: "Software Engineer en <b>Clerk</b> · Builder en <b>Crafter Station</b> · Lima, Perú",
+    sp_p1: "Go, TypeScript y cloud — backends, sistemas distribuidos, dev tools",
+    sp_p2: "Antes: servicios en Go para Disney Parks en Globant",
+    sp_p3: "Ganador del Gemini CLI Desktop UI Challenge 2025 (hecho con Go + React)",
+    sp_p4: "Hackathons, YouTube y eventos de comunidad sobre IA y shipping rápido",
     s4_note: "Una personalidad es solo un string de instrucciones.",
     sf_title: "Una ronda, de inicio a fin",
     sf_note: "Un solo botón HTTP en el stage maneja todo — la máquina de estados hace el resto.",
