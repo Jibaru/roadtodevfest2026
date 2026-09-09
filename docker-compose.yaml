@@ -1,0 +1,13 @@
+services:
+  agentarena:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      PORT: "8080"
+      PRESENTER_TOKEN: ${PRESENTER_TOKEN}
+      # FAKE_AGENTS=1 runs the show offline; set GEMINI_API_KEY and
+      # FAKE_AGENTS=0 for the real crew.
+      FAKE_AGENTS: ${FAKE_AGENTS:-1}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
