@@ -14,10 +14,10 @@ func New(h *handlers.Handlers, webFS fs.FS, log *slog.Logger) http.Handler {
 
 	// API
 	mux.HandleFunc("GET /health", h.Health)
-	mux.HandleFunc("POST /api/battles", h.StartBattle)
-	mux.HandleFunc("POST /api/battles/current/advance", h.Advance)
-	mux.HandleFunc("POST /api/battles/current/reset", h.Reset)
-	mux.HandleFunc("GET /api/battles/current", h.CurrentBattle)
+	mux.HandleFunc("POST /api/reviews", h.StartSession)
+	mux.HandleFunc("POST /api/reviews/current/advance", h.Advance)
+	mux.HandleFunc("POST /api/reviews/current/reset", h.Reset)
+	mux.HandleFunc("GET /api/reviews/current", h.CurrentSession)
 
 	// Realtime
 	mux.HandleFunc("GET /ws", h.AudienceWS)

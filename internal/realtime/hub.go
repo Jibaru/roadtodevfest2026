@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/jibaru/agentarena/internal/battle/domain"
-	"github.com/jibaru/agentarena/internal/battle/service"
+	"github.com/jibaru/agentarena/internal/review/domain"
+	"github.com/jibaru/agentarena/internal/review/service"
 )
 
 // Room separates the two client kinds.
@@ -18,13 +18,12 @@ const (
 	RoomStage    Room = "stage"
 )
 
-// GameCommands is what the hub needs from the battle service to route
+// GameCommands is what the hub needs from the review service to route
 // inbound audience messages.
 type GameCommands interface {
-	SubmitTopic(ctx context.Context, clientID, word string) error
-	Vote(ctx context.Context, clientID string, battler domain.Battler) error
-	AddCrowdWord(ctx context.Context, word string) error
-	State(ctx context.Context) (domain.BattleState, error)
+	SubmitRepo(ctx context.Context, clientID, url string) error
+	VoteFinding(ctx context.Context, clientID, findingID string) error
+	State(ctx context.Context) (domain.SessionState, error)
 }
 
 // Hub fans events out to connected WebSocket clients. Slow clients are
@@ -43,7 +42,7 @@ func NewHub(log *slog.Logger) *Hub {
 	}
 }
 
-// SetGame wires the battle service in after construction (the service
+// SetGame wires the review service in after construction (the service
 // needs the hub as Broadcaster; the hub needs the service for commands).
 func (h *Hub) SetGame(game GameCommands) {
 	h.game = game
@@ -105,9 +104,9 @@ func (h *Hub) remove(c *Client) {
 
 // inboundMessage is what audience/stage pages send us.
 type inboundMessage struct {
-	Type    string `json:"type"` // submit_topic | vote | crowd_word
-	Word    string `json:"word,omitempty"`
-	Battler string `json:"battler,omitempty"`
+	Type      string `json:"type"` // submit_repo | vote_finding
+	Repo      string `json:"repo,omitempty"`
+	FindingID string `json:"finding_id,omitempty"`
 }
 
 // handleInbound routes one client message to the game. Errors are sent
@@ -121,17 +120,15 @@ func (h *Hub) handleInbound(c *Client, raw []byte) {
 
 	var err error
 	switch msg.Type {
-	case "submit_topic":
-		err = h.game.SubmitTopic(ctx, c.id, msg.Word)
-	case "vote":
-		err = h.game.Vote(ctx, c.id, domain.Battler(msg.Battler))
-	case "crowd_word":
-		err = h.game.AddCrowdWord(ctx, msg.Word)
+	case "submit_repo":
+		err = h.game.SubmitRepo(ctx, c.id, msg.Repo)
+	case "vote_finding":
+		err = h.game.VoteFinding(ctx, c.id, msg.FindingID)
 	default:
 		return
 	}
 	if err != nil {
-		c.sendEvent(service.Event{Type: "error", Payload: err.Error()})
+		c.sendEvent(service.Event{Type: service.EventError, Payload: err.Error()})
 	}
 }
 
@@ -139,7 +136,7 @@ func (h *Hub) handleInbound(c *Client, raw []byte) {
 func (h *Hub) sendSnapshot(c *Client) {
 	state, err := h.game.State(context.Background())
 	if err != nil {
-		state = domain.BattleState{Phase: domain.PhaseIdle}
+		state = domain.SessionState{Phase: domain.PhaseIdle}
 	}
 	c.sendEvent(service.Event{Type: service.EventState, Payload: state})
 }

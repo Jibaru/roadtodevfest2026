@@ -152,14 +152,14 @@
 <section class="slide active">
   <div class="eyebrow"><span class="bk">[</span> Google DevFest 2026 <span class="bk">]</span></div>
   <div style="margin-bottom:24px">
-    <span class="avatar blue"><span class="ms">pets</span></span>
-    <span class="avatar yellow"><span class="ms">mic</span></span>
-    <span class="avatar red"><span class="ms">pets</span></span>
+    <span class="avatar red"><span class="ms">bug_report</span></span>
+    <span class="avatar yellow"><span class="ms">security</span></span>
+    <span class="avatar blue"><span class="ms">auto_fix_high</span></span>
   </div>
   <h1>AGENT ARENA</h1>
-  <p class="sub" style="font-size:1.5rem;margin-bottom:12px"><span class="g" style="font-weight:700">Blue Gopher</span> <span class="vs">vs</span> <span class="n" style="font-weight:700">Red Gopher</span></p>
-  <h2 style="font-weight:400" data-i18n="s1_sub">Building AI agents in Go for the agentic era</h2>
-  <p class="sub">Go + ADK · <span class="gold" data-i18n="s1_you">you are the jury</span></p>
+  <p class="sub" style="font-size:1.5rem;margin-bottom:12px"><span class="n" style="font-weight:700">Bug Hunter</span> · <span class="gold" style="font-weight:700">Sentinel</span> · <span class="g" style="font-weight:700">The Simplifier</span></p>
+  <h2 style="font-weight:400" data-i18n="s1_sub">Live AI code review — agents in Go for the agentic era</h2>
+  <p class="sub">Go + ADK · <span class="gold" data-i18n="s1_you">your repos, your votes</span></p>
 </section>
 
 <!-- 2 · The agentic era -->
@@ -194,10 +194,10 @@
     <span class="pill"><span class="ms">autorenew</span> Loops</span><span class="pill"><span class="ms">hub</span> Graphs</span>
   </div>
   <pre style="margin-top:30px"><span class="fn">llmagent</span>.New(llmagent.Config{
-    Name:        <span class="st">"blue_gopher"</span>,
+    Name:        <span class="st">"bug_hunter"</span>,
     Model:       geminiModel,
-    Instruction: <span class="st">"You are BLUE GOPHER, battle rapper…"</span>,
-    Tools:       []tool.Tool{crowdScanner},
+    Instruction: <span class="st">"You are BUG HUNTER, a relentless reviewer…"</span>,
+    Tools:       []tool.Tool{readFile},
 })</pre>
   <p class="sub" style="margin-top:16px" data-i18n="s4_note">A personality is just an instruction string.</p>
 </section>
@@ -207,13 +207,13 @@
   <div style="margin-bottom:24px"><span class="avatar blue"><span class="ms">smartphone</span></span></div>
   <h1><span class="bk">[</span> <span data-i18n="s5_title">DEMO TIME</span> <span class="bk">]</span></h1>
   <div class="join-chip" id="join-url">agent-arena.crafter.run</div>
-  <p class="sub" data-i18n="s5_sub">Join now: you pick the topics, you judge the rounds.<br>3 rounds. Two AIs. One champion.</p>
+  <p class="sub" data-i18n="s5_sub">Propose a public repo. Watch three agents tear into it, live.<br>Then vote the most valuable finding.</p>
 </section>
 
 <!-- 6 · What just happened -->
 <section class="slide">
   <h2 data-i18n="s6_title">What you just experienced</h2>
-  <svg class="dg" viewBox="0 0 900 410" role="img" aria-label="Flow: audience browsers connect over WebSocket to the hub, then the battle service fans out to the Blue Gopher, Red Gopher and Judge agents; the two gophers write verses in parallel and feed Gemini TTS.">
+  <svg class="dg" viewBox="0 0 900 410" role="img" aria-label="Flow: audience browsers connect over WebSocket to the hub, the review service fetches the repo snapshot and fans out to the Bug Hunter, Sentinel and Simplifier agents, which review in parallel using the read_file tool; the Lead Reviewer closes with a verdict.">
     <defs>
       <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
         <path d="M0,0 L10,5 L0,10 z" fill="#5f6368"/>
@@ -227,8 +227,8 @@
     <text x="362" y="45" text-anchor="middle" class="nlbl" fill="#1967d2">Hub</text>
     <text x="362" y="66" text-anchor="middle" class="nsub">realtime</text>
     <rect x="520" y="20" width="250" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
-    <text x="645" y="45" text-anchor="middle" class="nlbl" fill="#1967d2">BattleService</text>
-    <text x="645" y="66" text-anchor="middle" class="nsub">state machine</text>
+    <text x="645" y="45" text-anchor="middle" class="nlbl" fill="#1967d2">ReviewService</text>
+    <text x="645" y="66" text-anchor="middle" class="nsub">state machine + repo snapshot</text>
     <line x1="205" y1="49" x2="298" y2="49" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
     <text x="252" y="38" text-anchor="middle" class="albl mono">WebSocket</text>
     <line x1="420" y1="49" x2="513" y2="49" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
@@ -237,40 +237,40 @@
     <line x1="160" y1="158" x2="160" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
     <line x1="450" y1="158" x2="450" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
     <line x1="740" y1="158" x2="740" y2="163" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
-    <!-- row 2: agents -->
-    <rect x="55" y="166" width="210" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
-    <text x="160" y="191" text-anchor="middle" class="nlbl" fill="#1967d2">Blue Gopher</text>
-    <text x="160" y="212" text-anchor="middle" class="nsub">llmagent + session</text>
-    <rect x="345" y="166" width="210" height="58" rx="16" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
-    <text x="450" y="191" text-anchor="middle" class="nlbl" fill="#ea4335">Red Gopher</text>
-    <text x="450" y="212" text-anchor="middle" class="nsub">llmagent + session</text>
-    <rect x="635" y="166" width="210" height="58" rx="16" fill="#fef7e0" stroke="#f9ab00" stroke-width="2"/>
-    <text x="740" y="191" text-anchor="middle" class="nlbl" fill="#b06f00">Judge</text>
-    <text x="740" y="212" text-anchor="middle" class="nsub">commentary</text>
-    <!-- parallel bracket around the two gophers -->
-    <rect x="35" y="148" width="540" height="126" rx="20" fill="none" stroke="#1967d2" stroke-width="2" stroke-dasharray="7 6"/>
-    <text x="305" y="262" text-anchor="middle" class="albl mono" fill="#1967d2">goroutines — parallel verse writing</text>
-    <!-- TTS -->
-    <line x1="305" y1="274" x2="305" y2="313" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
-    <rect x="165" y="316" width="280" height="58" rx="16" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
-    <text x="305" y="341" text-anchor="middle" class="nlbl" fill="#1e7e34">Gemini TTS</text>
-    <text x="305" y="362" text-anchor="middle" class="nsub">Puck · Fenrir → WAV → stage</text>
+    <!-- row 2: reviewers -->
+    <rect x="55" y="166" width="210" height="58" rx="16" fill="#fce8e6" stroke="#ea4335" stroke-width="2"/>
+    <text x="160" y="191" text-anchor="middle" class="nlbl" fill="#ea4335">Bug Hunter</text>
+    <text x="160" y="212" text-anchor="middle" class="nsub">llmagent + read_file</text>
+    <rect x="345" y="166" width="210" height="58" rx="16" fill="#fef7e0" stroke="#f9ab00" stroke-width="2"/>
+    <text x="450" y="191" text-anchor="middle" class="nlbl" fill="#b06f00">Sentinel</text>
+    <text x="450" y="212" text-anchor="middle" class="nsub">llmagent + read_file</text>
+    <rect x="635" y="166" width="210" height="58" rx="16" fill="#e8f0fe" stroke="#1967d2" stroke-width="2"/>
+    <text x="740" y="191" text-anchor="middle" class="nlbl" fill="#1967d2">Simplifier</text>
+    <text x="740" y="212" text-anchor="middle" class="nsub">llmagent + read_file</text>
+    <!-- parallel bracket around all three reviewers -->
+    <rect x="35" y="148" width="830" height="126" rx="20" fill="none" stroke="#1967d2" stroke-width="2" stroke-dasharray="7 6"/>
+    <text x="450" y="262" text-anchor="middle" class="albl mono" fill="#1967d2">goroutines — parallel review, findings compete for votes</text>
+    <!-- Lead reviewer -->
+    <line x1="450" y1="274" x2="450" y2="313" stroke="#5f6368" stroke-width="2" marker-end="url(#arw)"/>
+    <rect x="310" y="316" width="280" height="58" rx="16" fill="#e6f4ea" stroke="#34a853" stroke-width="2"/>
+    <text x="450" y="341" text-anchor="middle" class="nlbl" fill="#1e7e34">Lead Reviewer</text>
+    <text x="450" y="362" text-anchor="middle" class="nsub">closing verdict for the author</text>
   </svg>
-  <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every vote, topic and verse flowed through goroutines and channels.</p>
+  <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every proposal, tool call and vote flowed through goroutines and channels.</p>
 </section>
 
 <!-- 6b · One round, end to end -->
 <section class="slide">
   <h2><span class="ms" style="color:var(--blue)">route</span> <span data-i18n="sf_title">One round, end to end</span></h2>
   <div class="steps">
-    <div class="step"><span class="num">1</span><span class="txt" data-i18n="sf1">Your phone sends <code class="chip">submit_topic</code> over WebSocket</span></div>
-    <div class="step"><span class="num">2</span><span class="txt" data-i18n="sf2">The most-submitted word becomes the round topic</span></div>
-    <div class="step"><span class="num">3</span><span class="txt" data-i18n="sf3"><code class="chip">go write(Blue)</code> ⇄ <code class="chip">go write(Red)</code> — verses written in parallel</span></div>
-    <div class="step"><span class="num">4</span><span class="txt" data-i18n="sf4">Each ADK runner calls Gemini 2.5 Flash → 8 bars</span></div>
-    <div class="step"><span class="num">5</span><span class="txt" data-i18n="sf5">Gemini TTS performs them — Puck vs Fenrir voices</span></div>
-    <div class="step"><span class="num">6</span><span class="txt" data-i18n="sf6">The audience votes: one per browser, live tally</span></div>
-    <div class="step"><span class="num">7</span><span class="txt" data-i18n="sf7">The Judge agent drops its commentary, scores update</span></div>
-    <div class="step"><span class="num">8</span><span class="txt" data-i18n="sf8">Next round… until a champion is crowned</span></div>
+    <div class="step"><span class="num">1</span><span class="txt" data-i18n="sf1">Your phone sends <code class="chip">submit_repo</code> over WebSocket</span></div>
+    <div class="step"><span class="num">2</span><span class="txt" data-i18n="sf2">The most-backed repo wins the round</span></div>
+    <div class="step"><span class="num">3</span><span class="txt" data-i18n="sf3">One tarball download → in-memory snapshot (capped, filtered)</span></div>
+    <div class="step"><span class="num">4</span><span class="txt" data-i18n="sf4"><code class="chip">go review(bugs)</code> ⇄ <code class="chip">security</code> ⇄ <code class="chip">simplify</code> — in parallel</span></div>
+    <div class="step"><span class="num">5</span><span class="txt" data-i18n="sf5">Each agent picks which files to open with the <code class="chip">read_file</code> tool — you watch it choose</span></div>
+    <div class="step"><span class="num">6</span><span class="txt" data-i18n="sf6">Findings come back as JSON → ranked by severity</span></div>
+    <div class="step"><span class="num">7</span><span class="txt" data-i18n="sf7">You vote the most valuable finding — reviewers score points</span></div>
+    <div class="step"><span class="num">8</span><span class="txt" data-i18n="sf8">The Lead Reviewer closes with a verdict. Next repo!</span></div>
   </div>
   <p class="sub" style="margin-top:14px" data-i18n="sf_note">One HTTP button on the stage drives all of it — the state machine does the rest.</p>
 </section>
@@ -280,15 +280,11 @@
   <h2><span class="ms" style="color:var(--blue)">account_tree</span> <span data-i18n="sm_title">The state machine that runs the show</span></h2>
   <div class="flow-pills">
     <span class="fpill">idle</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-blue">topics_open</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-yellow">writing</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-blue">performing_a</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-red">performing_b</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-green">voting</span><span class="ms">arrow_forward</span>
-    <span class="fpill">round_result</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-yellow">champion</span>
+    <span class="fpill p-blue">repos_open</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-yellow">reviewing</span><span class="ms">arrow_forward</span>
+    <span class="fpill p-green">results</span>
   </div>
-  <p class="sub" style="margin-top:22px"><span class="ms">replay</span> <span data-i18n="sm_loop">round_result loops back to topics_open until best-of-3 is decided</span></p>
+  <p class="sub" style="margin-top:22px"><span class="ms">replay</span> <span data-i18n="sm_loop">results loops back to repos_open — and reviewing→results fires automatically when the crew finishes</span></p>
   <p class="sub" style="margin-top:14px" data-i18n="sm_note">The agents are non-deterministic — the show can't be. Every transition is guarded in the domain; one mutex owns the truth. Deterministic orchestration around stochastic agents.</p>
 </section>
 
@@ -297,11 +293,11 @@
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
   <div class="tree">
     <div class="trow"><span class="ms">terminal</span><code>cmd/api</code><span class="tdesc" data-i18n="ar1">wires everything together</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/battle/<b class="g">domain</b></code><span class="tdesc" data-i18n="ar2">entities · repo interfaces · errors</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/battle/<b class="g">service</b></code><span class="tdesc" data-i18n="ar3">the show's state machine</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/battle/infra</code><span class="tdesc" data-i18n="ar4">memory | file | embedded — same interface</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/<b class="gold">agents</b></code><span class="tdesc" data-i18n="ar5">ADK: 2 battlers + 1 judge</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/tts</code><span class="tdesc" data-i18n="ar6">Gemini TTS → WAV</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/review/<b class="g">domain</b></code><span class="tdesc" data-i18n="ar2">session · findings · votes · errors</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/review/<b class="g">service</b></code><span class="tdesc" data-i18n="ar3">the show's state machine</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/review/infra</code><span class="tdesc" data-i18n="ar4">memory | file — same interface</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/<b class="gold">agents</b></code><span class="tdesc" data-i18n="ar5">ADK: 3 reviewers + 1 lead</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/repofetch</code><span class="tdesc" data-i18n="ar6">GitHub tarball → in-memory snapshot</span></div>
     <div class="trow"><span class="ms">folder</span><code>internal/realtime</code><span class="tdesc" data-i18n="ar7">WebSocket hub, drops slow clients</span></div>
     <div class="trow"><span class="ms">folder</span><code>web/</code><span class="tdesc" data-i18n="ar8">go:embed — UI inside the binary</span></div>
   </div>
@@ -311,15 +307,15 @@
 <!-- 7a2 · Agents behind ports -->
 <section class="slide">
   <h2><span class="ms" style="color:var(--blue)">swap_horiz</span> <span data-i18n="ports_title">The LLM is just another dependency</span></h2>
-  <pre><span class="kw">type</span> <span class="fn">VerseWriter</span> <span class="kw">interface</span> {
-    WriteVerse(ctx, battler, topic, history) (<span class="kw">string</span>, error)
+  <pre><span class="kw">type</span> <span class="fn">ReviewerAgent</span> <span class="kw">interface</span> {
+    Review(ctx, reviewer, repoSnapshot, onStatus) ([]Finding, error)
 }
 
 <span class="cm">// wiring in main.go — one flag swaps the whole cast:</span>
 <span class="kw">if</span> cfg.FakeAgents {
-    writer = &amp;fake.Crew{Cache: verses}      <span class="cm">// rehearse offline, zero tokens</span>
+    crew = &amp;fake.Crew{}                   <span class="cm">// rehearse offline, zero tokens</span>
 } <span class="kw">else</span> {
-    writer, _ = agents.<span class="fn">NewCrew</span>(ctx, apiKey) <span class="cm">// the real Gemini crew</span>
+    crew, _ = agents.<span class="fn">NewCrew</span>(ctx, apiKey) <span class="cm">// the real Gemini crew</span>
 }</pre>
   <p class="sub" style="margin-top:16px" data-i18n="ports_note">Small implicit interfaces make Gemini swappable like a database. Every rehearsal of this talk ran the full show offline — the state machine never knew.</p>
 </section>
@@ -327,15 +323,15 @@
 <!-- 7b · Why Go, proof 1: goroutines -->
 <section class="slide">
   <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow">why Go — proof</span> 1/4 <span class="bk">]</span></div>
-  <h2 data-i18n="g1_title">Two agents rapping at once = two goroutines</h2>
+  <h2 data-i18n="g1_title">Three reviewers digging at once = three goroutines</h2>
   <pre>var wg sync.WaitGroup
-<span class="kw">for</span> _, battler := <span class="kw">range</span> []Battler{<span class="g">Blue</span>, <span class="n">Red</span>} {
+<span class="kw">for</span> _, reviewer := <span class="kw">range</span> []Reviewer{<span class="n">Bugs</span>, <span class="gold">Security</span>, <span class="g">Simplify</span>} {
     wg.Add(1)
-    <span class="kw">go</span> <span class="kw">func</span>(b Battler) {
+    <span class="kw">go</span> <span class="kw">func</span>(r Reviewer) {
         <span class="kw">defer</span> wg.Done()
-        verse, err := writer.<span class="fn">WriteVerse</span>(ctx, b, topic, history)
+        findings, err := crew.<span class="fn">Review</span>(ctx, r, snapshot, onStatus)
         ...
-    }(battler)
+    }(reviewer)
 }
 wg.Wait()</pre>
   <p class="sub" style="margin-top:16px" data-i18n="g1_note">This is the real code from the show you just watched. No async/await, no thread pools, no callback pyramids — the language primitive IS the feature.</p>
@@ -359,14 +355,15 @@ wg.Wait()</pre>
 <section class="slide">
   <div class="eyebrow"><span class="bk">[</span> <span data-i18n="g_eyebrow3">why Go — proof</span> 3/4 <span class="bk">]</span></div>
   <h2 data-i18n="g3_title">A live show can't crash — errors are just values</h2>
-  <pre>verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, history)
-<span class="kw">if</span> err != nil {
-    verse, err = cache.<span class="fn">Emergency</span>(battler, topic)  <span class="cm">// plan B: embedded verses</span>
-}
-<span class="kw">if</span> err != nil {
-    verse = <span class="st">"(lost the beat — skip this round)"</span>  <span class="cm">// plan C: shrug, continue</span>
+  <pre>findings, err := crew.<span class="fn">Review</span>(ctx, reviewer, snapshot, onStatus)
+<span class="kw">if</span> err != nil || len(findings) == 0 {
+    <span class="cm">// plan B: the failure itself becomes a visible finding</span>
+    findings = []Finding{{
+        Severity: <span class="st">"low"</span>,
+        Title:    <span class="st">"Reviewer went offline"</span>,
+    }}
 }</pre>
-  <p class="sub" style="margin-top:16px" data-i18n="g3_note">Gemini down? Cached verses. TTS down? I perform it live. Every fallback is a visible `if err != nil` — no hidden exception paths on stage.</p>
+  <p class="sub" style="margin-top:16px" data-i18n="g3_note">Gemini down? The failure ships as a finding. Repo unfetchable? The verdict says so and the show moves on. Every fallback is a visible `if err != nil` — no hidden exception paths on stage.</p>
 </section>
 
 <!-- 7e · Why Go, proof 4: context -->
@@ -376,11 +373,11 @@ wg.Wait()</pre>
   <pre>ctx, cancel := context.<span class="fn">WithTimeout</span>(ctx, 45*time.Second)
 <span class="kw">defer</span> cancel()
 
-verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, history)
+findings, err := crew.<span class="fn">Review</span>(ctx, reviewer, snapshot, onStatus)
 
-<span class="cm">// every LLM call in the show has a budget:</span>
-<span class="cm">// verses 45s · TTS 60s · judge 20s — then the fallbacks kick in</span></pre>
-  <p class="sub" style="margin-top:16px" data-i18n="g4_note">Cancellation flows through every layer — ADK, HTTP, TTS — because context is the standard library's contract, not a bolt-on. LLMs are the slowest, flakiest dependency you'll ever call; deadlines are not optional.</p>
+<span class="cm">// every external call in the show has a budget:</span>
+<span class="cm">// repo fetch 45s · review 3m · verdict 30s — then the fallbacks kick in</span></pre>
+  <p class="sub" style="margin-top:16px" data-i18n="g4_note">Cancellation flows through every layer — ADK, HTTP, the tarball download — because context is the standard library's contract, not a bolt-on. LLMs are the slowest, flakiest dependency you'll ever call; deadlines are not optional.</p>
 </section>
 
 <!-- 7f · Scorecard -->
@@ -399,23 +396,23 @@ verse, err := writer.<span class="fn">WriteVerse</span>(ctx, battler, topic, his
 
 <!-- 8 · Sessions -->
 <section class="slide">
-  <h2 data-i18n="s8_title">Did you notice the comebacks?</h2>
+  <h2 data-i18n="s8_title">The agents chose what to read</h2>
   <ul class="points">
-    <li data-i18n="s8_p1">Each battler has a persistent ADK session — it remembers its own verses</li>
-    <li data-i18n="s8_p2">The opponent's last verse is injected into the prompt each round</li>
-    <li data-i18n="s8_p3">Memory + context = round 3 answering round 1's punchline</li>
-    <li data-i18n="s8_p4">The audience vote is the human-in-the-loop</li>
+    <li data-i18n="s8_p1">read_file is a plain typed Go function — the structs ARE the schema the model sees</li>
+    <li data-i18n="s8_p2">Each reviewer decided which files mattered for its specialty — you watched it choose</li>
+    <li data-i18n="s8_p3">Tool calls are budgeted: 12 reads max, then it must conclude</li>
+    <li data-i18n="s8_p4">Your vote on the findings is the human-in-the-loop</li>
   </ul>
 </section>
 
 <!-- 9 · Live coding -->
 <section class="slide">
-  <h2><span class="ms" style="color:var(--blue)">visibility</span> <span data-i18n="s9_title">Live coding: give Blue Gopher eyes</span></h2>
-  <pre>scanner, _ := <span class="fn">NewCrowdScannerTool</span>(crew.CrowdWords)
+  <h2><span class="ms" style="color:var(--blue)">search</span> <span data-i18n="s9_title">Live coding: give the crew grep</span></h2>
+  <pre>search := <span class="fn">NewSearchCodeTool</span>(snapshot, onStatus)
 
-<span class="cm">// blue_gopher gets one extra line:</span>
-Tools: []tool.Tool{<span class="g">scanner</span>}</pre>
-  <p class="sub" style="margin-top:16px" data-i18n="s9_note">A typed Go function becomes a tool the model decides to call.<br>Next verse: watch it quote what you're shouting right now.</p>
+<span class="cm">// every reviewer gets one extra tool:</span>
+Tools: []tool.Tool{readFile, <span class="g">search</span>}</pre>
+  <p class="sub" style="margin-top:16px" data-i18n="s9_note">Two lines, redeploy — and now Sentinel greps the whole repo for "password" in one call.<br>Watch the next round get sharper.</p>
 </section>
 
 <!-- 10 · Deploy -->
@@ -427,7 +424,7 @@ Tools: []tool.Tool{<span class="g">scanner</span>}</pre>
 <span class="cm">#   one binary, one instance, one source of truth</span>
 Show is live!</pre>
   <table class="compare" style="margin-top:24px">
-    <tr><td data-i18n="s10_r1">Whole demo tonight (verses + TTS + Cloud Run)</td><td class="val">&lt; $1</td></tr>
+    <tr><td data-i18n="s10_r1">Whole demo tonight (reviews + hosting)</td><td class="val">&lt; $1</td></tr>
     <tr><td data-i18n="s10_r2">Concurrent WebSocket viewers on 512 MB</td><td class="val">300+</td></tr>
   </table>
 </section>
@@ -436,7 +433,7 @@ Show is live!</pre>
 <section class="slide">
   <h2 data-i18n="s11_title">What building this taught me</h2>
   <ul class="points">
-    <li data-i18n="s11_p1">Design for failure: cached emergency verses, TTS→text fallback, offline mode</li>
+    <li data-i18n="s11_p1">Design for failure: every broken agent becomes a visible finding, plus full offline mode</li>
     <li data-i18n="s11_p2">Agents are just another dependency — put them behind an interface</li>
     <li data-i18n="s11_p3">Persona engineering is prompt engineering with commitment</li>
     <li data-i18n="s11_p4">The demo people remember is the one they were part of</li>
@@ -446,7 +443,7 @@ Show is live!</pre>
 <!-- 12 · Close -->
 <section class="slide">
   <div style="margin-bottom:24px"><span class="avatar yellow"><span class="ms">trophy</span></span></div>
-  <h1 data-i18n="s12_title">Go build your own battle</h1>
+  <h1 data-i18n="s12_title">Go build your own crew</h1>
   <p class="sub" style="font-size:1.4rem; line-height:2">
     <span class="a">adk.dev</span> · ADK for Go<br>
     <span class="g">github.com/jibaru</span> · <span data-i18n="s12_code">code &amp; slides</span><br>
@@ -460,8 +457,8 @@ Show is live!</pre>
 <script>
 const I18N = {
   es: {
-    s1_sub: "Construyendo agentes de IA en Go para la era agéntica",
-    s1_you: "tú eres el jurado",
+    s1_sub: "Code review con IA en vivo — agentes en Go para la era agéntica",
+    s1_you: "tus repos, tus votos",
     s2_title: "Bienvenidos a la era agéntica",
     s2_p1: "2023: chateábamos con LLMs",
     s2_p2: "2024–25: los LLMs recibieron herramientas y empezaron a hacer cosas",
@@ -476,30 +473,30 @@ const I18N = {
     s4_note: "Una personalidad es solo un string de instrucciones.",
     sf_title: "Una ronda, de inicio a fin",
     sf_note: "Un solo botón HTTP en el stage maneja todo — la máquina de estados hace el resto.",
-    sf1: 'Tu teléfono envía <code class="chip">submit_topic</code> por WebSocket',
-    sf2: "La palabra más enviada se vuelve el tema de la ronda",
-    sf3: '<code class="chip">go write(Blue)</code> ⇄ <code class="chip">go write(Red)</code> — versos escritos en paralelo',
-    sf4: "Cada runner de ADK llama a Gemini 2.5 Flash → 8 barras",
-    sf5: "Gemini TTS los interpreta — voces Puck vs Fenrir",
-    sf6: "La audiencia vota: uno por navegador, conteo en vivo",
-    sf7: "El agente Juez suelta su comentario, los puntajes se actualizan",
-    sf8: "Siguiente ronda… hasta coronar al campeón",
+    sf1: "Tu teléfono envía <code class=\"chip\">submit_repo</code> por WebSocket",
+    sf2: "El repo más apoyado gana la ronda",
+    sf3: "Un tarball → snapshot en memoria (con límites y filtros)",
+    sf4: "<code class=\"chip\">go review(bugs)</code> ⇄ <code class=\"chip\">security</code> ⇄ <code class=\"chip\">simplify</code> — en paralelo",
+    sf5: "Cada agente elige qué archivos abrir con <code class=\"chip\">read_file</code> — lo ves elegir",
+    sf6: "Los hallazgos vuelven como JSON → rankeados por severidad",
+    sf7: "Votas el hallazgo más valioso — los revisores suman puntos",
+    sf8: "El Lead Reviewer cierra con un veredicto. ¡Siguiente repo!",
     ar1: "conecta todo",
-    ar2: "entidades · interfaces de repos · errores",
+    ar2: "sesión · hallazgos · votos · errores",
     ar3: "la máquina de estados del show",
-    ar4: "memory | file | embedded — misma interfaz",
-    ar5: "ADK: 2 battlers + 1 juez",
-    ar6: "Gemini TTS → WAV",
+    ar4: "memory | file — misma interfaz",
+    ar5: "ADK: 3 revisores + 1 lead",
+    ar6: "tarball de GitHub → snapshot en memoria",
     ar7: "hub WebSocket, descarta clientes lentos",
     ar8: "go:embed — la UI dentro del binario",
     sm_title: "La máquina de estados que maneja el show",
-    sm_loop: "round_result vuelve a topics_open hasta decidir el mejor de 3",
+    sm_loop: "results vuelve a repos_open — y reviewing→results dispara solo cuando el equipo termina",
     sm_note: "Los agentes son no-deterministas — el show no puede serlo. Cada transición está protegida en el dominio; un mutex es dueño de la verdad. Orquestación determinista alrededor de agentes estocásticos.",
     ports_title: "El LLM es una dependencia más",
     ports_note: "Interfaces pequeñas e implícitas hacen a Gemini intercambiable como una base de datos. Cada ensayo de esta charla corrió el show completo offline — la máquina de estados nunca se enteró.",
     g_eyebrow4: "por qué Go — prueba",
     g4_title: "Un agente que nunca responde no puede congelar el show",
-    g4_note: "La cancelación fluye por todas las capas — ADK, HTTP, TTS — porque context es el contrato de la librería estándar, no un agregado. Los LLMs son la dependencia más lenta y frágil que llamarás; los deadlines no son opcionales.",
+    g4_note: "La cancelación fluye por todas las capas — ADK, HTTP, la descarga del tarball — porque context es el contrato de la librería estándar, no un agregado. Los LLMs son la dependencia más lenta y frágil que llamarás; los deadlines no son opcionales.",
     sc_title: "Go para desarrollo agéntico — el scorecard",
     sc_r1: "Muchos agentes pensando a la vez",
     sc_r2: "Fan-out a una audiencia en vivo",
@@ -511,34 +508,34 @@ const I18N = {
     g_eyebrow: "por qué Go — prueba",
     g_eyebrow2: "por qué Go — prueba",
     g_eyebrow3: "por qué Go — prueba",
-    g1_title: "Dos agentes rapeando a la vez = dos goroutines",
+    g1_title: "Tres revisores escarbando a la vez = tres goroutines",
     g1_note: "Este es el código real del show que acaban de ver. Sin async/await, sin thread pools, sin pirámides de callbacks — la primitiva del lenguaje ES el feature.",
     g2_title: "Transmitir a cada navegador = un channel por cliente",
     g2_note: "Cientos de espectadores, una instancia de 512 MB. El manejo de backpressure es un select — en la mayoría de stacks esto es un message broker.",
     g3_title: "Un show en vivo no puede caerse — los errores son valores",
-    g3_note: "¿Gemini caído? Versos en caché. ¿TTS caído? Lo interpreto en vivo. Cada fallback es un `if err != nil` visible — sin rutas de excepción ocultas en el escenario.",
+    g3_note: "¿Gemini caído? El fallo se publica como hallazgo. ¿Repo inaccesible? El veredicto lo dice y el show sigue. Cada fallback es un `if err != nil` visible — sin rutas de excepción ocultas.",
     s5_title: "HORA DEL DEMO",
-    s5_sub: "Entra ahora: tú eliges los temas, tú juzgas las rondas.\n3 rondas. Dos IAs. Un campeón.",
+    s5_sub: "Propón un repo público. Mira a tres agentes destriparlo en vivo.\nLuego vota el hallazgo más valioso.",
     s6_title: "Lo que acaban de vivir",
-    s6_note: "Cada voto, tema y verso pasó por goroutines y channels.",
+    s6_note: "Cada propuesta, tool call y voto pasó por goroutines y channels.",
     s7_title: "La arquitectura (limpia y aburrida a propósito)",
     s7_note: "Cambiar el storage es una línea de constructor. Los agentes también están detrás de interfaces — el show corrió offline en los ensayos.",
-    s8_title: "¿Notaron las respuestas entre rondas?",
-    s8_p1: "Cada rapero tiene una sesión ADK persistente — recuerda sus propios versos",
-    s8_p2: "El último verso del oponente se inyecta al prompt en cada ronda",
-    s8_p3: "Memoria + contexto = la ronda 3 respondiendo el punchline de la ronda 1",
-    s8_p4: "El voto de la audiencia es el humano-en-el-loop",
-    s9_title: "Live coding: dale ojos a Blue Gopher",
-    s9_note: "Una función Go tipada se convierte en una herramienta que el modelo decide llamar.\nPróximo verso: mira cómo cita lo que están gritando ahora mismo.",
+    s8_title: "Los agentes eligieron qué leer",
+    s8_p1: "read_file es una función Go tipada — los structs SON el schema que ve el modelo",
+    s8_p2: "Cada revisor decidió qué archivos importaban para su especialidad — lo viste elegir",
+    s8_p3: "Los tool calls tienen presupuesto: máximo 12 lecturas, luego debe concluir",
+    s8_p4: "Tu voto sobre los hallazgos es el humano-en-el-loop",
+    s9_title: "Live coding: dale grep al equipo",
+    s9_note: "Dos líneas, redeploy — y ahora Sentinel busca \"password\" en todo el repo con una llamada.\nMira cómo la siguiente ronda sale más afilada.",
     s10_title: "Llevándolo a producción",
-    s10_r1: "Todo el demo de hoy (versos + TTS + Cloud Run)",
+    s10_r1: "Todo el demo de hoy (reviews + hosting)",
     s10_r2: "Viewers WebSocket concurrentes en 512 MB",
     s11_title: "Lo que aprendí construyendo esto",
-    s11_p1: "Diseña para el fallo: versos de emergencia, TTS→texto, modo offline",
+    s11_p1: "Diseña para el fallo: cada agente roto se vuelve un hallazgo visible, más modo offline completo",
     s11_p2: "Los agentes son una dependencia más — ponlos detrás de una interfaz",
     s11_p3: "Ingeniería de personas es prompt engineering con compromiso",
     s11_p4: "El demo que la gente recuerda es del que fueron parte",
-    s12_title: "Ve y construye tu propia batalla",
+    s12_title: "Ve y construye tu propio equipo",
     s12_code: "código y slides",
     s12_play: "juégalo tú mismo",
     s12_thanks: "¡Gracias! ¿Preguntas?",

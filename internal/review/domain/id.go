@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-// NextID generates a new battle ID. ID creation is a domain
+// NextID generates a new session ID. ID creation is a domain
 // responsibility; repositories only store what they are given.
 func NextID() string {
 	b := make([]byte, 8)

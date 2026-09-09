@@ -11,17 +11,16 @@ import (
 
 	"github.com/jibaru/agentarena/internal/agents"
 	"github.com/jibaru/agentarena/internal/agents/fake"
-	"github.com/jibaru/agentarena/internal/battle/domain"
-	filerepo "github.com/jibaru/agentarena/internal/battle/infra/persistence/file"
-	"github.com/jibaru/agentarena/internal/battle/infra/persistence/embedded"
-	"github.com/jibaru/agentarena/internal/battle/infra/persistence/memory"
-	"github.com/jibaru/agentarena/internal/battle/service"
 	"github.com/jibaru/agentarena/internal/config"
 	"github.com/jibaru/agentarena/internal/handlers"
 	"github.com/jibaru/agentarena/internal/logger"
 	"github.com/jibaru/agentarena/internal/realtime"
+	"github.com/jibaru/agentarena/internal/repofetch"
+	"github.com/jibaru/agentarena/internal/review/domain"
+	filerepo "github.com/jibaru/agentarena/internal/review/infra/persistence/file"
+	"github.com/jibaru/agentarena/internal/review/infra/persistence/memory"
+	"github.com/jibaru/agentarena/internal/review/service"
 	"github.com/jibaru/agentarena/internal/server"
-	"github.com/jibaru/agentarena/internal/tts"
 	"github.com/jibaru/agentarena/web"
 )
 
@@ -37,54 +36,36 @@ func main() {
 
 	// Persistence: memory for the show, file snapshots for rehearsals.
 	// Swapping storage is exactly this one decision.
-	var repo domain.BattleRepository = memory.NewBattleRepository()
+	var repo domain.SessionRepository = memory.NewSessionRepository()
 	if cfg.SnapshotDir != "" {
-		if repo, err = filerepo.NewBattleRepository(cfg.SnapshotDir); err != nil {
+		if repo, err = filerepo.NewSessionRepository(cfg.SnapshotDir); err != nil {
 			log.Error("file repo", "error", err)
 			os.Exit(1)
 		}
 		log.Info("using file snapshot repository", "dir", cfg.SnapshotDir)
 	}
 
-	cache, err := embedded.NewVerseCache()
-	if err != nil {
-		log.Error("verse cache", "error", err)
-		os.Exit(1)
-	}
-
 	// The cast: real Gemini-powered crew, or fakes for offline rehearsal.
 	var (
-		writer    service.VerseWriter
-		judge     service.Judge
-		performer service.Performer
+		crew    service.ReviewerAgent
+		lead    service.LeadReviewer
+		fetcher service.RepoFetcher
 	)
 	if cfg.FakeAgents {
-		log.Info("FAKE_AGENTS=1: running the show offline with canned verses")
-		crew := &fake.Crew{Cache: cache, Delay: 3 * time.Second}
-		writer, judge, performer = crew, crew, fake.SilentPerformer{}
+		log.Info("FAKE_AGENTS=1: running the show offline with canned findings")
+		fakeCrew := &fake.Crew{Delay: 3 * time.Second}
+		crew, lead, fetcher = fakeCrew, fakeCrew, fake.Fetcher{}
 	} else {
-		crew, err := agents.NewCrew(ctx, cfg.GeminiAPIKey)
+		realCrew, err := agents.NewCrew(ctx, cfg.GeminiAPIKey)
 		if err != nil {
 			log.Error("agents", "error", err)
 			os.Exit(1)
 		}
-		crew.CrowdWords = func(n int) []string {
-			b, err := repo.Current(context.Background())
-			if err != nil {
-				return nil
-			}
-			return b.RecentCrowdWords(n)
-		}
-		ttsClient, err := tts.NewClient(ctx, cfg.GeminiAPIKey)
-		if err != nil {
-			log.Error("tts", "error", err)
-			os.Exit(1)
-		}
-		writer, judge, performer = crew, crew, ttsClient
+		crew, lead, fetcher = realCrew, realCrew, &repofetch.Fetcher{}
 	}
 
 	hub := realtime.NewHub(log)
-	svc := service.NewBattleService(repo, cache, writer, judge, performer, hub, log)
+	svc := service.NewReviewService(repo, fetcher, crew, lead, hub, log)
 	hub.SetGame(svc)
 
 	h := handlers.New(svc, hub, cfg.PresenterToken, log)

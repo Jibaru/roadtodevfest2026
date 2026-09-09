@@ -12,11 +12,10 @@
     /* DevFest design tokens (developers.google.com/community/devfest) */
     --ink: #1e1e1e; --ink-soft: #5f6368; --bg: #ffffff; --surface: #f8f9fa;
     --border: #dadce0;
-    --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe; --blue-soft: #c3e7ff;
+    --blue: #1967d2; --blue-core: #4285f4; --blue-pastel: #e8f0fe;
     --red: #ea4335; --red-pastel: #fce8e6;
-    --yellow: #f9ab00; --yellow-pastel: #fef7e0;
-    --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea;
-    
+    --yellow: #f9ab00; --yellow-pastel: #fef7e0; --yellow-ink: #b06f00;
+    --green: #34a853; --green-bright: #5cdb6d; --green-pastel: #e6f4ea; --green-ink: #1e7e34;
     --r-card: 24px; --r-pill: 50px; --r-input: 16px;
     --ease-strong: cubic-bezier(0.23, 1, 0.32, 1);
     --elev-1: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
@@ -37,18 +36,16 @@
     letter-spacing: normal; white-space: nowrap; -webkit-font-smoothing: antialiased; }
   .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
     flex-wrap: wrap; gap: 12px; }
-  h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: -.01em;
+  h1 { font-size: 1.7rem; font-weight: 700; letter-spacing: .01em;
     display: flex; align-items: center; gap: 10px; }
-  h1 .g { color: var(--blue); } h1 .n { color: var(--red); }
-  h1 .vs { color: var(--ink-soft); font-weight: 400; font-size: 1.2rem; }
   h1 > .ms { color: var(--blue); }
+  h1 .vs { color: var(--ink-soft); font-weight: 400; font-size: 1.05rem; }
   .bk { color: var(--blue); font-weight: 700; }
   .brand { font-size: .78rem; font-weight: 500; letter-spacing: .1em; color: var(--ink-soft);
     text-transform: uppercase; }
   .join { font-size: 1.1rem; background: var(--blue-pastel); padding: 12px 22px;
     border-radius: var(--r-pill); display: flex; align-items: center; gap: 8px; }
-  .join .ms { color: var(--blue); }
-  .join b { color: var(--blue); }
+  .join .ms, .join b { color: var(--blue); }
   .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
   .card { background: var(--surface); border-radius: var(--r-card); padding: 26px;
     box-shadow: var(--elev-1); }
@@ -56,41 +53,44 @@
   @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   .phase-banner { text-align: center; font-size: 1rem; font-weight: 700; letter-spacing: .12em;
     color: var(--blue); text-transform: uppercase; margin-bottom: 16px; }
-  .topic { text-align: center; font-size: 1.7rem; font-weight: 700; margin-bottom: 14px;
+  .topic { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 14px;
     animation: rise .4s var(--ease-strong) both; }
-  .verse { white-space: pre-wrap; font-family: 'Roboto Mono', ui-monospace, monospace;
-    font-size: 1.25rem; line-height: 1.8; background: var(--bg); border-radius: var(--r-input);
-    padding: 24px; border: 1px solid var(--border); animation: rise .5s var(--ease-strong) both .1s; }
-  .verse.blue { border-left: 6px solid var(--blue); }
-  .verse.red { border-left: 6px solid var(--red); }
-  .tag { display: inline-flex; align-items: center; gap: 8px; padding: 7px 20px;
-    border-radius: var(--r-pill); font-weight: 700; margin-bottom: 12px; color: #fff; }
-  .tag.blue { background: var(--blue); }
-  .tag.red { background: var(--red); }
-  .agents { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .agent { text-align: center; padding: 24px 12px; border-radius: var(--r-card);
+  .topic.mono { font-family: 'Roboto Mono', monospace; }
+  .reviewers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .reviewer { text-align: center; padding: 18px 10px; border-radius: var(--r-card);
     background: var(--bg); border: 1px solid var(--border);
-    transition: background .3s, border-color .3s; animation: rise .4s var(--ease-strong) both; }
-  .avatar { width: 68px; height: 68px; border-radius: 50%; display: inline-flex;
-    align-items: center; justify-content: center; margin-bottom: 10px; }
-  .avatar .ms { font-size: 2.4rem; color: #fff; vertical-align: 0; }
-  .avatar.blue { background: var(--blue); }
-  .avatar.red { background: var(--red); }
-  .agent b { display: block; }
-  .agent .status { color: var(--ink-soft); margin-top: 8px; }
-  .agent.writing { border-color: var(--yellow); background: var(--yellow-pastel); }
-  .agent.writing .avatar { animation: bob 1.1s ease-in-out infinite; }
-  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-  .agent.writing .status::after { content: "…"; animation: blink 1s infinite; }
-  @keyframes blink { 50% { opacity: .2; } }
-  .scores { display: flex; justify-content: center; gap: 40px; font-size: 2rem; font-weight: 700; }
-  .scores .ms { vertical-align: -0.2em; }
-  .bar-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; font-size: 1rem; }
-  .bar-row .name { width: 140px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-  .bar { flex: 1; height: 22px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 11px; overflow: hidden; }
-  .bar > div { height: 100%; width: 0%; transition: width .5s var(--ease-strong); }
-  .bar .g { background: var(--blue); } .bar .n { background: var(--red); }
+    transition: border-color .3s, background .3s; animation: rise .4s var(--ease-strong) both; }
+  .avatar { width: 60px; height: 60px; border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center; margin-bottom: 8px; }
+  .avatar .ms { font-size: 2.1rem; color: #fff; vertical-align: 0; }
+  .avatar.bugs { background: var(--red); }
+  .avatar.security { background: var(--yellow); }
+  .avatar.simplify { background: var(--blue); }
+  .reviewer b { display: block; font-size: .95rem; }
+  .reviewer .status { font-size: .78rem; color: var(--ink-soft); margin-top: 6px; min-height: 2.2em;
+    font-family: 'Roboto Mono', monospace; word-break: break-all; }
+  .reviewer.working { border-color: var(--yellow); background: var(--yellow-pastel); }
+  .reviewer.working .avatar { animation: bob 1.1s ease-in-out infinite; }
+  .reviewer.done { border-color: var(--green); background: var(--green-pastel); }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .repos li { display: flex; justify-content: space-between; padding: 10px 6px; font-size: 1.15rem;
+    border-bottom: 1px solid var(--border); list-style: none; font-family: 'Roboto Mono', monospace;
+    animation: rise .35s var(--ease-strong) both; }
+  .repos li b { color: var(--blue); font-family: 'Google Sans', sans-serif; }
+  .summary { font-style: italic; color: var(--ink-soft); font-size: 1.05rem; text-align: center;
+    margin: 0 0 14px; }
+  .finding { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-input);
+    padding: 12px 16px; margin-bottom: 10px; animation: rise .4s var(--ease-strong) both;
+    display: flex; align-items: center; gap: 12px; }
+  .sev { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    padding: 3px 10px; border-radius: var(--r-pill); color: #fff; flex-shrink: 0; }
+  .sev.high { background: var(--red); } .sev.medium { background: var(--yellow); color: var(--ink); }
+  .sev.low { background: var(--border); color: var(--ink); }
+  .finding .who .ms { font-size: 1.3rem; }
+  .finding .txt { min-width: 0; }
+  .finding b { font-size: 1rem; display: block; }
+  .finding .file { font-family: 'Roboto Mono', monospace; font-size: .75rem; color: var(--blue); }
+  .finding .votes { margin-left: auto; font-weight: 700; color: var(--blue); white-space: nowrap; }
   .controls button { width: 100%; padding: 13px; margin-bottom: 10px; border: 0;
     border-radius: var(--r-pill); font-size: 1rem; font-weight: 500; cursor: pointer;
     font-family: inherit; color: #fff; display: flex; align-items: center;
@@ -99,34 +99,22 @@
   .controls button:active { transform: translateY(3px); box-shadow: 0 0 0 transparent !important; }
   #btn-start { background: var(--green); box-shadow: 0 3px 0 #1e7e34; }
   #btn-advance { background: var(--blue); box-shadow: 0 3px 0 #14509e; }
-  #btn-beat { background: var(--yellow); color: var(--ink); box-shadow: 0 3px 0 #c68a00; }
   #btn-reset { background: var(--bg); color: var(--ink); border: 1px solid var(--border);
     box-shadow: 0 3px 0 var(--border); }
   .kv { font-size: .9rem; color: var(--ink-soft); margin: 5px 0; }
   .kv b { color: var(--ink); }
-  .alert { background: var(--red-pastel); border: 2px solid var(--red); color: var(--red);
-    border-radius: var(--r-input); padding: 14px; margin-top: 12px; font-weight: 700;
-    display: none; align-items: center; gap: 8px; }
-  .judge { font-style: italic; color: var(--ink-soft); margin-top: 14px; font-size: 1.15rem;
-    text-align: center; }
-  .topics li { display: flex; justify-content: space-between; padding: 10px 6px; font-size: 1.2rem;
-    border-bottom: 1px solid var(--border); list-style: none;
-    animation: rise .35s var(--ease-strong) both; }
-  .topics li b { color: var(--blue); }
+  .scores { display: flex; justify-content: center; gap: 26px; font-size: 1.5rem; font-weight: 700; }
+  .scores span { display: flex; align-items: center; gap: 6px; }
   #log { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: .72rem;
-    color: var(--ink-soft); max-height: 140px; overflow-y: auto; margin-top: 12px; }
+    color: var(--ink-soft); max-height: 160px; overflow-y: auto; margin-top: 12px; }
   #conn { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
     background: var(--red); }
   #conn.ok { background: var(--green-bright); }
-  .champion-view { text-align: center; font-size: 2.4rem; font-weight: 700; padding: 34px 0;
+  .big-view { text-align: center; font-size: 2rem; font-weight: 700; padding: 30px 0;
     animation: rise .45s var(--ease-strong) both; }
-  .champion-view .ms { color: var(--yellow); font-size: 2.6rem; }
-  .champion-view .sub { font-size: 1.1rem; color: var(--ink-soft); font-weight: 400; }
-  .champion-view .word span { display: inline-block; animation: pop .6s var(--ease-strong) both; }
-  @keyframes pop { 0% { transform: translateY(16px) scale(.7); opacity: 0; }
-    60% { transform: translateY(-5px) scale(1.06); opacity: 1; } 100% { transform: none; opacity: 1; } }
+  .big-view .sub { font-size: 1.05rem; color: var(--ink-soft); font-weight: 400; }
 
-  /* Phase wipe: Google four-color stripe sweep; content swaps while covered. */
+  /* Phase wipe */
   #wipe { position: fixed; inset: 0; z-index: 50; pointer-events: none; display: none; }
   #wipe.run { display: block; }
   #wipe .panel { position: absolute; inset: 0; background: var(--bg); transform: translateX(-101%); }
@@ -147,7 +135,7 @@
 <div class="top">
   <div>
     <div class="brand"><span class="bk">[</span> DevFest 2026 <span class="bk">]</span></div>
-    <h1><span class="ms">mic</span>AGENT ARENA <span class="vs"><span class="g">Blue</span> vs <span class="n">Red</span> Gopher</span> <span id="conn"></span></h1>
+    <h1><span class="ms">rate_review</span>AGENT ARENA <span class="vs">live code review</span> <span id="conn"></span></h1>
   </div>
   <div class="join"><span class="ms">group_add</span>Join the jury → <b id="join-url"></b></div>
 </div>
@@ -155,26 +143,19 @@
   <div class="card blue" id="main-view">
     <div class="phase-banner" id="phase">idle</div>
     <div id="content"></div>
-    <div class="alert" id="tts-alert"><span class="ms">warning</span>TTS UNAVAILABLE — GRAB THE MIC AND PERFORM IT YOURSELF!</div>
-    <div class="judge" id="judge"></div>
   </div>
   <div>
     <div class="card controls">
-      <button id="btn-start"><span class="ms">play_arrow</span>START BATTLE (3 rounds)</button>
+      <button id="btn-start"><span class="ms">play_arrow</span>START SESSION</button>
       <button id="btn-advance"><span class="ms">skip_next</span>ADVANCE</button>
-      <button id="btn-beat"><span class="ms">music_note</span>BEAT: OFF</button>
       <button id="btn-reset"><span class="ms">restart_alt</span>RESET</button>
       <div class="kv">Phase: <b id="kv-phase">—</b></div>
       <div class="kv">Round: <b id="kv-round">—</b></div>
-      <div class="kv">Verses ready: <b id="kv-verses">—</b></div>
-      <div class="kv">Next: <b id="kv-next">start a battle</b></div>
+      <div class="kv">Next: <b id="kv-next">start a session</b></div>
       <div id="log"></div>
     </div>
     <div class="card" style="margin-top:20px">
-      <div class="scores">
-        <span style="color:var(--blue)"><span class="ms">pets</span> <span id="score-g">0</span></span>
-        <span style="color:var(--red)"><span class="ms">pets</span> <span id="score-n">0</span></span>
-      </div>
+      <div class="scores" id="scores"></div>
     </div>
   </div>
 </div>
@@ -182,18 +163,17 @@
 <script>
 const token = new URLSearchParams(location.search).get("token") || prompt("Presenter token:");
 document.getElementById("join-url").textContent = location.host;
-const ICONS = { blue: "pets", red: "pets" };
-const NAMES = { blue: "BLUE GOPHER", red: "RED GOPHER" };
+const RV = {
+  bugs: { name: "BUG HUNTER", icon: "bug_report", color: "var(--red)" },
+  security: { name: "SENTINEL", icon: "security", color: "var(--yellow-ink)" },
+  simplify: { name: "THE SIMPLIFIER", icon: "auto_fix_high", color: "var(--blue)" },
+};
 const NEXT = {
-  idle: "open topic submissions", topics_open: "close topics → agents write",
-  writing: "start Blue Gopher's performance", performing_a: "start Red Gopher's performance",
-  performing_b: "open audience voting", voting: "close votes → judge speaks",
-  round_result: "open next round", champion: "battle over — reset for a new one",
+  idle: "open repo submissions", repos_open: "close submissions → crew reviews",
+  reviewing: "(automatic — wait for the crew)", results: "open next round",
 };
 const WIPE_LABEL = {
-  topics_open: "pick a topic", writing: "agents writing", performing_a: "Blue Gopher",
-  performing_b: "Red Gopher", voting: "vote now", round_result: "round result",
-  champion: "the champion",
+  repos_open: "propose a repo", reviewing: "agents reviewing", results: "vote the best finding",
 };
 let ws, lastState = null, lastPhase = null;
 
@@ -209,11 +189,10 @@ function connect() {
   ws.onmessage = (e) => {
     const { type, payload } = JSON.parse(e.data);
     if (type === "state") { lastState = payload; renderWithWipe(payload); }
-    else if (type === "agent_status") log(`${payload.battler}: ${payload.status}`);
-    else if (type === "performance") playPerformance(payload);
-    else if (type === "tts_unavailable") {
-      document.getElementById("tts-alert").style.display = "flex";
-      log(`TTS failed for ${payload.battler} — perform live!`);
+    else if (type === "agent_status") {
+      log(`${payload.reviewer}: ${payload.status}`);
+      const el = document.getElementById("st-" + payload.reviewer);
+      if (el && !payload.done) el.textContent = payload.status;
     }
     else if (type === "error") log(`error: ${payload}`);
   };
@@ -235,151 +214,74 @@ function renderWithWipe(s) {
   setTimeout(() => wipe.classList.remove("run"), 820);
 }
 
-// ---- Presenter controls (REST) ----
-async function api(path, body) {
+async function api(path) {
   const res = await fetch(path, {
     method: "POST",
-    headers: { "X-Presenter-Token": token, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
+    headers: { "X-Presenter-Token": token },
   });
   if (!res.ok && res.status !== 204) {
     const err = await res.json().catch(() => ({}));
     log(`API ${res.status}: ${err.error || path}`);
   }
 }
-document.getElementById("btn-start").onclick = () => api("/api/battles", { rounds: 3 });
-document.getElementById("btn-advance").onclick = () => api("/api/battles/current/advance");
-document.getElementById("btn-reset").onclick = () => { stopAudio(); api("/api/battles/current/reset"); };
+document.getElementById("btn-start").onclick = () => api("/api/reviews");
+document.getElementById("btn-advance").onclick = () => api("/api/reviews/current/advance");
+document.getElementById("btn-reset").onclick = () => api("/api/reviews/current/reset");
 
-// ---- Rendering ----
 function currentRound(s) { return s.rounds && s.rounds.length ? s.rounds[s.rounds.length - 1] : null; }
-function battlerName(b) { return `<span class="ms" style="color:var(--${b})">${ICONS[b]}</span> ${NAMES[b]}`; }
 function render(s) {
   const r = currentRound(s);
   document.getElementById("phase").textContent = s.phase.replace("_", " ");
   document.getElementById("kv-phase").textContent = s.phase;
-  document.getElementById("kv-round").textContent = r ? `${r.number} / ${s.total_rounds}` : "—";
+  document.getElementById("kv-round").textContent = r ? r.number : "—";
   document.getElementById("kv-next").textContent = NEXT[s.phase] || "—";
-  document.getElementById("kv-verses").textContent = r
-    ? `G:${r.verses && r.verses.blue ? "✓" : "…"} N:${r.verses && r.verses.red ? "✓" : "…"}` : "—";
-  document.getElementById("score-g").textContent = s.scores ? s.scores.blue : 0;
-  document.getElementById("score-n").textContent = s.scores ? s.scores.red : 0;
-  document.getElementById("judge").textContent = "";
-  if (s.phase !== "performing_a" && s.phase !== "performing_b") {
-    document.getElementById("tts-alert").style.display = "none";
-  }
+  renderScores(s);
 
   const c = document.getElementById("content");
   switch (s.phase) {
     case "idle":
-      c.innerHTML = `<div class="champion-view"><span class="ms" style="color:var(--blue)">mic</span><br>Waiting to start…<br>
-        <span class="sub">audience joins at <b>${esc(location.host)}</b></span></div>`;
+      c.innerHTML = `<div class="big-view"><span class="ms" style="color:var(--blue);font-size:2.6rem">rate_review</span><br>
+        Waiting to start…<br><span class="sub">audience joins at <b>${esc(location.host)}</b></span></div>`;
       break;
-    case "topics_open": {
-      const counts = Object.entries(r.topic_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
-      c.innerHTML = `<div class="topic"><span class="ms" style="color:var(--blue)">campaign</span> Round ${r.number}: the crowd picks a topic</div>
-        <ul class="topics">${counts.map(([w, x], i) => `<li style="animation-delay:${i * 40}ms"><span>${esc(w)}</span><b>${x}</b></li>`).join("") || "<li>waiting for submissions…</li>"}</ul>`;
-      break;
-    }
-    case "writing":
-      c.innerHTML = `<div class="topic"><span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span></div><div class="agents">
-        <div class="agent ${r.verses && r.verses.blue ? "" : "writing"}"><span class="avatar blue"><span class="ms">pets</span></span><b>BLUE GOPHER</b><div class="status">${r.verses && r.verses.blue ? "verse ready ✓" : "writing"}</div></div>
-        <div class="agent ${r.verses && r.verses.red ? "" : "writing"}"><span class="avatar red"><span class="ms">pets</span></span><b>RED GOPHER</b><div class="status">${r.verses && r.verses.red ? "verse ready ✓" : "writing"}</div></div>
-      </div>`;
-      break;
-    case "performing_a": showVerse(r, "blue"); break;
-    case "performing_b": showVerse(r, "red"); break;
-    case "voting": {
-      const g = r.vote_counts.blue || 0, n = r.vote_counts.red || 0, total = Math.max(g + n, 1);
-      c.innerHTML = `<div class="topic"><span class="ms" style="color:var(--blue)">how_to_vote</span> VOTE NOW at <span style="color:var(--blue)">${esc(location.host)}</span></div>
-        <div class="bar-row"><span class="name" style="color:var(--blue)"><span class="ms">pets</span>Blue</span><div class="bar"><div class="g" style="width:${(100*g)/total}%"></div></div><b>${g}</b></div>
-        <div class="bar-row"><span class="name" style="color:var(--red)"><span class="ms">pets</span>Red</span><div class="bar"><div class="n" style="width:${(100*n)/total}%"></div></div><b>${n}</b></div>`;
+    case "repos_open": {
+      const counts = Object.entries(r.repo_counts || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      c.innerHTML = `<div class="topic"><span class="ms" style="color:var(--blue)">campaign</span> Round ${r.number}: the crowd picks a repo</div>
+        <ul class="repos">${counts.map(([repo, x], i) => `<li style="animation-delay:${i * 40}ms"><span>${esc(repo)}</span><b>+${x}</b></li>`).join("") || "<li>waiting for proposals…</li>"}</ul>`;
       break;
     }
-    case "round_result": {
-      const title = r.winner
-        ? `${battlerName(r.winner)} takes round ${r.number}!`
-        : `It's a tie!`;
-      c.innerHTML = `<div class="champion-view">${title}</div>`;
-      setJudge(r.judge_commentary);
+    case "reviewing":
+      c.innerHTML = `<div class="topic mono"><span class="bk">[</span> ${esc(r.repo)} <span class="bk">]</span></div>
+        <div class="reviewers">${["bugs","security","simplify"].map((rv) => {
+          const done = (r.findings || []).some((f) => f.reviewer === rv);
+          return `<div class="reviewer ${done ? "done" : "working"}">
+            <span class="avatar ${rv}"><span class="ms">${RV[rv].icon}</span></span>
+            <b>${RV[rv].name}</b>
+            <div class="status" id="st-${rv}">${done ? "✓ findings ready" : "…"}</div></div>`;
+        }).join("")}</div>`;
       break;
-    }
-    case "champion": {
-      const text = s.champion ? `${NAMES[s.champion]} IS THE CHAMPION!` : "IT'S A DRAW — REMATCH!";
-      c.innerHTML = `<div class="champion-view"><span class="ms">${s.champion ? "trophy" : "handshake"}</span><br>
-        <span class="word">${[...text].map((ch, i) =>
-          `<span style="animation-delay:${i * 26}ms">${ch === " " ? "&nbsp;" : esc(ch)}</span>`).join("")}</span></div>`;
-      setJudge(r && r.judge_commentary);
+    case "results": {
+      const votes = r.vote_counts || {};
+      c.innerHTML = `<div class="topic mono"><span class="bk">[</span> ${esc(r.repo)} <span class="bk">]</span></div>
+        ${r.summary ? `<p class="summary"><span class="ms">rate_review</span> ${esc(r.summary)}</p>` : ""}
+        <div class="topic" style="font-size:1.05rem"><span class="ms" style="color:var(--blue)">how_to_vote</span> VOTE at <span style="color:var(--blue)">${esc(location.host)}</span></div>
+        ${(r.findings || []).map((f, i) => {
+          const rv = RV[f.reviewer] || RV.bugs;
+          return `<div class="finding" style="animation-delay:${i * 50}ms">
+            <span class="sev ${esc(f.severity)}">${esc(f.severity)}</span>
+            <span class="who" style="color:${rv.color}"><span class="ms">${rv.icon}</span></span>
+            <span class="txt"><b>${esc(f.title)}</b>${f.file ? `<span class="file">${esc(f.file)}</span>` : ""}</span>
+            <span class="votes">${votes[f.id] || 0} ★</span>
+          </div>`;
+        }).join("")}`;
       break;
     }
   }
 }
-function setJudge(text) {
-  document.getElementById("judge").innerHTML = text
-    ? `<span class="ms">gavel</span> ${esc(text)}` : "";
+function renderScores(s) {
+  const scores = s.scores || {};
+  document.getElementById("scores").innerHTML = Object.entries(RV).map(([k, rv]) =>
+    `<span style="color:${rv.color}"><span class="ms">${rv.icon}</span> ${scores[k] || 0}</span>`).join("");
 }
-function showVerse(r, battler) {
-  document.getElementById("content").innerHTML =
-    `<div class="topic"><span class="bk">[</span> ${esc(r.topic)} <span class="bk">]</span></div>
-     <span class="tag ${battler}"><span class="ms">mic</span>${NAMES[battler]} — ON THE MIC</span>
-     <div class="verse ${battler}">${esc(r.verses[battler] || "")}</div>`;
-}
-
-// ---- Audio: TTS playback + synthesized beat (Web Audio, no assets) ----
-let audioEl = null, actx = null, beatOn = false, beatTimer = null;
-function playPerformance(p) {
-  document.getElementById("tts-alert").style.display = "none";
-  stopVoice();
-  if (!p.audio_b64) return;
-  audioEl = new Audio("data:audio/wav;base64," + p.audio_b64);
-  audioEl.play().catch((e) => log("audio blocked — click anywhere then Advance again"));
-  log(`playing ${p.battler}'s verse`);
-}
-function stopVoice() { if (audioEl) { audioEl.pause(); audioEl = null; } }
-function stopAudio() { stopVoice(); if (beatOn) toggleBeat(); }
-
-function ensureCtx() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); }
-function kick(tm) {
-  const o = actx.createOscillator(), g = actx.createGain();
-  o.frequency.setValueAtTime(150, tm); o.frequency.exponentialRampToValueAtTime(40, tm + .12);
-  g.gain.setValueAtTime(.8, tm); g.gain.exponentialRampToValueAtTime(.001, tm + .25);
-  o.connect(g).connect(actx.destination); o.start(tm); o.stop(tm + .3);
-}
-function snare(tm) {
-  const len = actx.sampleRate * .12, buf = actx.createBuffer(1, len, actx.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
-  const src = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
-  src.buffer = buf; f.type = "highpass"; f.frequency.value = 1500; g.gain.value = .4;
-  src.connect(f).connect(g).connect(actx.destination); src.start(tm);
-}
-function hat(tm) {
-  const len = actx.sampleRate * .04, buf = actx.createBuffer(1, len, actx.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
-  const src = actx.createBufferSource(), g = actx.createGain(), f = actx.createBiquadFilter();
-  src.buffer = buf; f.type = "highpass"; f.frequency.value = 7000; g.gain.value = .15;
-  src.connect(f).connect(g).connect(actx.destination); src.start(tm);
-}
-let nextBar = 0;
-function scheduleBeat() {
-  const bpm = 88, beat = 60 / bpm;
-  while (nextBar < actx.currentTime + 1.2) {
-    kick(nextBar); kick(nextBar + beat * 2.5);
-    snare(nextBar + beat); snare(nextBar + beat * 3);
-    for (let i = 0; i < 8; i++) hat(nextBar + (beat / 2) * i);
-    nextBar += beat * 4;
-  }
-}
-function toggleBeat() {
-  beatOn = !beatOn;
-  document.getElementById("btn-beat").innerHTML =
-    `<span class="ms">${beatOn ? "music_off" : "music_note"}</span>BEAT: ${beatOn ? "ON" : "OFF"}`;
-  if (beatOn) { ensureCtx(); nextBar = actx.currentTime + .05; beatTimer = setInterval(scheduleBeat, 400); }
-  else clearInterval(beatTimer);
-}
-document.getElementById("btn-beat").onclick = toggleBeat;
-
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 }

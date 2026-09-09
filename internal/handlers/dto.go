@@ -1,16 +1,11 @@
 package handlers
 
-import "github.com/jibaru/agentarena/internal/battle/domain"
+import "github.com/jibaru/agentarena/internal/review/domain"
 
-// StartBattleRequest configures a new battle.
-type StartBattleRequest struct {
-	Rounds int `json:"rounds"`
-}
-
-// BattleResponse is the HTTP projection of the battle plus live info.
-type BattleResponse struct {
-	Battle        domain.BattleState `json:"battle"`
-	AudienceCount int                `json:"audience_count"`
+// SessionResponse is the HTTP projection of the session plus live info.
+type SessionResponse struct {
+	Session       domain.SessionState `json:"session"`
+	AudienceCount int                 `json:"audience_count"`
 }
 
 // ErrorResponse is the uniform error body.
