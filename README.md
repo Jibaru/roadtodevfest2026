@@ -47,8 +47,10 @@ lives in memory, so one instance owns the whole show.
 | Live-code the crowd-scanner tool | 5 min |
 | Q&A | 7 min |
 
-Slides: open `docs/index.html` (arrows to navigate, `L` toggles EN/ES).
-Before the talk, put the deployed URL on slide 5 (`join-url`).
+Slides: open `docs/index.html` (arrows to navigate, `L` toggles EN/ES) or the
+published deck at https://jibaru.github.io/roadtodevfest2026/. The live demo
+runs at https://agent-arena.crafter.run (slide 5 points there); if the show
+moves to Cloud Run for the event, update `join-url` on slide 5.
 
 ## Live-coding cheat sheet
 
