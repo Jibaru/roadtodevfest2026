@@ -12,6 +12,9 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       # FAKE_AGENTS=1 runs the whole pipeline offline (no yt-dlp, no Gemini).
       FAKE_AGENTS: ${FAKE_AGENTS:-0}
+      # Optional: contents of a Netscape cookies.txt to get past
+      # YouTube's datacenter-IP bot checks.
+      YTDLP_COOKIES: ${YTDLP_COOKIES:-}
       DATABASE_URL: postgres://s1ngo:s1ngo-internal@db:5432/s1ngo?sslmode=disable
 
   db:

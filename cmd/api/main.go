@@ -59,7 +59,18 @@ func main() {
 			log.Error("agents", "error", err)
 			os.Exit(1)
 		}
-		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath}
+		cookiesFile := ""
+		if cfg.YtdlpCookies != "" {
+			f, err := os.CreateTemp("", "s1ngo-cookies-*.txt")
+			if err == nil {
+				if _, err = f.WriteString(cfg.YtdlpCookies); err == nil {
+					cookiesFile = f.Name()
+					log.Info("yt-dlp cookies configured")
+				}
+				_ = f.Close()
+			}
+		}
+		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath, CookiesFile: cookiesFile}
 	}
 
 	hub := realtime.NewHub(log)

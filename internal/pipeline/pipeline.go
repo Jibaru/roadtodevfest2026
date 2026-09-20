@@ -91,6 +91,27 @@ func (s *Service) Enqueue(ctx context.Context, url, ownerFingerprintHash string)
 	}
 
 	if existing, err := s.repo.ByYouTubeID(ctx, youtubeID); err == nil {
+		if existing.Status != domain.StatusFailed {
+			return existing, nil
+		}
+		// Failed videos are retried on resubmission (YouTube's bot
+		// checks are intermittent — the next attempt often works).
+		s.mu.Lock()
+		if s.inFlight[youtubeID] {
+			s.mu.Unlock()
+			return existing, nil
+		}
+		s.inFlight[youtubeID] = true
+		s.mu.Unlock()
+		if err := s.repo.MarkProcessing(ctx, existing.ID); err != nil {
+			s.release(youtubeID)
+			return nil, err
+		}
+		existing.Status = domain.StatusProcessing
+		existing.ErrorMessage = ""
+		s.upsert(existing)
+		s.progress(existing.ID, "retrying")
+		s.jobs <- job{videoID: existing.ID, youtubeID: youtubeID}
 		return existing, nil
 	}
 

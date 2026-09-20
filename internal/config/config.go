@@ -17,6 +17,10 @@ type Config struct {
 	Workers int
 	// YtdlpPath overrides the yt-dlp binary location (default: PATH).
 	YtdlpPath string
+	// YtdlpCookies is the raw contents of a Netscape cookies.txt; when
+	// set it is written to a temp file and passed to yt-dlp — the
+	// escape hatch for YouTube's datacenter-IP bot checks.
+	YtdlpCookies string
 	// FakeAgents runs the whole pipeline offline: fake fetcher + fake agents.
 	FakeAgents bool
 }
@@ -29,6 +33,7 @@ func Load() (*Config, error) {
 		DatabaseURL:  os.Getenv("DATABASE_URL"),
 		Workers:      workers,
 		YtdlpPath:    os.Getenv("YTDLP_PATH"),
+		YtdlpCookies: os.Getenv("YTDLP_COOKIES"),
 		FakeAgents:   os.Getenv("FAKE_AGENTS") == "1",
 	}
 	if cfg.GeminiAPIKey == "" && !cfg.FakeAgents {

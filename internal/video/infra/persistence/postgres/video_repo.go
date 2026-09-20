@@ -98,6 +98,10 @@ func (r *VideoRepository) UpdateMeta(ctx context.Context, id, title, thumbnailUR
 		id, title, thumbnailURL, durationSec)
 }
 
+func (r *VideoRepository) MarkProcessing(ctx context.Context, id string) error {
+	return r.exec(ctx, `UPDATE videos SET status='processing', error_message=NULL WHERE id=$1`, id)
+}
+
 func (r *VideoRepository) MarkReady(ctx context.Context, id string, lyrics []domain.LyricLine, language string) error {
 	data, err := json.Marshal(lyrics)
 	if err != nil {

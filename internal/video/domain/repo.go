@@ -15,6 +15,7 @@ type VideoRepository interface {
 	ByYouTubeID(ctx context.Context, youtubeID string) (*Video, error)
 	ListRecent(ctx context.Context, limit int) ([]*Video, error)
 	UpdateMeta(ctx context.Context, id, title, thumbnailURL string, durationSec int) error
+	MarkProcessing(ctx context.Context, id string) error
 	MarkReady(ctx context.Context, id string, lyrics []LyricLine, language string) error
 	MarkFailed(ctx context.Context, id string, message string) error
 	Delete(ctx context.Context, id string) error

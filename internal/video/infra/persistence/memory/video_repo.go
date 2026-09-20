@@ -77,6 +77,18 @@ func (r *VideoRepository) UpdateMeta(_ context.Context, id, title, thumbnailURL 
 	return nil
 }
 
+func (r *VideoRepository) MarkProcessing(_ context.Context, id string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	v, ok := r.byID[id]
+	if !ok {
+		return domain.ErrVideoNotFound
+	}
+	v.Status = domain.StatusProcessing
+	v.ErrorMessage = ""
+	return nil
+}
+
 func (r *VideoRepository) MarkReady(_ context.Context, id string, lyrics []domain.LyricLine, language string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
