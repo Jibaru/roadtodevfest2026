@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Video } from '../types';
 import { DeleteVideoButton } from './DeleteVideoButton';
+import { PipelineDots } from './PipelineProgress';
 
 function fmtDuration(sec: number): string {
   if (!sec) return '—';
@@ -36,16 +37,19 @@ export function VideoCard({ video, stage }: { video: Video; stage?: string }) {
           {video.language ?? '—'}
         </span>
       </div>
-      <span
-        className={`text-[10px] uppercase tracking-[0.18em] ${
-          video.status === 'failed'
-            ? 'text-accent'
-            : video.status === 'processing'
-              ? 'animate-pulse text-mute'
-              : 'text-mute'
-        }`}
-      >
-        {statusText}
+      <span className="flex items-center gap-3">
+        {video.status !== 'ready' ? <PipelineDots stage={stage} status={video.status} /> : null}
+        <span
+          className={`text-[10px] uppercase tracking-[0.18em] ${
+            video.status === 'failed'
+              ? 'text-accent'
+              : video.status === 'processing'
+                ? 'animate-pulse text-mute'
+                : 'text-mute'
+          }`}
+        >
+          {statusText}
+        </span>
       </span>
     </article>
   );

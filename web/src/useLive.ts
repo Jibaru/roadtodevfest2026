@@ -47,7 +47,7 @@ export function useLive(initial: Video[] | null): Live {
         const event = JSON.parse(e.data) as LiveEvent;
         if (event.type === 'video') {
           setVideos((prev) => new Map(prev).set(event.payload.id, event.payload));
-          if (event.payload.status !== 'processing') {
+          if (event.payload.status === 'ready') {
             setStages((prev) => {
               const next = new Map(prev);
               next.delete(event.payload.id);

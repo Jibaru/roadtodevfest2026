@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { DeleteVideoButton } from '../components/DeleteVideoButton';
 import { KaraokePlayer } from '../components/KaraokePlayer';
+import { PipelineProgress } from '../components/PipelineProgress';
 import type { Video } from '../types';
 import { useLive } from '../useLive';
 
@@ -56,18 +57,8 @@ export function KaraokePage() {
 
       {video.status === 'ready' && video.lyrics ? (
         <KaraokePlayer youtubeId={video.youtubeId} lines={video.lyrics} />
-      ) : video.status === 'processing' ? (
-        <p className="py-24 text-center text-sm uppercase tracking-[0.18em] text-mute">
-          {stage ?? 'queued'}
-          <span className="animate-pulse"> …</span>
-        </p>
       ) : (
-        <div className="py-24 text-center">
-          <p className="text-sm uppercase tracking-[0.18em] text-accent">processing failed</p>
-          {video.errorMessage ? (
-            <p className="mt-3 text-xs text-mute">{video.errorMessage}</p>
-          ) : null}
-        </div>
+        <PipelineProgress stage={stage} status={video.status} errorMessage={video.errorMessage} />
       )}
     </div>
   );
