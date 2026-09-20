@@ -115,6 +115,8 @@
   .fpill.p-yellow { border-color: var(--yellow); background: var(--yellow-pastel); color: #b06f00; }
   .fpill.p-green { border-color: var(--green); background: var(--green-pastel); color: #1e7e34; }
   .flow-pills .ms { color: var(--ink-soft); }
+  .flow-pills.vertical { flex-direction: column; gap: 3px; }
+  .flow-pills.vertical .fpill { min-width: 340px; text-align: center; padding: 8px 20px; }
   /* Scorecard */
   table.scorecard { border-collapse: separate; border-spacing: 0; font-size: 1.2rem;
     border: 1px solid var(--border); border-radius: 16px; overflow: hidden; max-width: 860px; }
@@ -158,6 +160,15 @@
     border: 1px solid var(--border); border-radius: var(--r-pill); padding: 7px 16px;
     font-size: .95rem; font-weight: 500; }
   .links .ms { color: var(--blue); }
+  /* Closing slide link cards */
+  .close-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 780px; width: 100%; }
+  .close-card { display: flex; align-items: center; gap: 16px; text-align: left;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
+    padding: 18px 24px; }
+  .close-card > .ms { font-size: 1.9rem; }
+  .close-card b { display: block; font-size: 1.05rem; }
+  .close-card .url { display: block; font-family: 'Roboto Mono', monospace; font-size: .92rem;
+    color: var(--blue); }
   .join-chip { display: inline-block; background: var(--blue); color: #fff;
     border-radius: var(--r-pill); padding: 16px 42px; font-size: 1.9rem; font-weight: 700;
     margin: 10px 0 16px; }
@@ -208,10 +219,10 @@
 <section class="slide">
   <h2 data-i18n="s2_title">Welcome to the agentic era</h2>
   <ul class="points">
-    <li data-i18n="s2_p1">2023: we chatted with LLMs</li>
-    <li data-i18n="s2_p2">2024–25: LLMs got tools and started doing things</li>
-    <li data-i18n="s2_p3">2026: software is becoming teams of agents that plan, act and cooperate</li>
-    <li data-i18n="s2_p4">An agent = model + instructions + tools + memory, in a loop</li>
+    <li data-i18n="s2_p1">2023: we <b>chatted</b> with LLMs</li>
+    <li data-i18n="s2_p2">2024–25: LLMs got <b>tools</b> and started <b>doing things</b></li>
+    <li data-i18n="s2_p3">2026: software is becoming <b>teams of agents</b> that plan, act and cooperate</li>
+    <li data-i18n="s2_p4">An agent = <b>model + instructions + tools + memory</b>, in a loop</li>
   </ul>
 </section>
 
@@ -219,10 +230,10 @@
 <section class="slide">
   <h2 data-i18n="s3_title">Why Go for agents?</h2>
   <ul class="points">
-    <li data-i18n="s3_p1">Agents are concurrent by nature — goroutines and channels are the native fit</li>
-    <li data-i18n="s3_p2">One static binary: the whole show tonight ships as a single file</li>
-    <li data-i18n="s3_p3">Typed tools: the function signature IS the contract the model sees</li>
-    <li data-i18n="s3_p4">Boring, fast, deployable — perfect for agents that must not fall over</li>
+    <li data-i18n="s3_p1">Agents are concurrent by nature — <b>goroutines and channels</b> are the native fit</li>
+    <li data-i18n="s3_p2"><b>One static binary</b>: the whole show tonight ships as a single file</li>
+    <li data-i18n="s3_p3"><b>Typed contracts</b>: the struct IS the schema the model must fill</li>
+    <li data-i18n="s3_p4"><b>Boring, fast, deployable</b> — perfect for agents that must not fall over</li>
   </ul>
   <p class="sub" style="margin-top:20px" data-i18n="s3_promise">Don't take my word for it — you'll see each claim in the app's real code.</p>
 </section>
@@ -319,13 +330,13 @@
 <!-- 6c · The state machine -->
 <section class="slide">
   <h2><span class="ms" style="color:var(--blue)">account_tree</span> <span data-i18n="sm_title">The stages every video travels</span></h2>
-  <div class="flow-pills">
-    <span class="fpill">queued</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-blue">fetching subtitles</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-red">detecting language</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-yellow">romanizing</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-blue">translating</span><span class="ms">arrow_forward</span>
-    <span class="fpill p-yellow">building lines</span><span class="ms">arrow_forward</span>
+  <div class="flow-pills vertical">
+    <span class="fpill">queued</span><span class="ms">arrow_downward</span>
+    <span class="fpill p-blue">fetching subtitles</span><span class="ms">arrow_downward</span>
+    <span class="fpill p-red">detecting language <span class="ms" style="font-size:1em">smart_toy</span></span><span class="ms">arrow_downward</span>
+    <span class="fpill p-yellow">romanizing <span class="ms" style="font-size:1em">smart_toy</span></span><span class="ms">arrow_downward</span>
+    <span class="fpill p-blue">translating <span class="ms" style="font-size:1em">smart_toy</span></span><span class="ms">arrow_downward</span>
+    <span class="fpill p-yellow">building lines</span><span class="ms">arrow_downward</span>
     <span class="fpill p-green">ready</span>
   </div>
   <p class="sub" style="margin-top:22px"><span class="ms">replay</span> <span data-i18n="sm_loop">a failed video goes back to the queue on resubmit — YouTube's bot checks are intermittent</span></p>
@@ -443,65 +454,36 @@ res, err := fetcher.<span class="fn">Fetch</span>(ctx, youtubeID, detectLang)
   <p class="sub" style="margin-top:18px" data-i18n="sc_note">Not one of these needed a framework. Agentic workloads are concurrent, failure-prone, I/O-bound systems programming — exactly what Go was built for.</p>
 </section>
 
-<!-- 8 · Sessions -->
-<section class="slide">
-  <h2 data-i18n="s8_title">Three jobs the Go ecosystem couldn’t do</h2>
-  <ul class="points">
-    <li data-i18n="s8_p1">Romanization: kuroshiro and hangul-romanization exist in npm — in Go, an agent IS the library</li>
-    <li data-i18n="s8_p2">Language detection needs world knowledge: “Baam Baam Japanese Version” → ja, though the artist is Korean</li>
-    <li data-i18n="s8_p3">Translation per line is a brand-new feature the original didn’t have â one instruction string</li>
-    <li data-i18n="s8_p4">Batched JSON in, batched JSON out — length-checked, chunked, with fallbacks</li>
-  </ul>
-</section>
 
-<!-- 9 · Live coding -->
-<section class="slide">
-  <h2><span class="ms" style="color:var(--blue)">search</span> <span data-i18n="s9_title">Live coding: karaoke in Quechua</span></h2>
-  <pre><span class="cm">// the Translator's whole personality is one string:</span>
-target := <span class="st">"Latin American Spanish"</span>
-<span class="kw">if</span> sourceLang == <span class="st">"es"</span> {
-    target = <span class="st">"English"</span>
-}
-<span class="cm">// live change:</span>
-target = <span class="st">"Quechua (Cusco variety)"</span></pre>
-  <p class="sub" style="margin-top:16px" data-i18n="s9_note">One string, redeploy — and the next song comes out with lyrics translated to Quechua.<br>Prompt engineering is persona engineering with commitment.</p>
-</section>
 
-<!-- 10 · Deploy -->
-<section class="slide">
-  <h2 data-i18n="s10_title">Shipping it</h2>
-  <pre>$ git push
-
-<span class="cm"># → Dockerfile: node build → go build (SPA embedded) → yt-dlp</span>
-<span class="cm"># → docker compose: one Go binary + Postgres. That's the stack.</span>
-karaoke is live!</pre>
-  <table class="compare" style="margin-top:24px">
-    <tr><td data-i18n="s10_r1">Tonight’s demo (subtitles + 3 agents per song)</td><td class="val">&lt; $1</td></tr>
-    <tr><td data-i18n="s10_r2">Videos processed in parallel per instance</td><td class="val">WORKERS=N</td></tr>
-  </table>
-</section>
 
 <!-- 11 · Lessons -->
 <section class="slide">
   <h2 data-i18n="s11_title">What building this taught me</h2>
   <ul class="points">
-    <li data-i18n="s11_p1">Treat YouTube as a hostile dependency: retries, cookies escape hatch, full offline mode</li>
-    <li data-i18n="s11_p2">Agents are just another dependency — put them behind an interface (rehearsals ran offline)</li>
-    <li data-i18n="s11_p3">An agent can BE the library your language is missing</li>
-    <li data-i18n="s11_p4">The demo people remember is the one they were part of — bring your own song</li>
+    <li data-i18n="s11_p1">Treat YouTube as a <b>hostile dependency</b>: retries, cookies escape hatch, full <b>offline mode</b></li>
+    <li data-i18n="s11_p2">Agents are just another dependency — put them <b>behind an interface</b> (rehearsals ran offline)</li>
+    <li data-i18n="s11_p3">An agent can <b>BE the library</b> your language is missing</li>
+    <li data-i18n="s11_p4">The demo people remember is the one they were <b>part of</b> — bring your own song</li>
   </ul>
 </section>
 
 <!-- 12 · Close -->
 <section class="slide">
-  <div style="margin-bottom:24px"><span class="avatar yellow"><span class="ms">trophy</span></span></div>
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="s12_eyebrow">thank you</span> <span class="bk">]</span></div>
   <h1 data-i18n="s12_title">Go clone something — and make it parallel</h1>
-  <p class="sub" style="font-size:1.4rem; line-height:2">
-    <span class="a">adk.dev</span> · ADK for Go<br>
-    <span class="g">github.com/jibaru</span> · <span data-i18n="s12_code">code &amp; slides</span><br>
-    <span class="grn">s1ngo.crafter.run</span> · <span data-i18n="s12_play">play it yourself</span><br>
-    <span class="gold" data-i18n="s12_thanks">¡Gracias! Questions?</span>
-  </p>
+  <p class="sub" style="margin-bottom:28px">s1n.go · Google DevFest 2026 · Ignacio Rueda</p>
+  <div class="close-grid">
+    <div class="close-card"><span class="ms" style="color:var(--green)">play_circle</span>
+      <span><b data-i18n="s12_demo">Live demo</b><span class="url">s1ngo.crafter.run</span></span></div>
+    <div class="close-card"><span class="ms" style="color:var(--ink)">code</span>
+      <span><b data-i18n="s12_code">Source code</b><span class="url">github.com/Jibaru/roadtodevfest2026</span></span></div>
+    <div class="close-card"><span class="ms" style="color:var(--blue)">co_present</span>
+      <span><b data-i18n="s12_slides">These slides</b><span class="url">jibaru.github.io/roadtodevfest2026</span></span></div>
+    <div class="close-card"><span class="ms" style="color:var(--red)">school</span>
+      <span><b data-i18n="s12_adk">ADK for Go</b><span class="url">adk.dev</span></span></div>
+  </div>
+  <p class="sub" style="margin-top:30px"><span class="gold" style="font-weight:700" data-i18n="s12_thanks">¡Gracias! Questions?</span></p>
 </section>
 
 <div id="progress"></div>
@@ -512,15 +494,15 @@ const I18N = {
     s1_sub: "Karaoke paralelo desde YouTube — agentes en Go para la era agéntica",
     s1_you: "pega un link y canta",
     s2_title: "Bienvenidos a la era agéntica",
-    s2_p1: "2023: chateábamos con LLMs",
-    s2_p2: "2024–25: los LLMs recibieron herramientas y empezaron a hacer cosas",
-    s2_p3: "2026: el software se vuelve equipos de agentes que planean, actúan y cooperan",
-    s2_p4: "Un agente = modelo + instrucciones + herramientas + memoria, en un loop",
+    s2_p1: "2023: <b>chateábamos</b> con LLMs",
+    s2_p2: "2024–25: los LLMs recibieron <b>herramientas</b> y empezaron a <b>hacer cosas</b>",
+    s2_p3: "2026: el software se vuelve <b>equipos de agentes</b> que planean, actúan y cooperan",
+    s2_p4: "Un agente = <b>modelo + instrucciones + herramientas + memoria</b>, en un loop",
     s3_title: "¿Por qué Go para agentes?",
-    s3_p1: "Los agentes son concurrentes por naturaleza — goroutines y channels son el fit nativo",
-    s3_p2: "Un binario estático: todo el show de hoy es un solo archivo",
-    s3_p3: "Herramientas tipadas: la firma de la función ES el contrato que ve el modelo",
-    s3_p4: "Aburrido, rápido, desplegable — perfecto para agentes que no pueden caerse",
+    s3_p1: "Los agentes son concurrentes por naturaleza — <b>goroutines y channels</b> son el fit nativo",
+    s3_p2: "<b>Un binario estático</b>: todo el show de hoy es un solo archivo",
+    s3_p3: "<b>Contratos tipados</b>: el struct ES el schema que el modelo debe llenar",
+    s3_p4: "<b>Aburrido, rápido, desplegable</b> — perfecto para agentes que no pueden caerse",
     s3_promise: "No me crean a mí — verán cada afirmación en el código real de la app.",
     sp_eyebrow: "su anfitrión",
     sp_role: "Software Engineer en <b>Clerk</b> · Builder en <b>Crafter Station</b> · Lima, Perú",
@@ -578,24 +560,17 @@ const I18N = {
     s6_note: "Cada submission, llamada a agente y update de progreso pasó por goroutines y channels.",
     s7_title: "La arquitectura (limpia y aburrida a propósito)",
     s7_note: "Cambiar el storage es una línea de constructor. Los agentes también están detrás de interfaces — el show corrió offline en los ensayos.",
-    s8_title: "Tres trabajos que el ecosistema Go no podía hacer",
-    s8_p1: "Romanización: kuroshiro y hangul-romanization existen en npm — en Go, un agente ES la librería",
-    s8_p2: "Detectar idioma requiere conocimiento del mundo: “Baam Baam Japanese Version” → ja, aunque la artista es coreana",
-    s8_p3: "La traducción por línea es un feature nuevo que el original no tenía — un string de instrucciones",
-    s8_p4: "JSON en lote de entrada y salida — con longitud verificada, en chunks, con fallbacks",
-    s9_title: "Live coding: karaoke en quechua",
-    s9_note: "Un string, redeploy — y la siguiente canción sale traducida al quechua.\nEl prompt engineering es ingeniería de personas con compromiso.",
-    s10_title: "Llevándolo a producción",
-    s10_r1: "El demo de hoy (subtítulos + 3 agentes por canción)",
-    s10_r2: "Videos procesados en paralelo por instancia",
     s11_title: "Lo que aprendí construyendo esto",
-    s11_p1: "Trata a YouTube como dependencia hostil: reintentos, cookies de escape, modo offline completo",
-    s11_p2: "Los agentes son una dependencia más — detrás de una interfaz (los ensayos corrieron offline)",
-    s11_p3: "Un agente puede SER la librería que le falta a tu lenguaje",
-    s11_p4: "El demo que la gente recuerda es del que fueron parte — trae tu propia canción",
+    s11_p1: "Trata a YouTube como <b>dependencia hostil</b>: reintentos, cookies de escape, <b>modo offline</b> completo",
+    s11_p2: "Los agentes son una dependencia más — <b>detrás de una interfaz</b> (los ensayos corrieron offline)",
+    s11_p3: "Un agente puede <b>SER la librería</b> que le falta a tu lenguaje",
+    s11_p4: "El demo que la gente recuerda es del que fueron <b>parte</b> — trae tu propia canción",
     s12_title: "Ve y clona algo — y hazlo paralelo",
-    s12_code: "código y slides",
-    s12_play: "juégalo tú mismo",
+    s12_eyebrow: "gracias",
+    s12_demo: "Demo en vivo",
+    s12_code: "Código fuente",
+    s12_slides: "Estas slides",
+    s12_adk: "ADK para Go",
     s12_thanks: "¡Gracias! ¿Preguntas?",
   },
 };
