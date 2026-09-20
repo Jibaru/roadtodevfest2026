@@ -18,3 +18,6 @@ s1ngo
 
 # Frontend
 web/node_modules/
+
+# yt-dlp cookies (never commit)
+cookies.txt

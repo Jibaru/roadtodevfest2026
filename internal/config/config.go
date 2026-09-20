@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strconv"
@@ -33,13 +34,26 @@ func Load() (*Config, error) {
 		DatabaseURL:  os.Getenv("DATABASE_URL"),
 		Workers:      workers,
 		YtdlpPath:    os.Getenv("YTDLP_PATH"),
-		YtdlpCookies: os.Getenv("YTDLP_COOKIES"),
+		YtdlpCookies: loadCookies(),
 		FakeAgents:   os.Getenv("FAKE_AGENTS") == "1",
 	}
 	if cfg.GeminiAPIKey == "" && !cfg.FakeAgents {
 		return nil, fmt.Errorf("GEMINI_API_KEY is required unless FAKE_AGENTS=1")
 	}
 	return cfg, nil
+}
+
+// loadCookies accepts the cookies.txt either raw (YTDLP_COOKIES) or
+// base64-encoded (YTDLP_COOKIES_B64). Base64 is the practical option:
+// cookies.txt is multiline with tabs, which dotenv-style env blocks
+// (like Dokploy's) cannot carry.
+func loadCookies() string {
+	if b64 := os.Getenv("YTDLP_COOKIES_B64"); b64 != "" {
+		if raw, err := base64.StdEncoding.DecodeString(b64); err == nil {
+			return string(raw)
+		}
+	}
+	return os.Getenv("YTDLP_COOKIES")
 }
 
 func getEnv(key, fallback string) string {
