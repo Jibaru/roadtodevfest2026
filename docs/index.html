@@ -168,10 +168,8 @@
   .polaroid:nth-child(1) { transform: rotate(-4deg); z-index: 1; }
   .polaroid:nth-child(2) { transform: rotate(2.5deg) translateY(-14px); z-index: 2; margin: 0 -34px; }
   .polaroid:nth-child(3) { transform: rotate(-2deg); z-index: 1; }
-  /* Speaker brand logos */
-  .brandlogos { display: flex; align-items: center; gap: 24px; margin-top: 20px; flex-wrap: wrap; }
-  .brandlogos img { height: 26px; width: auto; display: block; }
-  .brandlogos img.sq { height: 30px; }
+  /* Inline brand logos next to the words that mention them */
+  .ilogo { height: 1em; width: auto; display: inline-block; vertical-align: -0.12em; margin: 0 3px; }
   /* Closing slide link cards */
   .close-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 780px; width: 100%; }
   .close-card { display: flex; align-items: center; gap: 16px; text-align: left;
@@ -222,25 +220,17 @@
     <img class="speaker-photo" src="ignacio.png" alt="Ignacio Rueda">
     <div>
       <h2>Ignacio Rueda</h2>
-      <p class="role" data-i18n="sp_role">Software Engineer at <b>Clerk</b> · Builder at <b>Crafter Station</b> · Lima, Perú</p>
+      <p class="role" data-i18n="sp_role">Software Engineer at <img class="ilogo" src="logos/clerk.svg" alt=""> <b>Clerk</b> · Builder at <img class="ilogo" src="logos/crafterstation.svg" alt=""> <b>Crafter Station</b> · Lima, Perú</p>
       <ul>
-        <li data-i18n="sp_p1"><b>Go, TypeScript &amp; cloud</b> — backends, distributed systems, dev tools</li>
-        <li data-i18n="sp_p2">Before: <b>Go services for Disney Parks</b> at Globant</li>
+        <li data-i18n="sp_p1"><img class="ilogo" src="logos/go.svg" alt=""> <b>Go</b>, <img class="ilogo" src="logos/typescript.svg" alt=""> <b>TypeScript</b> &amp; <b>cloud</b> — backends, distributed systems, dev tools</li>
+        <li data-i18n="sp_p2">Before: <b>Go services for Disney Parks</b> at <img class="ilogo" src="logos/globant.svg" alt="Globant"></li>
         <li data-i18n="sp_p3"><b>Winner</b>, Gemini CLI Desktop UI Challenge 2025 (built with <b>Go + React</b>)</li>
-        <li data-i18n="sp_p4"><b>Hackathons, YouTube</b>, and community events around AI &amp; <b>shipping fast</b></li>
+        <li data-i18n="sp_p4"><b>Hackathons</b>, <img class="ilogo" src="logos/youtube.svg" alt=""> <b>YouTube</b>, and community events around AI &amp; <b>shipping fast</b></li>
       </ul>
       <div class="links">
         <span><span class="ms">code</span>github.com/jibaru</span>
         <span><span class="ms">alternate_email</span>@IgnacioRuedaB</span>
         <span><span class="ms">play_circle</span>youtube.com/@ignacio-rueda</span>
-      </div>
-      <div class="brandlogos">
-        <img src="logos/clerk.svg" alt="Clerk" title="Clerk">
-        <img src="logos/crafterstation.svg" alt="Crafter Station" title="Crafter Station" class="sq">
-        <img src="logos/globant.svg" alt="Globant" title="Globant">
-        <img src="logos/youtube.svg" alt="YouTube" title="YouTube">
-        <img src="logos/go.svg" alt="Go" title="Go" class="sq">
-        <img src="logos/typescript.svg" alt="TypeScript" title="TypeScript">
       </div>
     </div>
   </div>
@@ -539,11 +529,11 @@ const I18N = {
     cm_title: "Construyendo con la comunidad en Lima",
     cm_note: "Meetups, hackathons y domingos de ship-it — esta charla nace de esa misma energía.",
     sp_eyebrow: "su anfitrión",
-    sp_role: "Software Engineer en <b>Clerk</b> · Builder en <b>Crafter Station</b> · Lima, Perú",
-    sp_p1: "<b>Go, TypeScript y cloud</b> — backends, sistemas distribuidos, dev tools",
-    sp_p2: "Antes: <b>servicios en Go para Disney Parks</b> en Globant",
+    sp_role: "Software Engineer en <img class='ilogo' src='logos/clerk.svg' alt=''> <b>Clerk</b> · Builder en <img class='ilogo' src='logos/crafterstation.svg' alt=''> <b>Crafter Station</b> · Lima, Perú",
+    sp_p1: "<img class='ilogo' src='logos/go.svg' alt=''> <b>Go</b>, <img class='ilogo' src='logos/typescript.svg' alt=''> <b>TypeScript</b> y <b>cloud</b> — backends, sistemas distribuidos, dev tools",
+    sp_p2: "Antes: <b>servicios en Go para Disney Parks</b> en <img class='ilogo' src='logos/globant.svg' alt='Globant'>",
     sp_p3: "<b>Ganador</b> del Gemini CLI Desktop UI Challenge 2025 (hecho con <b>Go + React</b>)",
-    sp_p4: "<b>Hackathons, YouTube</b> y eventos de comunidad sobre IA y <b>shipping rápido</b>",
+    sp_p4: "<b>Hackathons</b>, <img class='ilogo' src='logos/youtube.svg' alt=''> <b>YouTube</b> y eventos de comunidad sobre IA y <b>shipping rápido</b>",
     s4_note: "Una personalidad es solo un string de instrucciones.",
     sf_title: "Un video, de inicio a fin",
     sf_note: "Y mientras este video avanza por sus etapas, tres más hacen lo mismo en otros workers.",
