@@ -111,19 +111,38 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	files, _ := os.ReadDir(dir)
 	picked := pickManualVTT(names(files), youtubeID, manualKeys, sourceLang)
 
-	if picked == nil && sourceLang != "" {
+	// Karaoke needs the lyrics in the language they are SUNG in — a
+	// romanized translation track is useless to sing along. So when the
+	// best manual track is a translation (or none exists), phase 2
+	// fetches the auto-caption in the source language; the translation
+	// track remains only as a last resort.
+	if sourceLang != "" && (picked == nil || picked.lang != sourceLang) {
 		phase2 := []string{
 			"--skip-download", "--write-auto-subs",
 			"--sub-langs", sourceLang, "--sub-format", "vtt",
 			"--no-progress", "--no-playlist",
 			"-o", out, domain.WatchURL(youtubeID),
 		}
-		// Phase 2 failures fall through silently: the caller decides
-		// what "no subtitles" means.
+		// Phase 2 failures fall through silently: whatever was picked
+		// in phase 1 (possibly nil) decides what happens next.
 		if _, err := f.run(ctx, phase2); err == nil {
 			files, _ := os.ReadDir(dir)
 			if hit := findVTTForBaseLang(names(files), youtubeID, sourceLang); hit != nil {
-				picked = &pickedVTT{file: hit.file, lang: sourceLang, isManual: false}
+				picked = &pickedVTT{file: hit.file, lang: sourceLang, isManual: isManualTrack(manualKeys, hit.fullLang)}
+			}
+		}
+	}
+
+	// Still stuck with a translation track? Then pick the most READABLE
+	// one for the audience (es → en) instead of the source-hunting
+	// ko-first order: a Spanish translation you can read beats romanized
+	// Korean of a Japanese song.
+	if picked != nil && sourceLang != "" && picked.lang != sourceLang {
+		files, _ := os.ReadDir(dir)
+		for _, lang := range []string{"es", "en"} {
+			if hit := findVTTForBaseLang(names(files), youtubeID, lang); hit != nil && isManualTrack(manualKeys, hit.fullLang) {
+				picked = &pickedVTT{file: hit.file, lang: lang, isManual: true}
+				break
 			}
 		}
 	}
