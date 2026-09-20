@@ -117,13 +117,26 @@ func (c *Crew) mapLines(ctx context.Context, name, instruction, header string, t
 		chunk := texts[start:end]
 
 		payload, _ := json.Marshal(chunk)
-		reply, err := c.runAgent(ctx, name, instruction, header+"\nLines:\n"+string(payload))
-		if err != nil {
-			return nil, err
+		prompt := fmt.Sprintf("%s\nThe array has EXACTLY %d elements; return EXACTLY %d.\nLines:\n%s",
+			header, len(chunk), len(chunk), payload)
+
+		// LLMs occasionally merge or drop a line; one retry recovers
+		// most transient contract violations.
+		var mapped []string
+		var lastErr error
+		for attempt := 0; attempt < 2; attempt++ {
+			reply, err := c.runAgent(ctx, name, instruction, prompt)
+			if err != nil {
+				lastErr = err
+				continue
+			}
+			if mapped, err = parseStringArray(reply, len(chunk)); err == nil {
+				break
+			}
+			lastErr = err
 		}
-		mapped, err := parseStringArray(reply, len(chunk))
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", name, err)
+		if mapped == nil {
+			return nil, fmt.Errorf("%s: %w", name, lastErr)
 		}
 		out = append(out, mapped...)
 	}
