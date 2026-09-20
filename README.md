@@ -1,98 +1,80 @@
-# Agent Arena — Live AI Code Review
+# s1n.go — parallel karaoke from any YouTube link
 
-The audience proposes public GitHub repos, three AI reviewer agents tear into
-the winner **in parallel** — choosing which files to read with a typed
-`read_file` tool, live — and the audience votes the most valuable finding.
-Built in **Go** with **[ADK Go v2](https://adk.dev)** and **Gemini**, for
-Google DevFest 2026.
+A **Go + ADK** clone of [s1ng by Crafter Station](https://github.com/crafter-station/s1gn),
+built for Google DevFest 2026. Paste YouTube URLs — several at once — and a
+goroutine **worker pool** turns each one into a synced karaoke player with
+word-level highlighting, streaming per-stage progress to every browser over
+WebSocket.
 
-The crew: **Bug Hunter** (correctness), **Sentinel** (security) and
-**The Simplifier** (readability), plus a **Lead Reviewer** who closes each
-round with a verdict. The reviewers compete: every audience vote scores a
-point on the leaderboard.
+Where the original used npm libraries and a GPT call, s1n.go uses three
+**ADK Gemini agents**:
 
-## Run it locally (no API key needed)
+| Agent | Job | Replaces |
+|---|---|---|
+| Language Detective | lyrics language from title+description (covers/dubs aware) | gpt-4o-mini call |
+| Romanizer | ja/ko → romaji, Latin words pass through | kuroshiro + hangul-romanization |
+| Translator | per-line Spanish translation (English if the song is Spanish) | — new feature |
 
-```bash
-FAKE_AGENTS=1 PRESENTER_TOKEN=dev make run
-```
-
-- Audience: http://localhost:8080
-- Stage (presenter controls): http://localhost:8080/stage?token=dev
-
-`FAKE_AGENTS=1` runs the whole show offline with canned findings — use it for
-rehearsals that don't burn tokens. With a real key:
+## Run it locally (no API key, no yt-dlp needed)
 
 ```bash
-GEMINI_API_KEY=... PRESENTER_TOKEN=dev make run
+FAKE_AGENTS=1 make run          # embedded fake song + fake agents
 ```
 
-## Live URLs
+Open http://localhost:8080. With the real pipeline:
 
-- **Demo**: https://agent-arena.crafter.run (VPS via Dokploy; pushes to `main` auto-redeploy)
+```bash
+make web                        # build the React SPA once
+GEMINI_API_KEY=... make run     # needs yt-dlp on PATH (or YTDLP_PATH=...)
+```
+
+## Live
+
+- **App**: https://s1ngo.crafter.run (VPS via Dokploy compose: Go binary + Postgres; pushes to `main` auto-redeploy)
 - **Slides**: https://jibaru.github.io/roadtodevfest2026/ (GitHub Pages from `docs/`)
 
-## Deploy to Cloud Run (personal account, one command)
+## How a video is processed
 
-```bash
-./scripts/setup.sh    # one-time: isolated 'devfest' gcloud config, personal login, .env
-./scripts/deploy.sh   # every deploy: Cloud Run, prints audience + stage URLs
-./scripts/teardown.sh # after the event
-```
+1. `POST /api/videos` validates the URL and returns instantly — the job goes
+   into a buffered channel.
+2. A worker (of `WORKERS`, default 3) picks it up. Two-phase yt-dlp fetch:
+   manual subtitles in ko/ja/es/en first (never rate-limited), then the
+   auto-caption in the detected source language only.
+3. The Language Detective agent resolves the real lyrics language.
+4. VTT is parsed; YouTube's "rolling" auto-sub cues are collapsed.
+5. Romanizer (ja/ko) and Translator agents map the lines in batches.
+6. Word-level timing is distributed by syllable weight; result lands in
+   Postgres as `ready`. Every stage broadcasts over `/ws`.
 
-The setup wizard creates a **named gcloud configuration** (`devfest`) scoped
-with `CLOUDSDK_ACTIVE_CONFIG_NAME` — your work gcloud config is never touched.
-`--max-instances 1` is load-bearing: session state lives in memory.
-
-## The show (60 min)
-
-| Segment | Time |
-|---|---|
-| The agentic era + why Go | 8 min |
-| ADK Go concepts | 5 min |
-| **Live reviews with the audience** | 25 min |
-| Architecture walkthrough | 10 min |
-| Live-code the search_code tool | 5 min |
-| Q&A | 7 min |
-
-Slides: `docs/index.html` (arrows to navigate, `L` toggles EN/ES).
-
-## Live-coding cheat sheet
-
-The `search_code` tool (grep across the whole snapshot) already exists in
-`internal/agents/searchcode.go`. On stage, wire it into `Crew.Review` in
-`internal/agents/crew.go` (see the `LIVE-CODING MOMENT` comment), redeploy,
-and the next round's reviewers can hunt patterns across every file at once.
-
-## Failure playbook
-
-| Failure | What happens |
-|---|---|
-| Gemini down mid-show | The broken reviewer ships a visible "Reviewer went offline" finding; the round completes |
-| Repo private/unfetchable | The verdict says so; pick another repo and advance again |
-| Lead reviewer fails | Canned closing line |
-| Hosting trouble | `FAKE_AGENTS=1` local run + a tunnel, rehearsed |
-| Audience page dies | Platform chat as fallback for proposals/votes |
+Failures degrade, never crash: romanizer down → original script; translator
+down → no translation line; YouTube bot-check → the card shows why and
+resubmitting retries it. `YTDLP_COOKIES` (contents of a cookies.txt) is the
+escape hatch for datacenter-IP blocks.
 
 ## Architecture
 
 ```
 cmd/api                      wire everything
-internal/review/domain       session, findings, votes, repo-URL validation
-internal/review/service      the show's state machine (auto reviewing→results)
-internal/review/infra        memory | file-snapshot — same interface
-internal/agents              ADK Go: 3 reviewers + lead, read_file tool
-internal/repofetch           GitHub tarball → capped in-memory snapshot
-internal/realtime            WebSocket hub; slow clients get dropped
-internal/{handlers,server}   thin HTTP layer, DTOs, middleware
-web/                         audience + stage pages, go:embed, EN/ES
-docs/                        HTML slides (EN/ES) — served via GitHub Pages
+internal/video/domain        Video, LyricLine, VideoRepository, URL parsing
+internal/pipeline            worker pool + per-video stages + broadcasts
+internal/video/infra         memory | postgres (pgx) — same interface
+internal/agents              ADK: detective + romanizer + translator (+ fakes)
+internal/ytdlp               two-phase subtitle fetch, VTT parser, cue dedupe
+internal/lines               syllable-weight word timing (faithful port)
+internal/realtime            push-only WebSocket hub; slow clients dropped
+web/                         React SPA (Vite), embedded via go:embed
+docs/                        HTML slides (EN/ES) — GitHub Pages
 ```
 
-State machine: `idle → repos_open → reviewing → results → repos_open → …`.
-The presenter drives it with one button; `reviewing → results` fires
-automatically when the crew finishes. The audience drives everything else.
+Env: `PORT`, `GEMINI_API_KEY`, `FAKE_AGENTS`, `DATABASE_URL`, `WORKERS`,
+`YTDLP_PATH`, `YTDLP_COOKIES`.
 
 ```bash
-make test   # domain, repos, and full state-machine tests (all offline)
+make test   # url/vtt/lines/pipeline tests, all offline
 ```
+
+## Credits
+
+UI and pipeline design ported from **[s1ng](https://github.com/crafter-station/s1gn)**
+by [Crafter Station](https://crafterstation.com) — same team, different
+runtime. Attribution intentional and visible, also in the app footer.
