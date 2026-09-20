@@ -237,6 +237,10 @@ func DetectLangFromTitle(title string) string {
 }
 
 func (f *Fetcher) run(ctx context.Context, args []string) (string, error) {
+	// We only ever extract metadata and subtitle tracks, never video
+	// formats — some player clients (web_safari) expose no formats at
+	// all, and without this flag yt-dlp treats that as a hard error.
+	args = append([]string{"--ignore-no-formats-error"}, args...)
 	if f.CookiesFile != "" {
 		args = append([]string{"--cookies", f.CookiesFile}, args...)
 	}
