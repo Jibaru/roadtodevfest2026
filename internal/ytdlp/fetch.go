@@ -115,6 +115,11 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	}
 
 	files, _ := os.ReadDir(dir)
+	if sourceLang != "" && manualHasBase(manualKeys, sourceLang) &&
+		findVTTForBaseLang(names(files), youtubeID, sourceLang) == nil {
+		f.fetchManualTrack(ctx, dir, out, youtubeID, sourceLang)
+		files, _ = os.ReadDir(dir)
+	}
 	picked := pickManualVTT(names(files), youtubeID, manualKeys, sourceLang)
 
 	// Karaoke needs the lyrics in the language they are SUNG in — a
@@ -144,9 +149,15 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	// ko-first order: a Spanish translation you can read beats romanized
 	// Korean of a Japanese song.
 	if picked != nil && sourceLang != "" && picked.lang != sourceLang {
-		files, _ := os.ReadDir(dir)
 		for _, lang := range []string{"es", "en"} {
-			if hit := findVTTForBaseLang(names(files), youtubeID, lang); hit != nil && isManualTrack(manualKeys, hit.fullLang) {
+			files, _ := os.ReadDir(dir)
+			hit := findVTTForBaseLang(names(files), youtubeID, lang)
+			if hit == nil && manualHasBase(manualKeys, lang) {
+				f.fetchManualTrack(ctx, dir, out, youtubeID, lang)
+				files, _ = os.ReadDir(dir)
+				hit = findVTTForBaseLang(names(files), youtubeID, lang)
+			}
+			if hit != nil && isManualTrack(manualKeys, hit.fullLang) {
 				picked = &pickedVTT{file: hit.file, lang: lang, isManual: true}
 				break
 			}
@@ -169,6 +180,29 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	res.IsAuto = !picked.isManual
 	res.Cues = cues
 	return res, nil
+}
+
+// fetchManualTrack downloads one specific manual subtitle language.
+// Phase 1 asks for every language at once, but YouTube sometimes serves
+// only part of the set from a datacenter IP — a targeted second request
+// usually succeeds.
+func (f *Fetcher) fetchManualTrack(ctx context.Context, dir, out, youtubeID, lang string) {
+	args := []string{
+		"--skip-download", "--write-subs",
+		"--sub-langs", lang + "," + lang + ".*", "--sub-format", "vtt",
+		"--no-progress", "--no-playlist",
+		"-o", out, domain.WatchURL(youtubeID),
+	}
+	_, _ = f.run(ctx, args)
+}
+
+func manualHasBase(manualKeys []string, lang string) bool {
+	for _, k := range manualKeys {
+		if strings.FieldsFunc(k, func(r rune) bool { return r == '-' || r == '.' })[0] == lang {
+			return true
+		}
+	}
+	return false
 }
 
 type pickedVTT struct {
