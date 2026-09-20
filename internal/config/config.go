@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Config holds all runtime configuration, loaded from environment variables.
@@ -22,6 +23,9 @@ type Config struct {
 	// set it is written to a temp file and passed to yt-dlp — the
 	// escape hatch for YouTube's datacenter-IP bot checks.
 	YtdlpCookies string
+	// YtdlpExtraArgs is a space-separated list appended to every
+	// yt-dlp call (e.g. extractor-args to switch player client).
+	YtdlpExtraArgs []string
 	// FakeAgents runs the whole pipeline offline: fake fetcher + fake agents.
 	FakeAgents bool
 }
@@ -35,6 +39,7 @@ func Load() (*Config, error) {
 		Workers:      workers,
 		YtdlpPath:    os.Getenv("YTDLP_PATH"),
 		YtdlpCookies: loadCookies(),
+		YtdlpExtraArgs: strings.Fields(os.Getenv("YTDLP_EXTRA_ARGS")),
 		FakeAgents:   os.Getenv("FAKE_AGENTS") == "1",
 	}
 	if cfg.GeminiAPIKey == "" && !cfg.FakeAgents {

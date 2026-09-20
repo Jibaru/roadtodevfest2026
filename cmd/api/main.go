@@ -70,7 +70,7 @@ func main() {
 				_ = f.Close()
 			}
 		}
-		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath, CookiesFile: cookiesFile}
+		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath, CookiesFile: cookiesFile, ExtraArgs: cfg.YtdlpExtraArgs}
 	}
 
 	hub := realtime.NewHub(log)

@@ -43,6 +43,10 @@ type DetectLangFunc func(ctx context.Context, title, description string) string
 type Fetcher struct {
 	Bin         string
 	CookiesFile string
+	// ExtraArgs are appended to every yt-dlp invocation (e.g.
+	// "--extractor-args youtube:player_client=web_safari") — the knob
+	// for iterating on YouTube's datacenter challenges via env only.
+	ExtraArgs []string
 }
 
 func (f *Fetcher) bin() string {
@@ -236,6 +240,7 @@ func (f *Fetcher) run(ctx context.Context, args []string) (string, error) {
 	if f.CookiesFile != "" {
 		args = append([]string{"--cookies", f.CookiesFile}, args...)
 	}
+	args = append(args, f.ExtraArgs...)
 	cmd := exec.CommandContext(ctx, f.bin(), args...)
 	var stderr strings.Builder
 	cmd.Stderr = &stderr

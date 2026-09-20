@@ -16,6 +16,7 @@ services:
       # YouTube's datacenter-IP bot checks.
       YTDLP_COOKIES: ${YTDLP_COOKIES:-}
       YTDLP_COOKIES_B64: ${YTDLP_COOKIES_B64:-}
+      YTDLP_EXTRA_ARGS: ${YTDLP_EXTRA_ARGS:-}
       DATABASE_URL: postgres://s1ngo:s1ngo-internal@db:5432/s1ngo?sslmode=disable
 
   db:
