@@ -48,8 +48,22 @@ GEMINI_API_KEY=... make run     # needs yt-dlp on PATH (or YTDLP_PATH=...)
 
 Failures degrade, never crash: romanizer down → original script; translator
 down → no translation line; YouTube bot-check → the card shows why and
-resubmitting retries it. `YTDLP_COOKIES` (contents of a cookies.txt) is the
-escape hatch for datacenter-IP blocks.
+resubmitting retries it.
+
+### YouTube from a datacenter IP (the VPS reality)
+
+| Scenario | Status on the VPS |
+|---|---|
+| Metadata + **manual** subtitle tracks | ✅ stable (with cookies) |
+| **Auto-generated** captions | ⚠️ intermittent — retry by resubmitting |
+| Anything from a residential IP (local run) | ✅ everything works |
+
+Required setup for the VPS: `YTDLP_COOKIES_B64` (base64 of a Netscape
+cookies.txt exported from a logged-in browser). `--ignore-no-formats-error`
+is always passed (we never download media). `YTDLP_EXTRA_ARGS` exists for
+experimenting with player clients. Show strategy: prefer songs with manual
+subtitles (official K-pop/J-pop channels usually have them), pre-process
+your setlist before going live, or run locally.
 
 ## Architecture
 
