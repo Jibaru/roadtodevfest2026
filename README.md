@@ -50,6 +50,12 @@ Failures degrade, never crash: romanizer down → original script; translator
 down → no translation line; YouTube bot-check → the card shows why and
 resubmitting retries it.
 
+Track selection prefers the language the song is SUNG in (manual → auto
+caption), falling back to the most readable translation track (es → en).
+Known limitation: for some very well-known songs the model declines to
+transform the original lyrics — those play with the original script and no
+translation line. That's working as intended; the karaoke stays functional.
+
 ### YouTube from a datacenter IP (the VPS reality)
 
 | Scenario | Status on the VPS |
