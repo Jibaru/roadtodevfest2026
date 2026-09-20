@@ -9,19 +9,19 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jibaru/agentarena/internal/agents"
-	"github.com/jibaru/agentarena/internal/agents/fake"
-	"github.com/jibaru/agentarena/internal/config"
-	"github.com/jibaru/agentarena/internal/handlers"
-	"github.com/jibaru/agentarena/internal/logger"
-	"github.com/jibaru/agentarena/internal/realtime"
-	"github.com/jibaru/agentarena/internal/repofetch"
-	"github.com/jibaru/agentarena/internal/review/domain"
-	filerepo "github.com/jibaru/agentarena/internal/review/infra/persistence/file"
-	"github.com/jibaru/agentarena/internal/review/infra/persistence/memory"
-	"github.com/jibaru/agentarena/internal/review/service"
-	"github.com/jibaru/agentarena/internal/server"
-	"github.com/jibaru/agentarena/web"
+	"github.com/jibaru/s1ngo/internal/agents"
+	"github.com/jibaru/s1ngo/internal/agents/fake"
+	"github.com/jibaru/s1ngo/internal/config"
+	"github.com/jibaru/s1ngo/internal/handlers"
+	"github.com/jibaru/s1ngo/internal/logger"
+	"github.com/jibaru/s1ngo/internal/pipeline"
+	"github.com/jibaru/s1ngo/internal/realtime"
+	"github.com/jibaru/s1ngo/internal/server"
+	"github.com/jibaru/s1ngo/internal/video/domain"
+	"github.com/jibaru/s1ngo/internal/video/infra/persistence/memory"
+	"github.com/jibaru/s1ngo/internal/video/infra/persistence/postgres"
+	"github.com/jibaru/s1ngo/internal/ytdlp"
+	"github.com/jibaru/s1ngo/web"
 )
 
 func main() {
@@ -34,41 +34,38 @@ func main() {
 	}
 	ctx := context.Background()
 
-	// Persistence: memory for the show, file snapshots for rehearsals.
+	// Persistence: Postgres in production, memory for rehearsals.
 	// Swapping storage is exactly this one decision.
-	var repo domain.SessionRepository = memory.NewSessionRepository()
-	if cfg.SnapshotDir != "" {
-		if repo, err = filerepo.NewSessionRepository(cfg.SnapshotDir); err != nil {
-			log.Error("file repo", "error", err)
+	var repo domain.VideoRepository = memory.NewVideoRepository()
+	if cfg.DatabaseURL != "" {
+		if repo, err = postgres.NewVideoRepository(ctx, cfg.DatabaseURL); err != nil {
+			log.Error("postgres", "error", err)
 			os.Exit(1)
 		}
-		log.Info("using file snapshot repository", "dir", cfg.SnapshotDir)
+		log.Info("using postgres repository")
 	}
 
-	// The cast: real Gemini-powered crew, or fakes for offline rehearsal.
+	// The cast: real yt-dlp + Gemini agents, or fakes for offline rehearsal.
 	var (
-		crew    service.ReviewerAgent
-		lead    service.LeadReviewer
-		fetcher service.RepoFetcher
+		crew    pipeline.Agents
+		fetcher pipeline.Fetcher
 	)
 	if cfg.FakeAgents {
-		log.Info("FAKE_AGENTS=1: running the show offline with canned findings")
-		fakeCrew := &fake.Crew{Delay: 3 * time.Second}
-		crew, lead, fetcher = fakeCrew, fakeCrew, fake.Fetcher{}
+		log.Info("FAKE_AGENTS=1: offline pipeline with fake fetcher + agents")
+		crew, fetcher = &fake.Crew{Delay: time.Second}, fake.Fetcher{}
 	} else {
 		realCrew, err := agents.NewCrew(ctx, cfg.GeminiAPIKey)
 		if err != nil {
 			log.Error("agents", "error", err)
 			os.Exit(1)
 		}
-		crew, lead, fetcher = realCrew, realCrew, &repofetch.Fetcher{}
+		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath}
 	}
 
 	hub := realtime.NewHub(log)
-	svc := service.NewReviewService(repo, fetcher, crew, lead, hub, log)
-	hub.SetGame(svc)
+	pipe := pipeline.New(repo, fetcher, crew, hub, cfg.Workers, log)
 
-	h := handlers.New(svc, hub, cfg.PresenterToken, log)
+	h := handlers.New(pipe, repo, hub, log)
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: server.New(h, web.FS, log),

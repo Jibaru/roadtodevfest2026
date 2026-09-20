@@ -1,13 +1,28 @@
 services:
-  agentarena:
+  s1ngo:
     build: .
     restart: unless-stopped
+    depends_on:
+      - db
     expose:
       - "8080"
     environment:
       PORT: "8080"
-      PRESENTER_TOKEN: ${PRESENTER_TOKEN}
-      # FAKE_AGENTS=1 runs the show offline; set GEMINI_API_KEY and
-      # FAKE_AGENTS=0 for the real crew.
-      FAKE_AGENTS: ${FAKE_AGENTS:-1}
+      WORKERS: ${WORKERS:-4}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # FAKE_AGENTS=1 runs the whole pipeline offline (no yt-dlp, no Gemini).
+      FAKE_AGENTS: ${FAKE_AGENTS:-0}
+      DATABASE_URL: postgres://s1ngo:s1ngo-internal@db:5432/s1ngo?sslmode=disable
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: s1ngo
+      POSTGRES_PASSWORD: s1ngo-internal
+      POSTGRES_DB: s1ngo
+    volumes:
+      - s1ngo-pgdata:/var/lib/postgresql/data
+
+volumes:
+  s1ngo-pgdata:

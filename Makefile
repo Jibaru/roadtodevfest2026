@@ -1,10 +1,10 @@
-.PHONY: run build test lint fmt deploy setup
+.PHONY: run build test lint fmt web deploy setup
 
 run:
 	go run ./cmd/api
 
 build:
-	go build -o bin/agentarena ./cmd/api
+	go build -o bin/s1ngo ./cmd/api
 
 test:
 	go test ./...
@@ -20,3 +20,6 @@ setup:
 
 deploy:
 	./scripts/deploy.sh
+
+web:
+	cd web \&\& npm install \&\& npm run build

@@ -1,6 +1,6 @@
 # Binaries
 /bin/
-agentarena
+s1ngo
 
 # Local env
 .env
@@ -15,3 +15,6 @@ agentarena
 # Editor
 .idea/
 .vscode/
+
+# Frontend
+web/node_modules/

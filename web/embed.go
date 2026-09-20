@@ -1,8 +1,23 @@
-// Package web embeds the audience and stage pages into the binary:
-// one Go binary, whole show included.
+// Package web embeds the built React SPA into the binary:
+// one Go binary, whole product included. Run `make web` (or the Docker
+// build) to produce dist/ before compiling.
 package web
 
-import "embed"
+import (
+	"embed"
+	"io/fs"
+)
 
-//go:embed audience.html stage.html
-var FS embed.FS
+//go:embed all:dist
+var dist embed.FS
+
+// FS serves dist/ at the web root.
+var FS fs.FS
+
+func init() {
+	sub, err := fs.Sub(dist, "dist")
+	if err != nil {
+		panic(err)
+	}
+	FS = sub
+}

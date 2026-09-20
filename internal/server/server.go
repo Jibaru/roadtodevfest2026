@@ -4,41 +4,45 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"strings"
 
-	"github.com/jibaru/agentarena/internal/handlers"
+	"github.com/jibaru/s1ngo/internal/handlers"
 )
 
-// New builds the router with all routes and middleware.
+// New builds the router: JSON API + WebSocket + the embedded React SPA
+// (any unknown GET path falls back to index.html for client routing).
 func New(h *handlers.Handlers, webFS fs.FS, log *slog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
 	// API
 	mux.HandleFunc("GET /health", h.Health)
-	mux.HandleFunc("POST /api/reviews", h.StartSession)
-	mux.HandleFunc("POST /api/reviews/current/advance", h.Advance)
-	mux.HandleFunc("POST /api/reviews/current/reset", h.Reset)
-	mux.HandleFunc("GET /api/reviews/current", h.CurrentSession)
+	mux.HandleFunc("GET /api/videos", h.ListVideos)
+	mux.HandleFunc("POST /api/videos", h.CreateVideo)
+	mux.HandleFunc("GET /api/videos/{id}", h.GetVideo)
+	mux.HandleFunc("DELETE /api/videos/{id}", h.DeleteVideo)
 
 	// Realtime
-	mux.HandleFunc("GET /ws", h.AudienceWS)
-	mux.HandleFunc("GET /ws/stage", h.StageWS)
+	mux.HandleFunc("GET /ws", h.WS)
 
-	// Embedded UI
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(webFS)))
-	mux.HandleFunc("GET /{$}", servePage(webFS, "audience.html"))
-	mux.HandleFunc("GET /stage", servePage(webFS, "stage.html"))
-
-	return chain(mux, recovery(log), requestID(), logging(log))
-}
-
-func servePage(webFS fs.FS, name string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := fs.ReadFile(webFS, name)
+	// Embedded SPA with client-side routing fallback.
+	fileServer := http.FileServerFS(webFS)
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		path := strings.TrimPrefix(r.URL.Path, "/")
+		if path != "" {
+			if f, err := webFS.Open(path); err == nil {
+				_ = f.Close()
+				fileServer.ServeHTTP(w, r)
+				return
+			}
+		}
+		data, err := fs.ReadFile(webFS, "index.html")
 		if err != nil {
-			http.Error(w, "page not found", http.StatusNotFound)
+			http.Error(w, "UI not built", http.StatusNotFound)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write(data)
-	}
+	})
+
+	return chain(mux, recovery(log), requestID(), logging(log))
 }

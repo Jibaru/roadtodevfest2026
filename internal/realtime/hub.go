@@ -1,74 +1,51 @@
+// Package realtime is a push-only WebSocket fan-out: the pipeline
+// broadcasts video updates and progress; browsers just listen. Slow
+// clients are dropped rather than allowed to stall the show.
 package realtime
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
+	"net/http"
 	"sync"
+	"time"
 
-	"github.com/jibaru/agentarena/internal/review/domain"
-	"github.com/jibaru/agentarena/internal/review/service"
+	"github.com/gorilla/websocket"
 )
-
-// Room separates the two client kinds.
-type Room string
 
 const (
-	RoomAudience Room = "audience"
-	RoomStage    Room = "stage"
+	writeWait  = 10 * time.Second
+	pongWait   = 60 * time.Second
+	pingPeriod = 45 * time.Second
+	sendBuffer = 64
 )
 
-// GameCommands is what the hub needs from the review service to route
-// inbound audience messages.
-type GameCommands interface {
-	SubmitRepo(ctx context.Context, clientID, url string) error
-	VoteFinding(ctx context.Context, clientID, findingID string) error
-	State(ctx context.Context) (domain.SessionState, error)
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	// Same-origin in practice; the page is served by this same binary.
+	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-// Hub fans events out to connected WebSocket clients. Slow clients are
-// dropped rather than allowed to stall the show.
+type event struct {
+	Type    string `json:"type"`
+	Payload any    `json:"payload,omitempty"`
+}
+
+// Hub tracks connected clients and fans events out to all of them.
 type Hub struct {
 	mu      sync.RWMutex
-	clients map[*Client]struct{}
-	game    GameCommands
+	clients map[*client]struct{}
 	log     *slog.Logger
 }
 
 func NewHub(log *slog.Logger) *Hub {
-	return &Hub{
-		clients: map[*Client]struct{}{},
-		log:     log,
-	}
+	return &Hub{clients: map[*client]struct{}{}, log: log}
 }
 
-// SetGame wires the review service in after construction (the service
-// needs the hub as Broadcaster; the hub needs the service for commands).
-func (h *Hub) SetGame(game GameCommands) {
-	h.game = game
-}
-
-// ToAudience implements service.Broadcaster.
-func (h *Hub) ToAudience(event service.Event) { h.broadcast(RoomAudience, event) }
-
-// ToStage implements service.Broadcaster.
-func (h *Hub) ToStage(event service.Event) { h.broadcast(RoomStage, event) }
-
-// AudienceCount returns the number of connected audience clients.
-func (h *Hub) AudienceCount() int {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	n := 0
-	for c := range h.clients {
-		if c.room == RoomAudience {
-			n++
-		}
-	}
-	return n
-}
-
-func (h *Hub) broadcast(room Room, event service.Event) {
-	data, err := json.Marshal(event)
+// Broadcast implements the pipeline's Broadcaster port.
+func (h *Hub) Broadcast(eventType string, payload any) {
+	data, err := json.Marshal(event{Type: eventType, Payload: payload})
 	if err != nil {
 		h.log.Error("marshal event", "error", err)
 		return
@@ -76,67 +53,95 @@ func (h *Hub) broadcast(room Room, event service.Event) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	for c := range h.clients {
-		if c.room != room {
-			continue
-		}
 		select {
 		case c.send <- data:
 		default:
-			// Client can't keep up; close it, the browser will reconnect.
-			go c.close()
+			go c.close() // can't keep up; the browser will reconnect
 		}
 	}
 }
 
-func (h *Hub) add(c *Client) {
+// ClientCount returns the number of connected browsers.
+func (h *Hub) ClientCount() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.clients)
+}
+
+// ServeWS upgrades an HTTP request into a hub-managed connection.
+func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		h.log.Error("ws upgrade", "error", err)
+		return
+	}
+	c := &client{conn: conn, send: make(chan []byte, sendBuffer)}
 	h.mu.Lock()
 	h.clients[c] = struct{}{}
 	n := len(h.clients)
 	h.mu.Unlock()
-	h.log.Info("client connected", "room", c.room, "client_id", c.id, "total", n)
+	h.log.Info("ws client connected", "total", n)
+
+	go c.writePump()
+	go func() {
+		c.readPump()
+		h.mu.Lock()
+		delete(h.clients, c)
+		h.mu.Unlock()
+		c.close()
+	}()
 }
 
-func (h *Hub) remove(c *Client) {
-	h.mu.Lock()
-	delete(h.clients, c)
-	h.mu.Unlock()
+type client struct {
+	conn      *websocket.Conn
+	send      chan []byte
+	closeOnce sync.Once
 }
 
-// inboundMessage is what audience/stage pages send us.
-type inboundMessage struct {
-	Type      string `json:"type"` // submit_repo | vote_finding
-	Repo      string `json:"repo,omitempty"`
-	FindingID string `json:"finding_id,omitempty"`
+func (c *client) close() {
+	c.closeOnce.Do(func() {
+		close(c.send)
+		_ = c.conn.Close()
+	})
 }
 
-// handleInbound routes one client message to the game. Errors are sent
-// back to that client only (e.g. "already voted").
-func (h *Hub) handleInbound(c *Client, raw []byte) {
-	var msg inboundMessage
-	if err := json.Unmarshal(raw, &msg); err != nil {
-		return
-	}
-	ctx := context.Background()
-
-	var err error
-	switch msg.Type {
-	case "submit_repo":
-		err = h.game.SubmitRepo(ctx, c.id, msg.Repo)
-	case "vote_finding":
-		err = h.game.VoteFinding(ctx, c.id, msg.FindingID)
-	default:
-		return
-	}
-	if err != nil {
-		c.sendEvent(service.Event{Type: service.EventError, Payload: err.Error()})
+// readPump discards inbound messages (the UI talks over REST) but keeps
+// the pong handler alive.
+func (c *client) readPump() {
+	c.conn.SetReadLimit(512)
+	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error {
+		return c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	})
+	for {
+		if _, _, err := c.conn.ReadMessage(); err != nil {
+			return
+		}
 	}
 }
 
-// sendSnapshot pushes the current state to a newly connected client.
-func (h *Hub) sendSnapshot(c *Client) {
-	state, err := h.game.State(context.Background())
-	if err != nil {
-		state = domain.SessionState{Phase: domain.PhaseIdle}
+func (c *client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		_ = c.conn.Close()
+	}()
+	for {
+		select {
+		case data, ok := <-c.send:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				_ = c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+			if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+				return
+			}
+		case <-ticker.C:
+			_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
 	}
-	c.sendEvent(service.Event{Type: service.EventState, Payload: state})
 }

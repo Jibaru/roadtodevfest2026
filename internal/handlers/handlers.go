@@ -1,147 +1,120 @@
 package handlers
 
 import (
-	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
+	"regexp"
 
-	"github.com/jibaru/agentarena/internal/realtime"
-	"github.com/jibaru/agentarena/internal/review/domain"
-	"github.com/jibaru/agentarena/internal/review/service"
+	"github.com/jibaru/s1ngo/internal/pipeline"
+	"github.com/jibaru/s1ngo/internal/realtime"
+	"github.com/jibaru/s1ngo/internal/video/domain"
 )
 
-const clientCookie = "agentarena_client"
+var fingerprintRe = regexp.MustCompile(`^[A-Za-z0-9_-]{8,128}$`)
 
 // Handlers holds the HTTP surface. Thin by design: validate, call the
-// service, translate errors — no business logic.
+// pipeline/repo, translate errors — no business logic.
 type Handlers struct {
-	svc            *service.ReviewService
-	hub            *realtime.Hub
-	presenterToken string
-	log            *slog.Logger
+	pipe *pipeline.Service
+	repo domain.VideoRepository
+	hub  *realtime.Hub
+	log  *slog.Logger
 }
 
-func New(svc *service.ReviewService, hub *realtime.Hub, presenterToken string, log *slog.Logger) *Handlers {
-	return &Handlers{svc: svc, hub: hub, presenterToken: presenterToken, log: log}
+func New(pipe *pipeline.Service, repo domain.VideoRepository, hub *realtime.Hub, log *slog.Logger) *Handlers {
+	return &Handlers{pipe: pipe, repo: repo, hub: hub, log: log}
 }
 
 func (h *Handlers) Health(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-func (h *Handlers) StartSession(w http.ResponseWriter, r *http.Request) {
-	if !h.authorized(r) {
-		writeJSON(w, http.StatusUnauthorized, ErrorResponse{Error: "invalid presenter token"})
-		return
-	}
-	state, err := h.svc.StartSession(r.Context())
+func (h *Handlers) ListVideos(w http.ResponseWriter, r *http.Request) {
+	videos, err := h.repo.ListRecent(r.Context(), 100)
 	if err != nil {
 		h.writeError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, h.response(state))
+	fp := fingerprintHash(r)
+	for _, v := range videos {
+		v.Owned = fp != "" && v.OwnerFingerprintHash == fp
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"videos": videos})
 }
 
-func (h *Handlers) Advance(w http.ResponseWriter, r *http.Request) {
-	if !h.authorized(r) {
-		writeJSON(w, http.StatusUnauthorized, ErrorResponse{Error: "invalid presenter token"})
-		return
-	}
-	state, err := h.svc.Advance(r.Context())
+func (h *Handlers) GetVideo(w http.ResponseWriter, r *http.Request) {
+	v, err := h.repo.ByID(r.Context(), r.PathValue("id"))
 	if err != nil {
 		h.writeError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, h.response(state))
+	fp := fingerprintHash(r)
+	v.Owned = fp != "" && v.OwnerFingerprintHash == fp
+	writeJSON(w, http.StatusOK, map[string]any{"video": v})
 }
 
-func (h *Handlers) Reset(w http.ResponseWriter, r *http.Request) {
-	if !h.authorized(r) {
-		writeJSON(w, http.StatusUnauthorized, ErrorResponse{Error: "invalid presenter token"})
+func (h *Handlers) CreateVideo(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
 		return
 	}
-	if err := h.svc.Reset(r.Context()); err != nil {
+	v, err := h.pipe.Enqueue(r.Context(), req.URL, fingerprintHash(r))
+	if err != nil {
+		h.writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]any{"video": v})
+}
+
+func (h *Handlers) DeleteVideo(w http.ResponseWriter, r *http.Request) {
+	if err := h.pipe.Delete(r.Context(), r.PathValue("id"), fingerprintHash(r)); err != nil {
 		h.writeError(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handlers) CurrentSession(w http.ResponseWriter, r *http.Request) {
-	state, err := h.svc.State(r.Context())
-	if err != nil {
-		h.writeError(w, err)
-		return
+func (h *Handlers) WS(w http.ResponseWriter, r *http.Request) {
+	h.hub.ServeWS(w, r)
+}
+
+// fingerprintHash hashes the browser's self-issued fingerprint header,
+// mirroring the original s1ng owner mechanism.
+func fingerprintHash(r *http.Request) string {
+	raw := r.Header.Get("X-Fingerprint")
+	if !fingerprintRe.MatchString(raw) {
+		return ""
 	}
-	writeJSON(w, http.StatusOK, h.response(state))
-}
-
-// AudienceWS upgrades an audience connection, identifying the client
-// by a cookie so submissions and votes deduplicate.
-func (h *Handlers) AudienceWS(w http.ResponseWriter, r *http.Request) {
-	clientID := h.ensureClientID(w, r)
-	h.hub.ServeWS(w, r, clientID, realtime.RoomAudience)
-}
-
-// StageWS upgrades the presenter connection (token-gated).
-func (h *Handlers) StageWS(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Get("token") != h.presenterToken {
-		http.Error(w, "invalid presenter token", http.StatusUnauthorized)
-		return
-	}
-	h.hub.ServeWS(w, r, "stage", realtime.RoomStage)
-}
-
-func (h *Handlers) authorized(r *http.Request) bool {
-	return r.Header.Get("X-Presenter-Token") == h.presenterToken ||
-		r.URL.Query().Get("token") == h.presenterToken
-}
-
-func (h *Handlers) ensureClientID(w http.ResponseWriter, r *http.Request) string {
-	if c, err := r.Cookie(clientCookie); err == nil && c.Value != "" {
-		return c.Value
-	}
-	b := make([]byte, 8)
-	_, _ = rand.Read(b)
-	id := hex.EncodeToString(b)
-	http.SetCookie(w, &http.Cookie{
-		Name:     clientCookie,
-		Value:    id,
-		Path:     "/",
-		MaxAge:   60 * 60 * 6,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
-	return id
-}
-
-func (h *Handlers) response(state domain.SessionState) SessionResponse {
-	return SessionResponse{Session: state, AudienceCount: h.hub.AudienceCount()}
+	sum := sha256.Sum256([]byte(raw))
+	return hex.EncodeToString(sum[:])
 }
 
 // writeError maps domain errors to HTTP status codes.
 func (h *Handlers) writeError(w http.ResponseWriter, err error) {
 	status := http.StatusInternalServerError
 	switch {
-	case errors.Is(err, domain.ErrSessionNotFound):
+	case errors.Is(err, domain.ErrVideoNotFound):
 		status = http.StatusNotFound
-	case errors.Is(err, domain.ErrInvalidPhase),
-		errors.Is(err, domain.ErrNoRepos),
-		errors.Is(err, domain.ErrInvalidRepoURL),
-		errors.Is(err, domain.ErrFindingNotFound),
-		errors.Is(err, domain.ErrInvalidReviewer):
+	case errors.Is(err, domain.ErrInvalidYouTubeURL):
+		status = http.StatusBadRequest
+	case errors.Is(err, domain.ErrAlreadyQueued):
 		status = http.StatusConflict
-	case errors.Is(err, domain.ErrAlreadyVoted),
-		errors.Is(err, domain.ErrAlreadySubmitted):
-		status = http.StatusTooManyRequests
+	case errors.Is(err, domain.ErrNotOwner):
+		status = http.StatusForbidden
 	default:
 		h.log.Error("internal error", "error", err)
 	}
-	writeJSON(w, status, ErrorResponse{Error: err.Error()})
+	writeJSON(w, status, errBody(err.Error()))
 }
+
+func errBody(msg string) map[string]string { return map[string]string{"error": msg} }
 
 func writeJSON(w http.ResponseWriter, status int, body any) {
 	w.Header().Set("Content-Type", "application/json")

@@ -1,3 +1,8 @@
+// Package agents is the ADK-powered crew of s1n.go: a language
+// detective, a romanizer and a translator. In the original s1ng these
+// were npm libraries (kuroshiro, hangul-romanization) and a GPT call —
+// here each one is a Gemini agent, because Go has no good romanization
+// libraries and that's exactly what LLMs are great at.
 package agents
 
 import (
@@ -5,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"sync/atomic"
 
 	"google.golang.org/genai"
 
@@ -15,28 +19,50 @@ import (
 	"google.golang.org/adk/v2/model/gemini"
 	"google.golang.org/adk/v2/runner"
 	"google.golang.org/adk/v2/session"
-	"google.golang.org/adk/v2/tool"
-	"google.golang.org/adk/v2/tool/functiontool"
-
-	"github.com/jibaru/agentarena/internal/repofetch"
-	"github.com/jibaru/agentarena/internal/review/domain"
 )
 
 const (
-	appName      = "agentarena"
-	userID       = "show"
-	modelName    = "gemini-2.5-flash"
-	maxFileReads = 12 // hard budget per reviewer per round
-	maxListLines = 250
+	appName   = "s1ngo"
+	userID    = "pipeline"
+	modelName = "gemini-2.5-flash"
+	// Lyrics batches are chunked so one huge song can't blow the
+	// output budget of a single call.
+	chunkSize = 60
 )
 
-// Crew is the reviewing cast: three specialist reviewers plus the lead.
-// It implements service.ReviewerAgent and service.LeadReviewer.
+const detectInstruction = `You identify the language that a song's LYRICS are sung in,
+from its YouTube title and description.
+
+Rules:
+- Return the language of the LYRICS, not the title. "BTS - Dynamite (Korean cover)" → ko.
+- For covers and dubs, return the language OF THIS RECORDING:
+  "Momoland - Baam Baam Japanese Version" → ja, even though the original is Korean.
+- Use the description for clues (cover language, lyrics excerpts, original artist).
+- Reply with EXACTLY one token: ja, ko, es, en, or other.
+- If unsure, reply other.`
+
+const romanizeInstruction = `You romanize song lyrics for karaoke display.
+
+You receive a JSON array of lyric lines in Japanese or Korean. Return a JSON
+array of the same length where each line is romanized:
+- Japanese → Hepburn romaji, spaced by word.
+- Korean → Revised Romanization, spaced by word.
+- Words already in Latin script (English/Spanish inside mixed lines) pass through unchanged.
+- Keep the meaning-free fidelity of a transliteration: do NOT translate.
+Reply with ONLY the JSON array, no prose, no markdown fence.`
+
+const translateInstruction = `You translate song lyrics line by line for a karaoke display.
+
+You receive the source language and a JSON array of lyric lines. Return a JSON
+array of the same length with each line translated into %s. Keep translations
+short and singable-line sized; preserve the emotional register of the lyric.
+Reply with ONLY the JSON array, no prose, no markdown fence.`
+
+// Crew implements the pipeline's Agents port with three ADK agents.
 type Crew struct {
 	model model.LLM
 }
 
-// NewCrew builds the shared Gemini model.
 func NewCrew(ctx context.Context, apiKey string) (*Crew, error) {
 	m, err := gemini.NewModel(ctx, modelName, &genai.ClientConfig{APIKey: apiKey})
 	if err != nil {
@@ -45,86 +71,76 @@ func NewCrew(ctx context.Context, apiKey string) (*Crew, error) {
 	return &Crew{model: m}, nil
 }
 
-// ReadArgs / ReadResult define the read_file tool contract: the typed
-// structs ARE the schema the model sees (inferred by reflection).
-type ReadArgs struct {
-	Path string `json:"path"` // file path exactly as it appears in the listing
-}
-
-type ReadResult struct {
-	Content string `json:"content"`
-}
-
-// Review implements service.ReviewerAgent: a fresh agent per round,
-// armed with a read_file tool bound to this repo snapshot. Every tool
-// call surfaces through onStatus so the audience watches the agent
-// choose which files to open.
-func (c *Crew) Review(ctx context.Context, reviewer domain.Reviewer, snap *repofetch.Snapshot, onStatus func(string)) ([]domain.Finding, error) {
-	instruction, ok := reviewerInstructions[reviewer]
-	if !ok {
-		return nil, domain.ErrInvalidReviewer
+// DetectLanguage returns ja/ko/es/en, or "" when unknown/unsupported —
+// letting the caller fall back to deterministic title-script detection.
+func (c *Crew) DetectLanguage(ctx context.Context, title, description string) (string, error) {
+	desc := description
+	if len(desc) > 600 {
+		desc = desc[:600]
 	}
+	out, err := c.runAgent(ctx, "language_detective", detectInstruction,
+		fmt.Sprintf("Title: %s\nDescription: %s", title, desc))
+	if err != nil {
+		return "", err
+	}
+	lang := strings.ToLower(strings.TrimSpace(out))
+	switch lang {
+	case "ja", "ko", "es", "en":
+		return lang, nil
+	}
+	return "", nil
+}
 
-	var reads atomic.Int32
-	readFile, err := functiontool.New(functiontool.Config{
-		Name:        "read_file",
-		Description: "Read one file from the repository under review. Use the exact path from the listing.",
-	}, func(_ agent.Context, args ReadArgs) (ReadResult, error) {
-		if reads.Add(1) > maxFileReads {
-			return ReadResult{}, fmt.Errorf("read budget exhausted — output your findings now")
-		}
-		onStatus("reading " + args.Path)
-		content, err := snap.Read(args.Path)
+// Romanize converts ja/ko lyric lines to Latin script, batch by batch.
+func (c *Crew) Romanize(ctx context.Context, language string, texts []string) ([]string, error) {
+	return c.mapLines(ctx, "romanizer", romanizeInstruction,
+		"Language: "+language, texts)
+}
+
+// Translate renders each lyric line in the target language: Spanish for
+// most songs, English when the song is already in Spanish.
+func (c *Crew) Translate(ctx context.Context, sourceLang string, texts []string) ([]string, error) {
+	target := "Latin American Spanish"
+	if sourceLang == "es" {
+		target = "English"
+	}
+	return c.mapLines(ctx, "translator", fmt.Sprintf(translateInstruction, target),
+		"Source language: "+sourceLang, texts)
+}
+
+// mapLines sends texts through an agent in chunks, expecting a JSON
+// array of the same length back for each chunk.
+func (c *Crew) mapLines(ctx context.Context, name, instruction, header string, texts []string) ([]string, error) {
+	out := make([]string, 0, len(texts))
+	for start := 0; start < len(texts); start += chunkSize {
+		end := min(start+chunkSize, len(texts))
+		chunk := texts[start:end]
+
+		payload, _ := json.Marshal(chunk)
+		reply, err := c.runAgent(ctx, name, instruction, header+"\nLines:\n"+string(payload))
 		if err != nil {
-			return ReadResult{}, err
+			return nil, err
 		}
-		return ReadResult{Content: content}, nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating read_file tool: %w", err)
+		mapped, err := parseStringArray(reply, len(chunk))
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", name, err)
+		}
+		out = append(out, mapped...)
 	}
-
-	a, err := llmagent.New(llmagent.Config{
-		Name:        reviewerNames[reviewer],
-		Model:       c.model,
-		Description: "Specialist code reviewer: " + string(reviewer),
-		Instruction: instruction,
-		Tools:       []tool.Tool{readFile},
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating reviewer %s: %w", reviewer, err)
-	}
-
-	prompt := fmt.Sprintf("Repository: %s\n\nFile listing (path · bytes):\n%s\nRead what matters for your specialty, then output your findings JSON.",
-		snap.FullName(), formatListing(snap))
-
-	onStatus("scanning the file tree")
-	out, err := c.run(ctx, a, prompt)
-	if err != nil {
-		return nil, err
-	}
-	onStatus("writing up findings")
-	return parseFindings(out)
+	return out, nil
 }
 
-// Summary implements service.LeadReviewer.
-func (c *Crew) Summary(ctx context.Context, repo string, findings []domain.Finding) (string, error) {
-	lead, err := llmagent.New(llmagent.Config{
-		Name:        "lead_reviewer",
+// runAgent executes one single-turn agent with a fresh session.
+func (c *Crew) runAgent(ctx context.Context, name, instruction, prompt string) (string, error) {
+	a, err := llmagent.New(llmagent.Config{
+		Name:        name,
 		Model:       c.model,
-		Description: "Closes the review with a verdict.",
-		Instruction: leadInstruction,
+		Description: "s1n.go " + name,
+		Instruction: instruction,
 	})
 	if err != nil {
 		return "", err
 	}
-	data, _ := json.Marshal(findings)
-	prompt := fmt.Sprintf("Repository: %s\nFindings:\n%s\nGive your closing summary.", repo, data)
-	return c.run(ctx, lead, prompt)
-}
-
-// run executes one agent with a fresh session and collects the final text.
-func (c *Crew) run(ctx context.Context, a agent.Agent, prompt string) (string, error) {
 	svc := session.InMemoryService()
 	resp, err := svc.Create(ctx, &session.CreateRequest{AppName: appName, UserID: userID})
 	if err != nil {
@@ -136,7 +152,7 @@ func (c *Crew) run(ctx context.Context, a agent.Agent, prompt string) (string, e
 	}
 
 	msg := genai.NewContentFromText(prompt, genai.RoleUser)
-	var out strings.Builder
+	var sb strings.Builder
 	for event, err := range r.Run(ctx, userID, resp.Session.ID(), msg,
 		agent.RunConfig{StreamingMode: agent.StreamingModeNone}) {
 		if err != nil {
@@ -146,50 +162,26 @@ func (c *Crew) run(ctx context.Context, a agent.Agent, prompt string) (string, e
 			continue
 		}
 		for _, p := range event.LLMResponse.Content.Parts {
-			out.WriteString(p.Text)
+			sb.WriteString(p.Text)
 		}
 	}
-	return strings.TrimSpace(out.String()), nil
+	return strings.TrimSpace(sb.String()), nil
 }
 
-func formatListing(snap *repofetch.Snapshot) string {
-	var b strings.Builder
-	for i, f := range snap.List() {
-		if i >= maxListLines {
-			fmt.Fprintf(&b, "… and %d more files\n", len(snap.Files)-maxListLines)
-			break
-		}
-		fmt.Fprintf(&b, "%s · %d\n", f.Path, f.Size)
-	}
-	return b.String()
-}
-
-// parseFindings tolerantly extracts the JSON array from model output.
-func parseFindings(out string) ([]domain.Finding, error) {
+// parseStringArray tolerantly extracts a JSON string array of exactly
+// n elements from model output.
+func parseStringArray(out string, n int) ([]string, error) {
 	start := strings.Index(out, "[")
 	end := strings.LastIndex(out, "]")
 	if start < 0 || end <= start {
-		return nil, fmt.Errorf("no findings JSON in output: %.120s", out)
+		return nil, fmt.Errorf("no JSON array in output: %.120s", out)
 	}
-	var raw []struct {
-		Severity   string `json:"severity"`
-		Title      string `json:"title"`
-		File       string `json:"file"`
-		Detail     string `json:"detail"`
-		Suggestion string `json:"suggestion"`
+	var arr []string
+	if err := json.Unmarshal([]byte(out[start:end+1]), &arr); err != nil {
+		return nil, fmt.Errorf("parsing array: %w", err)
 	}
-	if err := json.Unmarshal([]byte(out[start:end+1]), &raw); err != nil {
-		return nil, fmt.Errorf("parsing findings JSON: %w", err)
+	if len(arr) != n {
+		return nil, fmt.Errorf("expected %d lines, got %d", n, len(arr))
 	}
-	findings := make([]domain.Finding, 0, len(raw))
-	for _, f := range raw {
-		findings = append(findings, domain.Finding{
-			Severity:   f.Severity,
-			Title:      f.Title,
-			File:       f.File,
-			Detail:     f.Detail,
-			Suggestion: f.Suggestion,
-		})
-	}
-	return findings, nil
+	return arr, nil
 }
