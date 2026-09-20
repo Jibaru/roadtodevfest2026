@@ -25,9 +25,10 @@ const (
 	appName   = "s1ngo"
 	userID    = "pipeline"
 	modelName = "gemini-2.5-flash"
-	// Lyrics batches are chunked so one huge song can't blow the
-	// output budget of a single call.
-	chunkSize = 60
+	// Lyrics batches are chunked small: besides bounding output size,
+	// short fragments avoid the model balking at mapping a whole
+	// well-known song in one go.
+	chunkSize = 12
 )
 
 const detectInstruction = `You identify the language that a song's LYRICS are sung in,

@@ -13,7 +13,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=web /web/dist ./web/dist
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /s1ngo ./cmd/api
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -X github.com/jibaru/s1ngo/internal/handlers.Rev=$(date +%s)" -o /s1ngo ./cmd/api
 
 # Stage 3: runtime with yt-dlp (standalone binary, no python needed)
 FROM debian:bookworm-slim

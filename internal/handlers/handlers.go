@@ -29,8 +29,12 @@ func New(pipe *pipeline.Service, repo domain.VideoRepository, hub *realtime.Hub,
 	return &Handlers{pipe: pipe, repo: repo, hub: hub, log: log}
 }
 
+// Rev is stamped at build time (Dockerfile ldflags) so deploys are
+// distinguishable — a container swap is otherwise invisible to /health.
+var Rev = "dev"
+
 func (h *Handlers) Health(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok", "rev": Rev})
 }
 
 func (h *Handlers) ListVideos(w http.ResponseWriter, r *http.Request) {
