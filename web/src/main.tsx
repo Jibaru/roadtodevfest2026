@@ -21,11 +21,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       </header>
       <main>{children}</main>
       <footer className="container-page mt-24 py-8 text-xs uppercase tracking-[0.18em] text-mute">
-        a Go + ADK clone of{' '}
-        <a href="https://github.com/crafter-station/s1gn" className="hover:text-ink underline">
-          s1ng by Crafter Station
-        </a>{' '}
-        · DevFest 2026
+        s1n.go · made with Go + ADK · Google DevFest 2026
       </footer>
     </div>
   );
