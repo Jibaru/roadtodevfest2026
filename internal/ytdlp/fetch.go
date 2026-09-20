@@ -94,8 +94,14 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 
 	// Detect the song's actual language: LLM agent → title script →
 	// yt-dlp's declared language (uploader-tagged, often wrong).
+	// One deterministic override: kana in the title is unambiguous —
+	// hiragana/katakana exist only in Japanese, so no agent opinion
+	// (nor multilingual video description) can outvote it.
 	sourceLang := ""
-	if detectLang != nil {
+	if titleHasKana(res.Title) {
+		sourceLang = "ja"
+	}
+	if sourceLang == "" && detectLang != nil {
 		sourceLang = detectLang(ctx, res.Title, res.Description)
 	}
 	if sourceLang == "" {
@@ -224,6 +230,16 @@ func pickManualVTT(files []string, youtubeID string, manualKeys []string, source
 		}
 	}
 	return nil
+}
+
+// titleHasKana reports whether the title contains hiragana or katakana.
+func titleHasKana(title string) bool {
+	for _, c := range title {
+		if (c >= 0x3040 && c <= 0x309f) || (c >= 0x30a0 && c <= 0x30ff) {
+			return true
+		}
+	}
+	return false
 }
 
 // DetectLangFromTitle scores the title's Unicode script. Deterministic
