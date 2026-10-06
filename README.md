@@ -95,7 +95,7 @@ make test   # url/vtt/lines/pipeline tests, all offline
 
 ## Credits
 
-Slide deck background music: "Pamgaea" Kevin MacLeod (incompetech.com),
+Slide deck background music: "Electrodoodle" Kevin MacLeod (incompetech.com),
 licensed under Creative Commons: By Attribution 4.0 License —
 http://creativecommons.org/licenses/by/4.0/
 
