@@ -95,6 +95,11 @@ make test   # url/vtt/lines/pipeline tests, all offline
 
 ## Credits
 
+Slide deck background music: "Carefree" Kevin MacLeod (incompetech.com),
+licensed under Creative Commons: By Attribution 4.0 License —
+http://creativecommons.org/licenses/by/4.0/
+
+
 UI and pipeline design ported from **[s1ng](https://github.com/crafter-station/s1gn)**
 by [Crafter Station](https://crafterstation.com) — same team, different
 runtime. Attribution intentional and visible, also in the app footer.
