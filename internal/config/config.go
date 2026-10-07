@@ -10,8 +10,13 @@ import (
 
 // Config holds all runtime configuration, loaded from environment variables.
 type Config struct {
-	Port         string
-	GeminiAPIKey string
+	Port string
+	// OpenAIAPIKey authenticates the lyrics agents.
+	OpenAIAPIKey string
+	// OpenAIModel is the model the agents run on. GPT-6 Luna is the
+	// budget tier — ideal for focused, high-volume jobs like line
+	// mapping; set OPENAI_MODEL=gpt-6-sol for the mid-tier model.
+	OpenAIModel string
 	// DatabaseURL enables the Postgres repository when non-empty;
 	// otherwise videos live in memory.
 	DatabaseURL string
@@ -33,17 +38,18 @@ type Config struct {
 func Load() (*Config, error) {
 	workers, _ := strconv.Atoi(getEnv("WORKERS", "3"))
 	cfg := &Config{
-		Port:         getEnv("PORT", "8080"),
-		GeminiAPIKey: os.Getenv("GEMINI_API_KEY"),
-		DatabaseURL:  os.Getenv("DATABASE_URL"),
-		Workers:      workers,
-		YtdlpPath:    os.Getenv("YTDLP_PATH"),
-		YtdlpCookies: loadCookies(),
+		Port:           getEnv("PORT", "8080"),
+		OpenAIAPIKey:   os.Getenv("OPENAI_API_KEY"),
+		OpenAIModel:    getEnv("OPENAI_MODEL", "gpt-6-luna"),
+		DatabaseURL:    os.Getenv("DATABASE_URL"),
+		Workers:        workers,
+		YtdlpPath:      os.Getenv("YTDLP_PATH"),
+		YtdlpCookies:   loadCookies(),
 		YtdlpExtraArgs: strings.Fields(os.Getenv("YTDLP_EXTRA_ARGS")),
-		FakeAgents:   os.Getenv("FAKE_AGENTS") == "1",
+		FakeAgents:     os.Getenv("FAKE_AGENTS") == "1",
 	}
-	if cfg.GeminiAPIKey == "" && !cfg.FakeAgents {
-		return nil, fmt.Errorf("GEMINI_API_KEY is required unless FAKE_AGENTS=1")
+	if cfg.OpenAIAPIKey == "" && !cfg.FakeAgents {
+		return nil, fmt.Errorf("OPENAI_API_KEY is required unless FAKE_AGENTS=1")
 	}
 	return cfg, nil
 }

@@ -9,24 +9,24 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/jibaru/s1ngo/internal/pipeline"
 	"github.com/jibaru/s1ngo/internal/realtime"
 	"github.com/jibaru/s1ngo/internal/video/domain"
+	"github.com/jibaru/s1ngo/internal/video/service"
 )
 
 var fingerprintRe = regexp.MustCompile(`^[A-Za-z0-9_-]{8,128}$`)
 
 // Handlers holds the HTTP surface. Thin by design: validate, call the
-// pipeline/repo, translate errors — no business logic.
+// service/repo, translate errors — no business logic.
 type Handlers struct {
-	pipe *pipeline.Service
-	repo domain.VideoRepository
-	hub  *realtime.Hub
-	log  *slog.Logger
+	processor *service.ProcessingService
+	repo      domain.VideoRepository
+	hub       *realtime.Hub
+	log       *slog.Logger
 }
 
-func New(pipe *pipeline.Service, repo domain.VideoRepository, hub *realtime.Hub, log *slog.Logger) *Handlers {
-	return &Handlers{pipe: pipe, repo: repo, hub: hub, log: log}
+func New(processor *service.ProcessingService, repo domain.VideoRepository, hub *realtime.Hub, log *slog.Logger) *Handlers {
+	return &Handlers{processor: processor, repo: repo, hub: hub, log: log}
 }
 
 // Rev is stamped at build time (Dockerfile ldflags) so deploys are
@@ -69,7 +69,7 @@ func (h *Handlers) CreateVideo(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errBody("invalid JSON body"))
 		return
 	}
-	v, err := h.pipe.Enqueue(r.Context(), req.URL, fingerprintHash(r))
+	v, err := h.processor.Enqueue(r.Context(), req.URL, fingerprintHash(r))
 	if err != nil {
 		h.writeError(w, err)
 		return
@@ -78,7 +78,7 @@ func (h *Handlers) CreateVideo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) DeleteVideo(w http.ResponseWriter, r *http.Request) {
-	if err := h.pipe.Delete(r.Context(), r.PathValue("id"), fingerprintHash(r)); err != nil {
+	if err := h.processor.Delete(r.Context(), r.PathValue("id"), fingerprintHash(r)); err != nil {
 		h.writeError(w, err)
 		return
 	}

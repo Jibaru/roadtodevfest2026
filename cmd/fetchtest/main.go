@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/jibaru/s1ngo/internal/lines"
-	"github.com/jibaru/s1ngo/internal/ytdlp"
+	"github.com/jibaru/s1ngo/internal/video/domain"
+	"github.com/jibaru/s1ngo/internal/video/infra/youtube"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 	if len(os.Args) > 1 {
 		id = os.Args[1]
 	}
-	f := &ytdlp.Fetcher{Bin: os.Getenv("YTDLP_PATH")}
+	f := &youtube.Fetcher{Bin: os.Getenv("YTDLP_PATH")}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 
@@ -28,8 +28,8 @@ func main() {
 	}
 	fmt.Printf("title=%q dur=%ds declared=%q subLang=%q auto=%v cues=%d\n",
 		res.Title, res.DurationSec, res.DeclaredLanguage, res.SubtitleLang, res.IsAuto, len(res.Cues))
-	cues := lines.CleanCues(res.Cues)
-	built := lines.Build(cues, nil, nil)
+	cues := domain.CleanCues(res.Cues)
+	built := domain.BuildLyricLines(cues, nil, nil)
 	fmt.Println("lines:", len(built))
 	for i, l := range built[:min(4, len(built))] {
 		fmt.Printf("  [%d] %d-%dms:", i, l.StartMs, l.EndMs)

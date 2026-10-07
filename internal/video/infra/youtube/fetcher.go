@@ -1,8 +1,8 @@
-// Package ytdlp wraps the yt-dlp binary to fetch YouTube metadata and
+// Package youtube wraps the yt-dlp binary to fetch YouTube metadata and
 // subtitle tracks. Faithful port of the original s1ng subtitles.ts:
 // two-phase fetch designed to avoid YouTube's per-IP rate limit on the
 // auto-translation endpoint.
-package ytdlp
+package youtube
 
 import (
 	"context"
@@ -19,23 +19,6 @@ import (
 // PriorityLangs orders subtitle track preference. Asian languages first
 // because romaji output is the user-facing value for them.
 var PriorityLangs = []string{"ko", "ja", "es", "en"}
-
-// Result is everything one video fetch produces.
-type Result struct {
-	Title            string
-	DurationSec      int
-	ThumbnailURL     string
-	DeclaredLanguage string
-	Description      string
-	// Language of the chosen subtitle track ("" if none found).
-	SubtitleLang string
-	IsAuto       bool
-	Cues         []Cue
-}
-
-// DetectLangFunc resolves the song's actual lyrics language from
-// title+description (LLM agent in production; "" means unknown).
-type DetectLangFunc func(ctx context.Context, title, description string) string
 
 // Fetcher shells out to yt-dlp. Bin defaults to "yt-dlp" on PATH.
 // CookiesFile, when set, is passed as --cookies to both phases — the
@@ -63,7 +46,7 @@ func (f *Fetcher) bin() string {
 //     auto-translation endpoint.
 //  2. Phase 2 — only if no manual track matched: fetch the auto-caption
 //     in just the detected source language.
-func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang DetectLangFunc) (*Result, error) {
+func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang domain.LanguageDetectFunc) (*domain.SubtitleResult, error) {
 	dir, err := os.MkdirTemp("", "s1ngo-subs-"+youtubeID+"-")
 	if err != nil {
 		return nil, err
@@ -82,7 +65,7 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	}
 
 	info := readJSON(filepath.Join(dir, youtubeID+".info.json"))
-	res := &Result{
+	res := &domain.SubtitleResult{
 		Title:            str(info["title"], youtubeID),
 		DurationSec:      num(info["duration"]),
 		ThumbnailURL:     str(info["thumbnail"], "https://i.ytimg.com/vi/"+youtubeID+"/hqdefault.jpg"),
@@ -98,14 +81,14 @@ func (f *Fetcher) Fetch(ctx context.Context, youtubeID string, detectLang Detect
 	// hiragana/katakana exist only in Japanese, so no agent opinion
 	// (nor multilingual video description) can outvote it.
 	sourceLang := ""
-	if titleHasKana(res.Title) {
+	if domain.TitleHasKana(res.Title) {
 		sourceLang = "ja"
 	}
 	if sourceLang == "" && detectLang != nil {
 		sourceLang = detectLang(ctx, res.Title, res.Description)
 	}
 	if sourceLang == "" {
-		sourceLang = DetectLangFromTitle(res.Title)
+		sourceLang = domain.DetectLangFromTitle(res.Title)
 	}
 	if sourceLang == "" && res.DeclaredLanguage != "" {
 		base := strings.ToLower(strings.FieldsFunc(res.DeclaredLanguage, func(r rune) bool { return r == '-' || r == '.' })[0])
@@ -264,45 +247,6 @@ func pickManualVTT(files []string, youtubeID string, manualKeys []string, source
 		}
 	}
 	return nil
-}
-
-// titleHasKana reports whether the title contains hiragana or katakana.
-func titleHasKana(title string) bool {
-	for _, c := range title {
-		if (c >= 0x3040 && c <= 0x309f) || (c >= 0x30a0 && c <= 0x30ff) {
-			return true
-		}
-	}
-	return false
-}
-
-// DetectLangFromTitle scores the title's Unicode script. Deterministic
-// fallback when the LLM is unavailable; returns "" for Latin titles.
-func DetectLangFromTitle(title string) string {
-	ja, ko := 0, 0
-	for _, c := range title {
-		switch {
-		case c >= 0x3040 && c <= 0x309f: // hiragana
-			ja += 2
-		case c >= 0x30a0 && c <= 0x30ff: // katakana
-			ja += 2
-		case c >= 0xac00 && c <= 0xd7a3: // hangul syllables
-			ko += 2
-		case c >= 0x1100 && c <= 0x11ff: // hangul jamo
-			ko++
-		case c >= 0x3130 && c <= 0x318f: // hangul compat jamo
-			ko++
-		case c >= 0x4e00 && c <= 0x9fff: // CJK ideographs: treat as ja in our domain
-			ja++
-		}
-	}
-	if ko >= 2 && ko >= ja {
-		return "ko"
-	}
-	if ja >= 2 {
-		return "ja"
-	}
-	return ""
 }
 
 func (f *Fetcher) run(ctx context.Context, args []string) (string, error) {

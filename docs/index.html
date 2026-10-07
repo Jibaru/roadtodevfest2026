@@ -294,7 +294,7 @@
   </div>
   <pre style="margin-top:30px"><span class="fn">llmagent</span>.New(llmagent.Config{
     Name:        <span class="st">"romanizer"</span>,
-    Model:       geminiModel,
+    Model:       openaiModel, <span class="cm">// GPT-6 Luna via ADK</span>
     Instruction: <span class="st">"You romanize song lyrics for karaoke display…"</span>,
 })</pre>
   <p class="sub" style="margin-top:16px" data-i18n="s4_note">A personality is just an instruction string.</p>
@@ -408,7 +408,7 @@
 <!-- 7a2 · Agents behind ports -->
 <section class="slide">
   <h2><span class="ms" style="color:var(--blue)">swap_horiz</span> <span data-i18n="ports_title">The LLM is just another dependency</span></h2>
-  <pre><span class="kw">type</span> <span class="fn">Agents</span> <span class="kw">interface</span> {
+  <pre><span class="kw">type</span> <span class="fn">LyricsAgents</span> <span class="kw">interface</span> {
     DetectLanguage(ctx, title, description) (<span class="kw">string</span>, error)
     Romanize(ctx, language, lines) ([]<span class="kw">string</span>, error)
     Translate(ctx, sourceLang, lines) ([]<span class="kw">string</span>, error)
@@ -416,11 +416,11 @@
 
 <span class="cm">// wiring in main.go — one flag swaps the whole cast:</span>
 <span class="kw">if</span> cfg.FakeAgents {
-    crew, fetcher = &amp;fake.Crew{}, fake.Fetcher{} <span class="cm">// offline, zero tokens</span>
+    lyrics, source = &amp;fake.Agents{}, fake.SubtitleSource{}      <span class="cm">// offline, zero tokens</span>
 } <span class="kw">else</span> {
-    crew, _ = agents.<span class="fn">NewCrew</span>(ctx, apiKey)        <span class="cm">// the real Gemini crew</span>
+    lyrics, _ = agents.<span class="fn">NewOpenAIAgents</span>(ctx, <span class="st">"gpt-6-luna"</span>, key) <span class="cm">// the real agents</span>
 }</pre>
-  <p class="sub" style="margin-top:16px" data-i18n="ports_note">Small implicit interfaces make Gemini and yt-dlp swappable like a database. Every rehearsal of this talk ran the full pipeline offline — the workers never knew.</p>
+  <p class="sub" style="margin-top:16px" data-i18n="ports_note">Small implicit interfaces make GPT-6 Luna and yt-dlp swappable like a database. Every rehearsal of this talk ran the full pipeline offline — the workers never knew.</p>
 </section>
 
 <!-- 7b · Why Go, proof 1: goroutines -->
@@ -590,7 +590,7 @@ const I18N = {
     sm_loop: "un video fallido vuelve a la cola al reenviarlo — los bot-checks de YouTube son intermitentes",
     sm_note: "Los agentes son no-deterministas — el pipeline no puede serlo. Cada etapa tiene timeout y fallback, y cada una transmite su progreso para que la audiencia vea al pool trabajar. Orquestación determinista alrededor de agentes estocásticos.",
     ports_title: "El LLM es una dependencia más",
-    ports_note: "Interfaces pequeñas e implícitas hacen a Gemini y yt-dlp intercambiables como una base de datos. Cada ensayo corrió el pipeline completo offline — los workers nunca se enteraron.",
+    ports_note: "Interfaces pequeñas e implícitas hacen a GPT-6 Luna y yt-dlp intercambiables como una base de datos. Cada ensayo corrió el pipeline completo offline — los workers nunca se enteraron.",
     g_eyebrow4: "por qué Go — prueba",
     g4_title: "Un agente que nunca responde no puede congelar el show",
     g4_note: "La cancelación fluye por todas las capas — ADK, el subproceso de yt-dlp, Postgres — porque context es el contrato de la librería estándar. yt-dlp y los LLMs son las dependencias más lentas y frágiles que llamarás; los deadlines no son opcionales.",

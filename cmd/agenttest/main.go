@@ -1,6 +1,6 @@
-// Command agenttest diagnoses the agent mapping pipeline against a real
-// video, printing only errors and counts (never lyric content).
-// Dev tool: GEMINI_API_KEY=... go run ./cmd/agenttest <youtubeID>
+// Command agenttest diagnoses the agent mapping against a real video,
+// printing only errors and counts (never lyric content).
+// Dev tool: OPENAI_API_KEY=... go run ./cmd/agenttest <youtubeID>
 package main
 
 import (
@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/jibaru/s1ngo/internal/agents"
-	"github.com/jibaru/s1ngo/internal/lines"
-	"github.com/jibaru/s1ngo/internal/ytdlp"
+	"github.com/jibaru/s1ngo/internal/video/domain"
+	"github.com/jibaru/s1ngo/internal/video/infra/agents"
+	"github.com/jibaru/s1ngo/internal/video/infra/youtube"
 )
 
 func main() {
@@ -19,28 +19,32 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	f := &ytdlp.Fetcher{Bin: os.Getenv("YTDLP_PATH")}
+	f := &youtube.Fetcher{Bin: os.Getenv("YTDLP_PATH")}
 	res, err := f.Fetch(ctx, id, nil)
 	if err != nil {
 		fmt.Println("FETCH ERROR:", err)
 		os.Exit(1)
 	}
-	cues := lines.CleanCues(res.Cues)
+	cues := domain.CleanCues(res.Cues)
 	texts := make([]string, len(cues))
 	for i, c := range cues {
 		texts[i] = c.Text
 	}
 	fmt.Printf("track=%s cues=%d needsRomanization=%v\n",
-		res.SubtitleLang, len(texts), lines.NeedsRomanization(res.SubtitleLang))
+		res.SubtitleLang, len(texts), domain.NeedsRomanization(res.SubtitleLang))
 
-	crew, err := agents.NewCrew(ctx, os.Getenv("GEMINI_API_KEY"))
+	model := os.Getenv("OPENAI_MODEL")
+	if model == "" {
+		model = "gpt-6-luna"
+	}
+	lyricsAgents, err := agents.NewOpenAIAgents(ctx, model, os.Getenv("OPENAI_API_KEY"))
 	if err != nil {
-		fmt.Println("CREW ERROR:", err)
+		fmt.Println("AGENTS ERROR:", err)
 		os.Exit(1)
 	}
 
-	if lines.NeedsRomanization(res.SubtitleLang) {
-		out, err := crew.Romanize(ctx, res.SubtitleLang, texts)
+	if domain.NeedsRomanization(res.SubtitleLang) {
+		out, err := lyricsAgents.Romanize(ctx, res.SubtitleLang, texts)
 		if err != nil {
 			fmt.Println("ROMANIZE ERROR:", err)
 		} else {
@@ -61,7 +65,7 @@ func main() {
 		}
 	}
 
-	tr, err := crew.Translate(ctx, res.SubtitleLang, texts)
+	tr, err := lyricsAgents.Translate(ctx, res.SubtitleLang, texts)
 	if err != nil {
 		fmt.Println("TRANSLATE ERROR:", err)
 	} else {

@@ -9,18 +9,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jibaru/s1ngo/internal/agents"
-	"github.com/jibaru/s1ngo/internal/agents/fake"
 	"github.com/jibaru/s1ngo/internal/config"
 	"github.com/jibaru/s1ngo/internal/handlers"
 	"github.com/jibaru/s1ngo/internal/logger"
-	"github.com/jibaru/s1ngo/internal/pipeline"
 	"github.com/jibaru/s1ngo/internal/realtime"
 	"github.com/jibaru/s1ngo/internal/server"
 	"github.com/jibaru/s1ngo/internal/video/domain"
+	"github.com/jibaru/s1ngo/internal/video/infra/agents"
+	"github.com/jibaru/s1ngo/internal/video/infra/fake"
 	"github.com/jibaru/s1ngo/internal/video/infra/persistence/memory"
 	"github.com/jibaru/s1ngo/internal/video/infra/persistence/postgres"
-	"github.com/jibaru/s1ngo/internal/ytdlp"
+	"github.com/jibaru/s1ngo/internal/video/infra/youtube"
+	"github.com/jibaru/s1ngo/internal/video/service"
 	"github.com/jibaru/s1ngo/web"
 )
 
@@ -45,20 +45,22 @@ func main() {
 		log.Info("using postgres repository")
 	}
 
-	// The cast: real yt-dlp + Gemini agents, or fakes for offline rehearsal.
+	// Infra adapters: real yt-dlp + OpenAI agents, or fakes for
+	// offline rehearsal.
 	var (
-		crew    pipeline.Agents
-		fetcher pipeline.Fetcher
+		lyricsAgents service.LyricsAgents
+		subtitles    service.SubtitleSource
 	)
 	if cfg.FakeAgents {
-		log.Info("FAKE_AGENTS=1: offline pipeline with fake fetcher + agents")
-		crew, fetcher = &fake.Crew{Delay: time.Second}, fake.Fetcher{}
+		log.Info("FAKE_AGENTS=1: offline processing with fake subtitle source + agents")
+		lyricsAgents, subtitles = &fake.Agents{Delay: time.Second}, fake.SubtitleSource{}
 	} else {
-		realCrew, err := agents.NewCrew(ctx, cfg.GeminiAPIKey)
+		openaiAgents, err := agents.NewOpenAIAgents(ctx, cfg.OpenAIModel, cfg.OpenAIAPIKey)
 		if err != nil {
 			log.Error("agents", "error", err)
 			os.Exit(1)
 		}
+		log.Info("lyrics agents ready", "model", cfg.OpenAIModel)
 		cookiesFile := ""
 		if cfg.YtdlpCookies != "" {
 			f, err := os.CreateTemp("", "s1ngo-cookies-*.txt")
@@ -70,13 +72,14 @@ func main() {
 				_ = f.Close()
 			}
 		}
-		crew, fetcher = realCrew, &ytdlp.Fetcher{Bin: cfg.YtdlpPath, CookiesFile: cookiesFile, ExtraArgs: cfg.YtdlpExtraArgs}
+		lyricsAgents = openaiAgents
+		subtitles = &youtube.Fetcher{Bin: cfg.YtdlpPath, CookiesFile: cookiesFile, ExtraArgs: cfg.YtdlpExtraArgs}
 	}
 
 	hub := realtime.NewHub(log)
-	pipe := pipeline.New(repo, fetcher, crew, hub, cfg.Workers, log)
+	processor := service.NewProcessingService(repo, subtitles, lyricsAgents, hub, cfg.Workers, log)
 
-	h := handlers.New(pipe, repo, hub, log)
+	h := handlers.New(processor, repo, hub, log)
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
 		Handler: server.New(h, web.FS, log),

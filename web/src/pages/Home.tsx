@@ -37,7 +37,7 @@ export function HomePage() {
         </h1>
         <p className="mt-6 max-w-xl text-base text-mute">
           s1n.go fetches subtitles with word-level timing and shows you two lines at a time. A Go
-          worker pool processes every submission concurrently while Gemini agents detect the
+          worker pool processes every submission concurrently while AI agents detect the
           language, romanize Japanese &amp; Korean, and translate each line.
         </p>
         <div className="mt-10 max-w-3xl">

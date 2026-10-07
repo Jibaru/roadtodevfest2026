@@ -1,18 +1,14 @@
-package ytdlp
+package youtube
 
 import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/jibaru/s1ngo/internal/video/domain"
 )
 
 // Cue is one subtitle cue with millisecond timing.
-type Cue struct {
-	StartMs int
-	EndMs   int
-	Text    string
-}
-
 var (
 	timestampRe = regexp.MustCompile(`(\d{1,2}):(\d{2}):(\d{2})\.(\d{3})\s+-->\s+(\d{1,2}):(\d{2}):(\d{2})\.(\d{3})`)
 	inlineTsRe  = regexp.MustCompile(`<\d{1,2}:\d{2}:\d{2}\.\d{3}>`)
@@ -28,10 +24,10 @@ var (
 // inline word timestamps and styling tags, then collapsing the
 // "rolling" cues of auto-generated captions. Faithful port of the
 // original's parseVtt + dedupeCues.
-func ParseVTT(content string) []Cue {
+func ParseVTT(content string) []domain.SubtitleCue {
 	normalized := strings.ReplaceAll(strings.ReplaceAll(content, "\r\n", "\n"), "\r", "\n")
 	blocks := regexp.MustCompile(`\n\n+`).Split(normalized, -1)
-	var cues []Cue
+	var cues []domain.SubtitleCue
 
 	for _, block := range blocks {
 		var lines []string
@@ -66,7 +62,7 @@ func ParseVTT(content string) []Cue {
 		if text == "" {
 			continue
 		}
-		cues = append(cues, Cue{StartMs: startMs, EndMs: endMs, Text: text})
+		cues = append(cues, domain.SubtitleCue{StartMs: startMs, EndMs: endMs, Text: text})
 	}
 	return dedupeCues(cues)
 }
@@ -90,11 +86,11 @@ func cleanCueText(raw string) string {
 
 // dedupeCues collapses runs where one cue's text is a strict prefix of
 // the next (YouTube auto-subs emit "rolling" cues), keeping the longest.
-func dedupeCues(cues []Cue) []Cue {
+func dedupeCues(cues []domain.SubtitleCue) []domain.SubtitleCue {
 	if len(cues) == 0 {
 		return cues
 	}
-	var out []Cue
+	var out []domain.SubtitleCue
 	for _, cue := range cues {
 		if len(out) > 0 {
 			last := &out[len(out)-1]
@@ -105,7 +101,7 @@ func dedupeCues(cues []Cue) []Cue {
 				continue
 			}
 			if strings.HasPrefix(cue.Text, last.Text) && cue.StartMs <= last.EndMs+200 {
-				out[len(out)-1] = Cue{StartMs: last.StartMs, EndMs: cue.EndMs, Text: cue.Text}
+				out[len(out)-1] = domain.SubtitleCue{StartMs: last.StartMs, EndMs: cue.EndMs, Text: cue.Text}
 				continue
 			}
 		}

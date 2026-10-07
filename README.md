@@ -7,7 +7,7 @@ word-level highlighting, streaming per-stage progress to every browser over
 WebSocket.
 
 Where the original used npm libraries and a GPT call, s1n.go uses three
-**ADK Gemini agents**:
+**ADK agents on GPT-6 Luna** (OpenAI, via ADK's `openaimodel`):
 
 | Agent | Job | Replaces |
 |---|---|---|
@@ -25,7 +25,7 @@ Open http://localhost:8080. With the real pipeline:
 
 ```bash
 make web                        # build the React SPA once
-GEMINI_API_KEY=... make run     # needs yt-dlp on PATH (or YTDLP_PATH=...)
+OPENAI_API_KEY=... make run     # needs yt-dlp on PATH (or YTDLP_PATH=...)
 ```
 
 ## Live
@@ -74,23 +74,25 @@ your setlist before going live, or run locally.
 ## Architecture
 
 ```
-cmd/api                      wire everything
-internal/video/domain        Video, LyricLine, VideoRepository, URL parsing
-internal/pipeline            worker pool + per-video stages + broadcasts
-internal/video/infra         memory | postgres (pgx) — same interface
-internal/agents              ADK: detective + romanizer + translator (+ fakes)
-internal/ytdlp               two-phase subtitle fetch, VTT parser, cue dedupe
-internal/lines               syllable-weight word timing (faithful port)
-internal/realtime            push-only WebSocket hub; slow clients dropped
-web/                         React SPA (Vite), embedded via go:embed
-docs/                        HTML slides (EN/ES) — GitHub Pages
+cmd/api                        wire everything
+internal/video/domain          Video, LyricLine, VideoRepository, URL parsing,
+                               cue cleaning + syllable-weight word timing
+internal/video/service         worker pool + per-video stages + broadcasts;
+                               ports: LyricsAgents, SubtitleSource, Broadcaster
+internal/video/infra/agents    ADK + GPT-6 Luna: detective + romanizer + translator
+internal/video/infra/youtube   two-phase subtitle fetch, VTT parser, cue dedupe
+internal/video/infra/fake      offline doubles for FAKE_AGENTS=1
+internal/video/infra/persistence  memory | postgres (pgx) — same interface
+internal/realtime              push-only WebSocket hub; slow clients dropped
+web/                           React SPA (Vite), embedded via go:embed
+docs/                          HTML slides (EN/ES) — GitHub Pages
 ```
 
-Env: `PORT`, `GEMINI_API_KEY`, `FAKE_AGENTS`, `DATABASE_URL`, `WORKERS`,
-`YTDLP_PATH`, `YTDLP_COOKIES`.
+Env: `PORT`, `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-6-luna`),
+`FAKE_AGENTS`, `DATABASE_URL`, `WORKERS`, `YTDLP_PATH`, `YTDLP_COOKIES`.
 
 ```bash
-make test   # url/vtt/lines/pipeline tests, all offline
+make test   # url/vtt/domain/service tests, all offline
 ```
 
 ## Credits

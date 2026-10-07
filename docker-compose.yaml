@@ -9,8 +9,10 @@ services:
     environment:
       PORT: "8080"
       WORKERS: ${WORKERS:-4}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      # FAKE_AGENTS=1 runs the whole pipeline offline (no yt-dlp, no Gemini).
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # gpt-6-luna (default, budget) or gpt-6-sol (mid-tier).
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-6-luna}
+      # FAKE_AGENTS=1 runs everything offline (no yt-dlp, no OpenAI).
       FAKE_AGENTS: ${FAKE_AGENTS:-0}
       # Optional: contents of a Netscape cookies.txt to get past
       # YouTube's datacenter-IP bot checks.
