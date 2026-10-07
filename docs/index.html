@@ -221,7 +221,7 @@
     <div class="polaroid"><img src="images/02-techleaders.jpg" alt="Tech Leaders — Lead UTEC × Crafter Station"></div>
     <div class="polaroid"><img src="images/03-cursor.jpg" alt="Café Cursor Lima — community meetup"></div>
   </div>
-  <p class="sub" style="margin-top:26px" data-i18n="cm_note">Meetups, hackathons and ship-it Sundays — this talk comes from that same energy.</p>
+  <p class="sub" style="margin-top:26px" data-i18n="cm_note">This talk comes from the same place I build everything else: meetups, hackathons, and Sundays shipping side projects with the community in Lima.</p>
 </section>
 
 <!-- 1b · Speaker -->
@@ -252,23 +252,22 @@
   <div class="eyebrow"><span class="bk">[</span> <span data-i18n="pb_eyebrow">the question</span> <span class="bk">]</span></div>
   <h2 style="max-width:24ch" data-i18n="pb_title">Can one Go binary turn any YouTube link into karaoke — many at a time?</h2>
   <ul class="points">
-    <li data-i18n="pb_p1">Fetch <b>subtitles with timing</b> for videos in any language</li>
-    <li data-i18n="pb_p2"><b>Romanize</b> Japanese &amp; Korean so anyone can sing — but Go has <b>no libraries</b> for that</li>
-    <li data-i18n="pb_p3"><b>Translate</b> every line — and treat YouTube as the <b>hostile dependency</b> it is</li>
-    <li data-i18n="pb_p4">Process <b>N videos in parallel</b>, streaming progress live — <b>without a job framework</b></li>
+    <li data-i18n="pb_p1">I needed <b>subtitles with timing</b>, for songs in any language</li>
+    <li data-i18n="pb_p2">I wanted to <b>romanize</b> Japanese &amp; Korean so anyone can sing — and Go has <b>no libraries</b> for that</li>
+    <li data-i18n="pb_p3">I wanted every line <b>translated</b> — while YouTube behaves like a <b>hostile dependency</b></li>
+    <li data-i18n="pb_p4">And I wanted <b>N videos in parallel</b> with live progress — <b>without pulling in a job framework</b></li>
   </ul>
-  <p class="sub" style="margin-top:20px" data-i18n="pb_note">That's the question this talk answers — with a working app you'll use in a few minutes.</p>
-  </div>
+  <p class="sub" style="margin-top:20px" data-i18n="pb_note">That's the question I set out to answer, and instead of telling you the answer, in a few minutes you'll be using the app yourselves.</p>
 </section>
 
 <!-- 2 · The agentic era -->
 <section class="slide">
-  <h2 data-i18n="s2_title">Welcome to the agentic era</h2>
+  <h2 data-i18n="s2_title">How we got to agents</h2>
   <ul class="points">
     <li data-i18n="s2_p1">2023: we <b>chatted</b> with LLMs</li>
     <li data-i18n="s2_p2">2024–25: LLMs got <b>tools</b> and started <b>doing things</b></li>
-    <li data-i18n="s2_p3">2026: software is becoming <b>teams of agents</b> that plan, act and cooperate</li>
-    <li data-i18n="s2_p4">An agent = <b>model + instructions + tools + memory</b>, in a loop</li>
+    <li data-i18n="s2_p3">2026: now we build <b>teams of agents</b> that plan, act and cooperate</li>
+    <li data-i18n="s2_p4">In practice an agent is <b>model + instructions + tools + memory</b>, in a loop</li>
   </ul>
 </section>
 
@@ -281,7 +280,7 @@
     <li data-i18n="s3_p3"><b>Typed contracts</b>: the struct IS the schema the model must fill</li>
     <li data-i18n="s3_p4"><b>Boring, fast, deployable</b> — perfect for agents that must not fall over</li>
   </ul>
-  <p class="sub" style="margin-top:20px" data-i18n="s3_promise">Don't take my word for it — you'll see each claim in the app's real code.</p>
+  <p class="sub" style="margin-top:20px" data-i18n="s3_promise">You don't have to take my word for any of this — every claim on this slide shows up in the app's real code, and we're going to look at it.</p>
 </section>
 
 <!-- 4 · ADK Go -->
@@ -354,7 +353,7 @@
     <text x="450" y="341" text-anchor="middle" class="nlbl" fill="#1e7e34">yt-dlp → detect (agent) → romanize (agent) → translate (agent) → Postgres</text>
     <text x="450" y="362" text-anchor="middle" class="nsub">every stage streams progress over WebSocket to every browser</text>
   </svg>
-  <p class="sub" style="margin-top:14px" data-i18n="s6_note">Every submission, agent call and progress update flowed through goroutines and channels.</p>
+  <p class="sub" style="margin-top:14px" data-i18n="s6_note">Everything you just did — every submission, every agent call, every progress update — went through goroutines and channels, and that's the part I want to walk you through now.</p>
 </section>
 
 <!-- 6b · One video, end to end -->
@@ -386,23 +385,23 @@
     <span class="fpill p-green">ready</span>
   </div>
   <p class="sub" style="margin-top:22px"><span class="ms">replay</span> <span data-i18n="sm_loop">a failed video goes back to the queue on resubmit — YouTube's bot checks are intermittent</span></p>
-  <p class="sub" style="margin-top:14px" data-i18n="sm_note">The agents are non-deterministic — the pipeline can't be. Every stage has a timeout and a fallback, and each one broadcasts its progress so the audience sees the pool working. Deterministic orchestration around stochastic agents.</p>
+  <p class="sub" style="margin-top:14px" data-i18n="sm_note">The agents are non-deterministic, so the orchestration around them can't afford to be: every stage has a timeout and a fallback, and each one broadcasts its progress — that's how you were able to watch the pool work.</p>
 </section>
 
 <!-- 7 · Architecture -->
 <section class="slide">
   <h2 data-i18n="s7_title">The architecture (clean &amp; boring on purpose)</h2>
   <div class="tree">
-    <div class="trow"><span class="ms">terminal</span><code>cmd/api</code><span class="tdesc" data-i18n="ar1">wires everything together</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/video/<b class="g">domain</b></code><span class="tdesc" data-i18n="ar2">Video · LyricLine · repo interface · errors</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/<b class="g">pipeline</b></code><span class="tdesc" data-i18n="ar3">the worker pool + per-video stages</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/video/infra</code><span class="tdesc" data-i18n="ar4">memory | postgres — same interface</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/<b class="gold">agents</b></code><span class="tdesc" data-i18n="ar5">ADK: detective + romanizer + translator</span></div>
-    <div class="trow"><span class="ms">folder</span><code>internal/ytdlp</code><span class="tdesc" data-i18n="ar6">two-phase subtitle fetch + VTT parser</span></div>
+    <div class="trow"><span class="ms">terminal</span><code>cmd/api</code><span class="tdesc" data-i18n="ar1">where I wire everything together</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/video/<b class="g">domain</b></code><span class="tdesc" data-i18n="ar2">Video · LyricLine · repo interface · the pure rules</span></div>
+    <div class="trow"><span class="ms">folder</span><code>internal/video/<b class="g">service</b></code><span class="tdesc" data-i18n="ar3">the worker pool + per-video stages</span></div>
+    <div class="trow"><span class="ms">folder</span><code>…infra/<b class="gold">agents</b></code><span class="tdesc" data-i18n="ar5">ADK + GPT-6 Luna: detective + romanizer + translator</span></div>
+    <div class="trow"><span class="ms">folder</span><code>…infra/youtube</code><span class="tdesc" data-i18n="ar6">two-phase subtitle fetch + VTT parser</span></div>
+    <div class="trow"><span class="ms">folder</span><code>…infra/persistence</code><span class="tdesc" data-i18n="ar4">memory | postgres — same interface</span></div>
     <div class="trow"><span class="ms">folder</span><code>internal/realtime</code><span class="tdesc" data-i18n="ar7">WebSocket hub, drops slow clients</span></div>
     <div class="trow"><span class="ms">folder</span><code>web/</code><span class="tdesc" data-i18n="ar8">React SPA, go:embed — UI inside the binary</span></div>
   </div>
-  <p class="sub" style="margin-top:14px" data-i18n="s7_note">Swapping storage is one constructor line. The agents are behind interfaces too — the show ran offline in rehearsal.</p>
+  <p class="sub" style="margin-top:14px" data-i18n="s7_note">I can swap storage in one constructor line, and the agents live behind interfaces too — in fact, every rehearsal of this talk ran the whole thing offline.</p>
 </section>
 
 <!-- 7a2 · Agents behind ports -->
@@ -420,7 +419,7 @@
 } <span class="kw">else</span> {
     lyrics, _ = agents.<span class="fn">NewOpenAIAgents</span>(ctx, <span class="st">"gpt-6-luna"</span>, key) <span class="cm">// the real agents</span>
 }</pre>
-  <p class="sub" style="margin-top:16px" data-i18n="ports_note">Small implicit interfaces make GPT-6 Luna and yt-dlp swappable like a database. Every rehearsal of this talk ran the full pipeline offline — the workers never knew.</p>
+  <p class="sub" style="margin-top:16px" data-i18n="ports_note">I treat GPT-6 Luna and yt-dlp the same way I treat a database: behind a small interface. That's why I could rehearse this talk with the full pipeline running offline — the workers never knew the difference.</p>
 </section>
 
 <!-- 7b · Why Go, proof 1: goroutines -->
@@ -469,7 +468,7 @@ translations, err := agents.<span class="fn">Translate</span>(ctx, lang, texts)
     <span class="cm">// plan C: no translation line — the karaoke still ships</span>
     translations = nil
 }</pre>
-  <p class="sub" style="margin-top:16px" data-i18n="g3_note">Romanizer down? Ship the original script. YouTube bot-checks the IP? The card shows why and a resubmit retries it. Every fallback is a visible `if err != nil` — no hidden exception paths on stage.</p>
+  <p class="sub" style="margin-top:16px" data-i18n="g3_note">If the Romanizer fails, you still get the original script; if YouTube bot-checks the IP, the card tells you why and a resubmit retries it. Every one of those fallbacks is a visible <code>if err != nil</code> — no hidden exception paths while I'm on stage.</p>
 </section>
 
 <!-- 7e · Why Go, proof 4: context -->
@@ -507,10 +506,10 @@ res, err := fetcher.<span class="fn">Fetch</span>(ctx, youtubeID, detectLang)
 <section class="slide">
   <h2 data-i18n="s11_title">What building this taught me</h2>
   <ul class="points">
-    <li data-i18n="s11_p1">Treat YouTube as a <b>hostile dependency</b>: retries, cookies escape hatch, full <b>offline mode</b></li>
-    <li data-i18n="s11_p2">Agents are just another dependency — put them <b>behind an interface</b> (rehearsals ran offline)</li>
-    <li data-i18n="s11_p3">An agent can <b>BE the library</b> your language is missing</li>
-    <li data-i18n="s11_p4">The demo people remember is the one they were <b>part of</b> — bring your own song</li>
+    <li data-i18n="s11_p1">None of the <b>retries, cookies or offline mode</b> existed on day one — they appeared because <b>YouTube kept failing</b>, and I ended up treating it as a hostile dependency</li>
+    <li data-i18n="s11_p2">Putting the agents <b>behind an interface</b> felt like overkill at first — then it saved <b>every single rehearsal</b></li>
+    <li data-i18n="s11_p3">When Go had no romanization library, an agent <b>became the library</b> — that's why the Romanizer exists</li>
+    <li data-i18n="s11_p4">The demo people remember is the one they were <b>part of</b> — that's why you sang</li>
   </ul>
 </section>
 
@@ -542,25 +541,25 @@ const I18N = {
     s1_you: "pega un link y canta",
     pb_eyebrow: "la pregunta",
     pb_title: "¿Puede un solo binario de Go convertir cualquier link de YouTube en karaoke — varios a la vez?",
-    pb_p1: "Obtener <b>subtítulos con timing</b> para videos en cualquier idioma",
-    pb_p2: "<b>Romanizar</b> japonés y coreano para que cualquiera cante — pero Go <b>no tiene librerías</b> para eso",
-    pb_p3: "<b>Traducir</b> cada línea — y tratar a YouTube como la <b>dependencia hostil</b> que es",
-    pb_p4: "Procesar <b>N videos en paralelo</b>, con progreso en vivo — <b>sin framework de jobs</b>",
-    pb_note: "Esa es la pregunta que responde esta charla — con una app funcionando que usarán en unos minutos.",
-    s2_title: "Bienvenidos a la era agéntica",
+    pb_p1: "Necesitaba <b>subtítulos con timing</b>, para canciones en cualquier idioma",
+    pb_p2: "Quería <b>romanizar</b> japonés y coreano para que cualquiera cante — y Go <b>no tiene librerías</b> para eso",
+    pb_p3: "Quería cada línea <b>traducida</b> — mientras YouTube se comporta como una <b>dependencia hostil</b>",
+    pb_p4: "Y quería <b>N videos en paralelo</b> con progreso en vivo — <b>sin meter un framework de jobs</b>",
+    pb_note: "Esa es la pregunta que me propuse responder, y en vez de contarles la respuesta, en unos minutos van a estar usando la app ustedes mismos.",
+    s2_title: "Cómo llegamos a los agentes",
     s2_p1: "2023: <b>chateábamos</b> con LLMs",
     s2_p2: "2024–25: los LLMs recibieron <b>herramientas</b> y empezaron a <b>hacer cosas</b>",
-    s2_p3: "2026: el software se vuelve <b>equipos de agentes</b> que planean, actúan y cooperan",
-    s2_p4: "Un agente = <b>modelo + instrucciones + herramientas + memoria</b>, en un loop",
+    s2_p3: "2026: ahora construimos <b>equipos de agentes</b> que planean, actúan y cooperan",
+    s2_p4: "En la práctica un agente es <b>modelo + instrucciones + herramientas + memoria</b>, en un loop",
     s3_title: "¿Por qué Go para agentes?",
     s3_p1: "Los agentes son concurrentes por naturaleza — <b>goroutines y channels</b> son el fit nativo",
     s3_p2: "<b>Un binario estático</b>: todo el show de hoy es un solo archivo",
     s3_p3: "<b>Contratos tipados</b>: el struct ES el schema que el modelo debe llenar",
     s3_p4: "<b>Aburrido, rápido, desplegable</b> — perfecto para agentes que no pueden caerse",
-    s3_promise: "No me crean a mí — verán cada afirmación en el código real de la app.",
+    s3_promise: "No tienen que creerme nada de esto — cada afirmación de esta slide aparece en el código real de la app, y lo vamos a revisar.",
     cm_eyebrow: "comunidad",
     cm_title: "Construyendo con la comunidad en Lima",
-    cm_note: "Meetups, hackathons y domingos de ship-it — esta charla nace de esa misma energía.",
+    cm_note: "Esta charla sale del mismo lugar donde construyo todo lo demás: meetups, hackathons y domingos haciendo side projects con la comunidad en Lima.",
     sp_eyebrow: "su anfitrión",
     sp_role: "Software Engineer en <img class='ilogo' src='logos/clerk.svg' alt=''> <b>Clerk</b> · Builder en <img class='ilogo' src='logos/crafterstation.svg' alt=''> <b>Crafter Station</b> · Lima, Perú",
     sp_p1: "<img class='ilogo' src='logos/go.svg' alt=''> <b>Go</b>, <img class='ilogo' src='logos/typescript.svg' alt=''> <b>TypeScript</b> y <b>cloud</b> — backends, sistemas distribuidos, dev tools",
@@ -578,19 +577,19 @@ const I18N = {
     sf6: "El agente <b>Romanizador</b> convierte ja/ko a romaji; el <b>Traductor</b> traduce cada línea al español",
     sf7: "Timing por sílabas palabra a palabra → Postgres → <code class=\"chip\">ready</code>",
     sf8: "Cada etapa transmitida en vivo a cada navegador por un WebSocket",
-    ar1: "conecta todo",
-    ar2: "Video · LyricLine · interfaz de repo · errores",
+    ar1: "donde conecto todo",
+    ar2: "Video · LyricLine · interfaz de repo · las reglas puras",
     ar3: "el worker pool + etapas por video",
     ar4: "memory | postgres — misma interfaz",
-    ar5: "ADK: detective + romanizador + traductor",
+    ar5: "ADK + GPT-6 Luna: detective + romanizador + traductor",
     ar6: "fetch de subtítulos en 2 fases + parser VTT",
     ar7: "hub WebSocket, descarta clientes lentos",
     ar8: "SPA React, go:embed — la UI dentro del binario",
     sm_title: "Las etapas que recorre cada video",
     sm_loop: "un video fallido vuelve a la cola al reenviarlo — los bot-checks de YouTube son intermitentes",
-    sm_note: "Los agentes son no-deterministas — el pipeline no puede serlo. Cada etapa tiene timeout y fallback, y cada una transmite su progreso para que la audiencia vea al pool trabajar. Orquestación determinista alrededor de agentes estocásticos.",
+    sm_note: "Los agentes son no-deterministas, entonces la orquestación alrededor no puede darse ese lujo: cada etapa tiene timeout y fallback, y cada una transmite su progreso — por eso pudieron ver al pool trabajando.",
     ports_title: "El LLM es una dependencia más",
-    ports_note: "Interfaces pequeñas e implícitas hacen a GPT-6 Luna y yt-dlp intercambiables como una base de datos. Cada ensayo corrió el pipeline completo offline — los workers nunca se enteraron.",
+    ports_note: "A GPT-6 Luna y a yt-dlp los trato igual que a una base de datos: detrás de una interfaz pequeña. Por eso pude ensayar esta charla con el pipeline completo corriendo offline — los workers nunca notaron la diferencia.",
     g_eyebrow4: "por qué Go — prueba",
     g4_title: "Un agente que nunca responde no puede congelar el show",
     g4_note: "La cancelación fluye por todas las capas — ADK, el subproceso de yt-dlp, Postgres — porque context es el contrato de la librería estándar. yt-dlp y los LLMs son las dependencias más lentas y frágiles que llamarás; los deadlines no son opcionales.",
@@ -610,18 +609,18 @@ const I18N = {
     g2_title: "Progreso a cada navegador = un channel por cliente",
     g2_note: "Cada etapa de cada video llega a cada navegador. El backpressure es un select — en la mayoría de stacks esto es un message broker.",
     g3_title: "Un pipeline en vivo no puede caerse — los errores son valores",
-    g3_note: "¿Romanizador caído? Sale el texto original. ¿YouTube bloquea la IP? La card muestra por qué y reenviar lo reintenta. Cada fallback es un `if err != nil` visible.",
+    g3_note: "Si el Romanizador falla, igual sale el texto original; si YouTube bloquea la IP, la card te dice por qué y reenviar lo reintenta. Cada uno de esos fallbacks es un <code>if err != nil</code> visible — nada de excepciones escondidas mientras estoy en el escenario.",
     s5_title: "HORA DEL DEMO",
     s5_sub: "Peguen links de YouTube — varios a la vez. Miren al worker pool\nprocesarlos en paralelo. Luego, a cantar.",
     s6_title: "Lo que acaban de vivir",
-    s6_note: "Cada submission, llamada a agente y update de progreso pasó por goroutines y channels.",
+    s6_note: "Todo lo que acaban de hacer — cada submission, cada llamada a un agente, cada update de progreso — pasó por goroutines y channels, y esa es la parte que quiero mostrarles ahora.",
     s7_title: "La arquitectura (limpia y aburrida a propósito)",
-    s7_note: "Cambiar el storage es una línea de constructor. Los agentes también están detrás de interfaces — el show corrió offline en los ensayos.",
+    s7_note: "Puedo cambiar el storage en una línea de constructor, y los agentes también viven detrás de interfaces — de hecho, cada ensayo de esta charla corrió todo offline.",
     s11_title: "Lo que aprendí construyendo esto",
-    s11_p1: "Trata a YouTube como <b>dependencia hostil</b>: reintentos, cookies de escape, <b>modo offline</b> completo",
-    s11_p2: "Los agentes son una dependencia más — <b>detrás de una interfaz</b> (los ensayos corrieron offline)",
-    s11_p3: "Un agente puede <b>SER la librería</b> que le falta a tu lenguaje",
-    s11_p4: "El demo que la gente recuerda es del que fueron <b>parte</b> — trae tu propia canción",
+    s11_p1: "Ni los <b>reintentos, ni las cookies, ni el modo offline</b> existían el primer día — aparecieron porque <b>YouTube seguía fallando</b>, y terminé tratándolo como una dependencia hostil",
+    s11_p2: "Poner los agentes <b>detrás de una interfaz</b> parecía exagerado al inicio — después salvó <b>todos los ensayos</b>",
+    s11_p3: "Cuando Go no tuvo librería de romanización, un agente <b>se volvió la librería</b> — por eso existe el Romanizador",
+    s11_p4: "El demo que la gente recuerda es del que fueron <b>parte</b> — por eso cantaron",
     s12_title: "Ve y clona algo — y hazlo paralelo",
     s12_eyebrow: "gracias",
     s12_demo: "Demo en vivo",
