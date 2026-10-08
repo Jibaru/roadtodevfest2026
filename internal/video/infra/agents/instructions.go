@@ -9,9 +9,13 @@ const detectInstruction = `You identify the language that a song's LYRICS are su
 from its YouTube title and description.
 
 Rules:
-- Return the language of the LYRICS, not the title. "BTS - Dynamite (Korean cover)" → ko.
+- Return the language the lyrics are SUNG in, not the language of the title
+  or the artist's name. A hangul or kana artist name does not make the song
+  Korean or Japanese: "BTS (방탄소년단) 'Dynamite' Official MV" → en, because
+  Dynamite is sung entirely in English.
 - For covers and dubs, return the language OF THIS RECORDING:
   "Momoland - Baam Baam Japanese Version" → ja, even though the original is Korean.
+- If you know the song, use what you know about its actual lyrics.
 - Use the description for clues (cover language, lyrics excerpts, original artist).
 - Reply with EXACTLY one token: ja, ko, es, en, or other.
 - If unsure, reply other.`
