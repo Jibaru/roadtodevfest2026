@@ -149,11 +149,6 @@
   /* Title slide: the title is the protagonist */
   .title-hero { font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.16; max-width: 36ch;
     margin-bottom: 22px; }
-  .title-hero .hl { position: relative; white-space: nowrap; z-index: 0; }
-  .title-hero .hl::after { content: ""; position: absolute; left: -0.06em; right: -0.06em;
-    bottom: .02em; height: .2em; border-radius: 6px; z-index: -1; opacity: .55;
-    background: linear-gradient(90deg, var(--blue-core) 0 25%, var(--red) 25% 50%,
-      var(--yellow) 50% 75%, var(--green) 75% 100%); }
   .lanes { display: flex; flex-direction: column; gap: 9px; width: min(430px, 64vw);
     margin: 4px auto 22px; }
   .lane { height: 8px; border-radius: 6px; background: var(--surface);
@@ -221,7 +216,7 @@
 <!-- 1 · Title -->
 <section class="slide active">
   <div class="eyebrow"><span class="bk">[</span> Google DevFest · GDG Bogotá <span class="bk">]</span></div>
-  <h1 class="title-hero" data-i18n="s1_title"><span class="hl">Parallel</span> YouTube Video Processing<br>with <b class="bk">Go</b> &amp; <b class="grn">ADK</b></h1>
+  <h1 class="title-hero" data-i18n="s1_title">Parallel YouTube Video Processing<br>with <b class="bk">Go</b> &amp; <b class="grn">ADK</b></h1>
   <div class="lanes" aria-hidden="true">
     <div class="lane"><i></i></div>
     <div class="lane"><i></i></div>
@@ -548,8 +543,16 @@ res, err := fetcher.<span class="fn">Fetch</span>(ctx, youtubeID, detectLang)
     <div class="close-card"><span class="ms" style="color:var(--red)">school</span>
       <span><b data-i18n="s12_adk">ADK for Go</b><span class="url">adk.dev</span></span></div>
   </div>
-  <p class="sub" style="margin-top:30px"><span class="gold" style="font-weight:700" data-i18n="s12_thanks">¡Gracias! Questions?</span></p>
+  <p class="sub" style="margin-top:30px"><span class="gold" style="font-weight:700" data-i18n="s12_thanks">¡Gracias!</span></p>
   <p style="margin-top:18px;font-size:.72rem;color:var(--ink-soft)">Music: “Electrodoodle” — Kevin MacLeod (incompetech.com) · CC BY 4.0</p>
+</section>
+
+<!-- 13 · Q&A -->
+<section class="slide">
+  <div class="eyebrow"><span class="bk">[</span> <span data-i18n="qa_eyebrow">your turn</span> <span class="bk">]</span></div>
+  <div style="margin-bottom:24px"><span class="avatar yellow"><span class="ms">forum</span></span></div>
+  <h1><span class="bk">[</span> Q &amp; A <span class="bk">]</span></h1>
+  <p class="sub" style="max-width:52ch" data-i18n="qa_sub">Ask me anything — the host will pass the questions along. And the demo stays up at <b style="color:var(--ink)">s1ngo.crafter.run</b>, so if you'd rather keep singing, I get it.</p>
 </section>
 
 <div id="progress"></div>
@@ -557,7 +560,7 @@ res, err := fetcher.<span class="fn">Fetch</span>(ctx, youtubeID, detectLang)
 <script>
 const I18N = {
   es: {
-    s1_title: "Procesamiento <span class='hl'>en paralelo</span> de videos de YouTube<br>con <b class='bk'>Go</b> y <b class='grn'>ADK</b>",
+    s1_title: "Procesamiento en paralelo de videos de YouTube<br>con <b class='bk'>Go</b> y <b class='grn'>ADK</b>",
     s1_you: "pega un link y canta",
     pb_eyebrow: "la pregunta",
     pb_title: "¿Puede un solo binario de Go convertir cualquier link de YouTube en karaoke — varios a la vez?",
@@ -647,7 +650,9 @@ const I18N = {
     s12_code: "Código fuente",
     s12_slides: "Estas slides",
     s12_adk: "ADK para Go",
-    s12_thanks: "¡Gracias! ¿Preguntas?",
+    s12_thanks: "¡Gracias!",
+    qa_eyebrow: "su turno",
+    qa_sub: "Pregunten lo que quieran — el host va pasando las preguntas. Y el demo queda arriba en <b style='color:var(--ink)'>s1ngo.crafter.run</b>, así que si prefieren seguir cantando, lo entiendo.",
   },
 };
 const defaults = {};
